@@ -10,7 +10,7 @@
 
 | 端              | 技术                                          | 端口   |
 | -------------- | ------------------------------------------- | ---- |
-| 后端服务（所有业务模块共用） | cool-admin-midway（Midway + TypeORM + MySQL） | 8001 |
+| 后端服务（管理业务模块共用） | cool-admin-midway（Midway + TypeORM + MySQL） | 8001 |
 | C端前端           | wu\_dong\_vue（Vue 3 + Vite + TS）            | 5173 |
 | 管理后台前端         | cool\_admin\_vue（cool-admin-vue 8.x）        | 9000 |
 
@@ -21,15 +21,41 @@
 
 ```
 WuDongProject/
+├── .rules/                     # 团队协作规则（编辑器/AI 辅助规则等）
 ├── app/
-│   ├── cool-admin-midway/      # 后端服务（端口 8001），业务模块在 src/modules/ 下
-│   ├── wu_dong_vue/            # C端前端（端口 5173）
-│   └── cool_admin_vue/         # 管理后台前端（端口 9000）
+│   ├── cool-admin-midway/      # 后端服务（端口 8001，模块化单体架构）
+│   │   ├── .env                # MySQL 连接与端口配置（root/123321@127.0.0.1:3306）
+│   │   └── src/
+│   │       ├── comm/           # 公共工具：path.ts / port.ts / utils.ts
+│   │       ├── config/         # 环境配置：config.default.ts / config.local.ts / config.prod.ts
+│   │       └── modules/        # 业务模块（见"后端模块划分"表）
+│   │           ├── base/       # 平台基础（框架自带，不改动）
+│   │           ├── user/       # C端用户（框架自带）
+│   │           ├── demo/ dict/ plugin/ recycle/ space/ swagger/ task/  # 框架自带示例
+│   │           └── m1-goods/ m2-meal/ m3-lodging/ m4-ticket/ m5-community/ order/  # 待创建
+│   ├── wu_dong_vue/            # C端前端（端口 5173，Vue 3 + Vite + TS）
+│   │   └── src/
+│   │       ├── api/            # 接口请求
+│   │       ├── components/     # 公共组件
+│   │       ├── mock/           # 本地 Mock 数据（server.ts）
+│   │       ├── router/         # 路由
+│   │       ├── stores/         # Pinia 状态
+│   │       ├── styles/         # 全局样式
+│   │       └── views/          # 页面视图
+│   ├── cool_admin_vue/         # 管理后台前端（端口 9000，cool-admin-vue 8.x）
+│   │   └── src/
+│   │       ├── config/         # 全局配置
+│   │       ├── cool/           # 框架核心（bootstrap/router/service/utils...）
+│   │       ├── modules/        # 后台功能模块（base/demo/dict/helper/recycle/space/task/user）
+│   │       └── plugins/        # 插件
+│   └── wu_dong_midway/         # 空目录（原独立后端遗留，已废弃，不要往里放东西）
 ├── docx/                       # 项目文档（设计文档、TODO、技术开发规范等）
 ├── exp/                        # 实验模块（Demo 代码）
 ├── libs/                       # 公共工具类
 ├── scripts/
-│   └── sql/wudong_schema.sql   # 业务库 DDL（41 张表）
+│   └── sql/wudong_schema.sql   # 业务库 DDL（41 张表，库名 wudong）
+├── CLAUDE.md                   # AI 助手上下文（项目专用）
+├── AGENT.md                    # 通用 AI 代理上下文（本文件）
 └── README.md
 ```
 
