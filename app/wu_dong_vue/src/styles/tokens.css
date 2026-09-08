@@ -1,0 +1,48 @@
+/* ============================================================
+   乌东文旅 · 全局主题变量（蜡染靛蓝 × 苗银 × 朱红）
+   三套 Web 应用统一引用，禁止页面内硬编码颜色
+   ============================================================ */
+:root {
+  /* 色板 */
+  --paper: #f6f3ec; /* 宣纸米白 */
+  --paper-2: #eee8da; /* 深一层的纸 */
+  --ink: #22303f; /* 墨 */
+  --ink-soft: #5b6b7c;
+  --ink-faint: #93a1af;
+
+  --indigo: #23456b; /* 蜡染靛蓝（主色） */
+  --indigo-deep: #16304d; /* 深靛 */
+  --indigo-night: #0f2338; /* 夜靛（深色区块） */
+  --indigo-mist: #dfe6ee; /* 靛雾（浅底） */
+
+  --silver: #9fb0bd; /* 苗银 */
+  --silver-light: #d7e0e6;
+  --red: #b5442e; /* 苗绣朱红（CTA/强调） */
+  --red-deep: #93351f;
+  --amber: #c08a2d; /* 稻黄（点缀） */
+
+  /* 语义 */
+  --bg: var(--paper);
+  --text: var(--ink);
+  --text-2: var(--ink-soft);
+  --text-3: var(--ink-faint);
+  --line: rgba(35, 69, 107, 0.16);
+  --line-strong: rgba(35, 69, 107, 0.34);
+  --primary: var(--indigo);
+  --primary-deep: var(--indigo-deep);
+  --accent: var(--red);
+
+  /* 字体 */
+  --font-display: 'Noto Serif SC', 'Songti SC', 'SimSun', serif;
+  --font-body: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+
+  /* 布局 */
+  --radius: 6px;
+  --radius-lg: 10px;
+  --shadow-1: 0 1px 2px rgba(22, 48, 77, 0.06), 0 4px 14px rgba(22, 48, 77, 0.07);
+  --shadow-2: 0 6px 24px rgba(22, 48, 77, 0.14);
+  --container: 1200px;
+
+  /* 动效 */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}

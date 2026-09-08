@@ -13,6 +13,25 @@
 3. 为平台运营方提供用户管理、数据看板、内容审核能力
 4. 沉淀乌东文旅数字化资产，支撑后续 AI 智能体接入与商业化扩展
 
+## 目录结构
+
+```
+WuDongProject/
+├── app/                        # 服务模块
+│   ├── clothing_backend_py/    # 衣 - 后端服务（端口 6666）
+│   ├── food_backend_py/        # 食 - 后端服务（端口 6667）
+│   ├── housing_backend_py/     # 住 - 后端服务（端口 6668）
+│   ├── transport_backend_py/   # 行 - 后端服务（端口 6669）
+│   ├── community_backend_py/   # 社区 - 后端服务（端口 6665）
+│   ├── admin_backend_py/       # 平台后台 - 后端服务（端口 6664）
+│   └── wu_dong_vue/            # 前端模块（Vue 3 + Vite + TypeScript）
+├── docx/                       # 项目文档（设计文档、TODO、技术开发规范等）
+├── exp/                        # 实验模块（Demo 代码，用于测试新功能）
+├── libs/                       # 公共工具类（日期、字符串等通用工具）
+├── scripts/                    # 脚本文件（数据库迁移、测试脚本等）
+└── README.md
+```
+
 ## git分支规则
 
 - 主分支：`main`
