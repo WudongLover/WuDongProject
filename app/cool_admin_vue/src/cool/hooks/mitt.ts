@@ -1,4 +1,4 @@
-import Mitt, { type Emitter } from '/@/cool/hooks/mitt';
+import Mitt, { type Emitter } from 'mitt';
 import { hmr } from './hmr';
 
 export const mitt: Emitter<any> = hmr.getData('mitt', Mitt());

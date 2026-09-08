@@ -961,26 +961,6 @@ declare namespace Eps {
 		description?: string;
 
 		/**
-		 * 生日
-		 */
-		birthday?: string;
-
-		/**
-		 * 省
-		 */
-		province?: string;
-
-		/**
-		 * 市
-		 */
-		city?: string;
-
-		/**
-		 * 区
-		 */
-		district?: string;
-
-		/**
 		 * 创建时间
 		 */
 		createTime?: string;
@@ -997,6 +977,8 @@ declare namespace Eps {
 	}
 
 	type json = any;
+
+	type DictKey = "brand" | "occupation";
 
 	interface PagePagination {
 		size: number;
@@ -2205,8 +2187,6 @@ declare namespace Eps {
 	}
 
 	type Request = (options: RequestOptions) => Promise<any>;
-
-	type DictKey = "brand" | "occupation";
 
 	type Service = {
 		request: Request;

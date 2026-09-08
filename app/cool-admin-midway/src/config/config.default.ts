@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { CoolConfig } from '@cool-midway/core';
 import { MidwayConfig } from '@midwayjs/core';
 import { CoolCacheStore } from '@cool-midway/core';
@@ -10,9 +11,9 @@ import { availablePort } from '../comm/port';
 
 export default {
   // 确保每个项目唯一，项目首次启动会自动生成
-  keys: 'cool-admin-keys-xxxxxx',
+  keys: '2072827a-d52a-475a-b4a6-7d431a35bb23',
   koa: {
-    port: availablePort(8001),
+    port: availablePort(Number(process.env.KOA_PORT) || 8001),
   },
   // 开启异步上下文管理
   asyncContextManager: {
