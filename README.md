@@ -18,19 +18,76 @@
 ```
 WuDongProject/
 ├── app/                        # 服务模块
-│   ├── clothing_backend_py/    # 衣 - 后端服务（端口 6666）
-│   ├── food_backend_py/        # 食 - 后端服务（端口 6667）
-│   ├── housing_backend_py/     # 住 - 后端服务（端口 6668）
-│   ├── transport_backend_py/   # 行 - 后端服务（端口 6669）
-│   ├── community_backend_py/   # 社区 - 后端服务（端口 6665）
-│   ├── admin_backend_py/       # 平台后台 - 后端服务（端口 6664）
-│   └── wu_dong_vue/            # 前端模块（Vue 3 + Vite + TypeScript）
+│   ├── wu_dong_vue/            # C端前端 - 乌东文旅门户（Vue 3 + Vite + TS，端口 5173）
+│   ├── cool_admin_vue/         # 管理后台前端（cool-admin-vue 8.x，端口 9000）
+│   └── cool-admin-midway/      # 管理后台后端（Midway + TypeORM + MySQL，端口 8001）
 ├── docx/                       # 项目文档（设计文档、TODO、技术开发规范等）
 ├── exp/                        # 实验模块（Demo 代码，用于测试新功能）
 ├── libs/                       # 公共工具类（日期、字符串等通用工具）
 ├── scripts/                    # 脚本文件（数据库迁移、测试脚本等）
 └── README.md
 ```
+
+> 规划中的衣(6666)、食(6667)、住(6668)、行(6669)、社区(6665)、平台后台(6664) Python 后端模块尚未创建，端口规划见 [app/README.md](app/README.md)。
+
+## 环境要求
+
+- Node.js >= 18
+- MySQL >= 5.7（管理后台后端使用）
+- 包管理器统一使用 npm
+
+## 模块启动
+
+### 1. C端前端 wu_dong_vue（端口 5173）
+
+```bash
+cd app/wu_dong_vue
+npm install
+npm run dev
+```
+
+访问 http://localhost:5173 。当前数据来自本地 Mock（`src/mock/server.ts`），`/api` 已代理到 `http://localhost:8000`，后续 FastAPI 后端就绪后可无缝切换。
+
+### 2. 管理后台后端 cool-admin-midway（端口 8001）
+
+需先准备 MySQL：创建数据库 `cool`（首次启动自动建表并导入初始数据）。
+
+```sql
+CREATE DATABASE cool DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+```
+
+数据库连接、服务端口等配置在 `app/cool-admin-midway/.env` 中（模板见 `.env.example`）：
+
+```env
+KOA_PORT=8001
+MYSQL_HOST=127.0.0.1
+MYSQL_PORT=3306
+MYSQL_USERNAME=root
+MYSQL_PASSWORD=你的密码
+MYSQL_DATABASE=cool
+```
+
+启动：
+
+```bash
+cd app/cool-admin-midway
+npm install
+npm run dev
+```
+
+启动后接口地址为 http://127.0.0.1:8001 ，Swagger 文档见 http://127.0.0.1:8001/swagger/ui 。
+
+### 3. 管理后台前端 cool_admin_vue（端口 9000）
+
+依赖后端 cool-admin-midway（需先启动）。
+
+```bash
+cd app/cool_admin_vue
+npm install
+npm run dev
+```
+
+访问 http://localhost:9000 ，默认账号 `admin / 123456`。`/dev` 前缀请求已代理到 `http://127.0.0.1:8001`。
 
 ## git分支规则
 
