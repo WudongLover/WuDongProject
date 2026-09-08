@@ -28,7 +28,7 @@ WuDongProject/
 └── README.md
 ```
 
-> 规划中的衣(6666)、食(6667)、住(6668)、行(6669)、社区(6665)、平台后台(6664) Python 后端模块尚未创建，端口规划见 [app/README.md](app/README.md)。
+> 衣/食/住/行/社区 5 个业务模块采用单服务 + 目录分模块架构，在 `cool-admin-midway/src/modules/` 下按 `m1-goods` ~ `m5-community` 划分，模块边界与数据表对照见 [app/README.md](app/README.md)。
 
 ## 环境要求
 
