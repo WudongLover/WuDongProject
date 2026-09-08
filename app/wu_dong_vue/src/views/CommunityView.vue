@@ -7,7 +7,7 @@ import { useUserStore } from '@/stores/user'
 import PostCard from '@/components/PostCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
-import { scene } from '@/mock/images'
+import { img, scene } from '@/mock/images'
 
 const route = useRoute()
 const userStore = useUserStore()
