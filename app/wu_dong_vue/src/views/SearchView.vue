@@ -30,11 +30,12 @@ async function search() {
   if (!keyword) return
   loading.value = true
   try {
-    const [searchResponse, routeResponse] = await Promise.all([
+    const [searchResponse, goodsResponse, routeResponse] = await Promise.all([
       api.searchAll(keyword),
+      api.getGoodsList({ keyword, page_size: 100 }),
       api.getRoutePage({ keyword, page: 1, size: 100, status: 'ON_SHELF' }),
     ])
-    results.value = { ...searchResponse.data, routes: routeResponse.data.list }
+    results.value = { ...searchResponse.data, goods: goodsResponse.data.items, routes: routeResponse.data.list }
     if (route.query.kw !== keyword) router.replace({ query: { kw: keyword } })
   } finally {
     loading.value = false

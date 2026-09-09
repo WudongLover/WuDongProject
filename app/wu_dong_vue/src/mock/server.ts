@@ -272,47 +272,6 @@ export function logout() {
   db.user = null
 }
 
-/* ---------- 商品（衣 + 特产） ---------- */
-
-export interface GoodsFilter {
-  category?: string
-  module?: 'GOODS' | 'SPECIALTY'
-  keyword?: string
-  sort?: 'default' | 'sales' | 'price-asc' | 'price-desc' | 'rating'
-  maxPrice?: number
-}
-
-export async function getGoodsList(filter: GoodsFilter = {}) {
-  await delay(280)
-  let list = filter.module === 'SPECIALTY' ? [...specialties] : [...goods, ...specialties]
-  if (filter.module === 'GOODS') list = [...goods]
-  if (filter.category && filter.category !== '全部') list = list.filter((g) => g.category === filter.category)
-  if (filter.keyword) list = list.filter((g) => (g.title + g.subtitle).includes(filter.keyword!))
-  if (filter.maxPrice) list = list.filter((g) => g.price <= filter.maxPrice!)
-  switch (filter.sort) {
-    case 'sales':
-      list.sort((a, b) => b.sales - a.sales)
-      break
-    case 'price-asc':
-      list.sort((a, b) => a.price - b.price)
-      break
-    case 'price-desc':
-      list.sort((a, b) => b.price - a.price)
-      break
-    case 'rating':
-      list.sort((a, b) => b.rating - a.rating)
-      break
-  }
-  return ok({ items: list, total: list.length })
-}
-
-export async function getProductDetail(id: string) {
-  await delay(240)
-  const found = [...goods, ...specialties].find((g) => g.id === id)
-  if (!found) throw new ApiError(1003, '资源不存在')
-  return ok(found)
-}
-
 /* ---------- 食 ---------- */
 
 export async function getRestaurants() {

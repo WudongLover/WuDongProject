@@ -1,7 +1,10 @@
 /** API 模块：每个函数对应一个后端接口或本地尚未迁移的能力 */
 import type {
+  Homestay,
   Post,
   PostComment,
+  Product,
+  ProductModule,
 } from '@/types'
 import * as S from '@/mock/server'
 import { apiFetch } from './http'
@@ -24,9 +27,48 @@ export {
 } from './auth'
 export const currentUser = S.currentUser
 
-/* 商品（衣 / 特产） */
-export const getGoodsList = S.getGoodsList
-export const getProductDetail = S.getProductDetail
+/* 商品（衣 / 特产）：真实后端 m1-goods，路由前缀 /api/v1/m1 */
+export interface GoodsQuery {
+  module?: ProductModule
+  /** 类目 id（后端主键），由 getCategories 提供；不传即全部类目 */
+  category_id?: string
+  keyword?: string
+  sort?: 'default' | 'sales' | 'price-asc' | 'price-desc' | 'rating'
+  max_price?: number
+  page?: number
+  page_size?: number
+}
+
+export interface GoodsPage {
+  items: Product[]
+  page: number
+  page_size: number
+  total: number
+}
+
+export interface Category {
+  id: string
+  module: ProductModule
+  name: string
+}
+
+export function getGoodsList(query: GoodsQuery = {}): Promise<Envelope<GoodsPage>> {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== '') params.set(key, String(value))
+  }
+  const qs = params.toString()
+  return apiFetch<Envelope<GoodsPage>>(`/v1/m1/products${qs ? `?${qs}` : ''}`)
+}
+
+export function getProductDetail(id: string): Promise<Envelope<Product>> {
+  return apiFetch<Envelope<Product>>(`/v1/m1/products/${id}`)
+}
+
+/** 商品类目列表，供筛选栏把类目名换成 id 传给后端 */
+export function getCategories(module?: ProductModule): Promise<Envelope<Category[]>> {
+  return apiFetch<Envelope<Category[]>>(`/v1/m1/categories${module ? `?module=${module}` : ''}`)
+}
 
 /* 食 */
 export const getRestaurants = S.getRestaurants

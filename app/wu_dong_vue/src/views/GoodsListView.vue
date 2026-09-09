@@ -6,7 +6,6 @@ import ProductCard from '@/components/ProductCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import { img } from '@/mock/images'
 
-const cats = ['全部', '银饰', '蜡染', '刺绣', '苗族服饰']
 const sorts = [
   { key: 'default', label: '综合' },
   { key: 'sales', label: '销量' },
@@ -15,10 +14,13 @@ const sorts = [
   { key: 'rating', label: '评分' },
 ] as const
 
-const cat = ref('全部')
+/** 类目来自后端，筛选按 id 传参；null 表示「全部」 */
+const cats = ref<api.Category[]>([])
+const catId = ref<string | null>(null)
 const sort = ref<(typeof sorts)[number]['key']>('default')
 const maxPrice = ref<number | null>(null)
 const items = ref<Product[]>([])
+const total = ref(0)
 const loading = ref(true)
 
 const heroImg = img('Miao embroidery and silver jewelry flat lay on indigo cloth, wide banner', 'landscape_16_9')
@@ -26,15 +28,21 @@ const heroImg = img('Miao embroidery and silver jewelry flat lay on indigo cloth
 async function load() {
   loading.value = true
   const res = await api.getGoodsList({
-    category: cat.value,
+    category_id: catId.value ?? undefined,
     sort: sort.value,
-    maxPrice: maxPrice.value ?? undefined,
+    max_price: maxPrice.value ?? undefined,
+    // 本页无分页控件，一次取全量（后端上限 100）
+    page_size: 100,
   })
   items.value = res.data.items
+  total.value = res.data.total
   loading.value = false
 }
 
-onMounted(load)
+onMounted(async () => {
+  cats.value = (await api.getCategories('GOODS')).data
+  await load()
+})
 </script>
 
 <template>
@@ -53,13 +61,20 @@ onMounted(load)
         <div class="f-block">
           <h4>分类</h4>
           <button
-            v-for="c in cats"
-            :key="c"
             class="f-cat"
-            :class="{ on: cat === c }"
-            @click="cat = c; load()"
+            :class="{ on: catId === null }"
+            @click="catId = null; load()"
           >
-            {{ c }}
+            全部
+          </button>
+          <button
+            v-for="c in cats"
+            :key="c.id"
+            class="f-cat"
+            :class="{ on: catId === c.id }"
+            @click="catId = c.id; load()"
+          >
+            {{ c.name }}
           </button>
         </div>
         <div class="f-block">
@@ -84,7 +99,7 @@ onMounted(load)
 
       <main>
         <div class="toolbar">
-          <span class="count">共 {{ items.length }} 件作品</span>
+          <span class="count">共 {{ total }} 件作品</span>
           <div class="sorts">
             <button
               v-for="s in sorts"

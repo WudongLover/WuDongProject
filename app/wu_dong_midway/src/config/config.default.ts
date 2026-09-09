@@ -4,6 +4,10 @@ import { PostEntity } from '../modules/m5-community/entity/post_entity';
 import { CommentEntity } from '../modules/m5-community/entity/comment_entity';
 import { PostLikeEntity } from '../modules/m5-community/entity/post_like_entity';
 import { UserEntity } from '../modules/m5-community/entity/user_entity';
+import { ProductEntity } from '../modules/m1-goods/entity/product_entity';
+import { SkuEntity } from '../modules/m1-goods/entity/sku_entity';
+import { CategoryEntity } from '../modules/m1-goods/entity/category_entity';
+import { ReviewEntity } from '../modules/m1-goods/entity/review_entity';
 
 /**
  * 通用配置（本地开发与生产一致）
@@ -34,7 +38,16 @@ export default {
         synchronize: false,
         logging: true,
         // 实体：显式注册（见文件顶部 import）
-        entities: [PostEntity, CommentEntity, PostLikeEntity, UserEntity],
+        entities: [
+          PostEntity,
+          CommentEntity,
+          PostLikeEntity,
+          UserEntity,
+          ProductEntity,
+          SkuEntity,
+          CategoryEntity,
+          ReviewEntity,
+        ],
       },
     },
   },

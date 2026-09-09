@@ -39,10 +39,14 @@ async function loadLive() {
 }
 
 onMounted(async () => {
-  const res = await api.getHomeData()
+  // 商品走真实后端，其余板块仍为 mock；两者 id 体系不同，不能混用 recommends.goods
+  const [res, goodsRes] = await Promise.all([
+    api.getHomeData(),
+    api.getGoodsList({ module: 'GOODS', page_size: 4 }),
+  ])
   banners.value = res.data.banners
   announcements.value = res.data.announcements
-  goods.value = res.data.recommends.goods
+  goods.value = goodsRes.data.items
   restaurants.value = res.data.recommends.restaurants
   homestays.value = res.data.recommends.homestays
   posts.value = res.data.recommends.posts
@@ -160,7 +164,7 @@ onUnmounted(() => {
             杨光银，乌东村州级银饰锻造技艺传承人。十四岁随父学艺，守着老银铺的炉火四十余年。
             他坚持不用模具，每一件银器上的纹样都由手锤一寸寸敲出。到乌东，你可以坐进他的工坊，亲手敲一枚戒指。
           </p>
-          <router-link to="/goods/g1" class="btn btn-outline story-btn">认识他的作品</router-link>
+          <router-link to="/product/1" class="btn btn-outline story-btn">认识他的作品</router-link>
         </div>
       </div>
     </section>
