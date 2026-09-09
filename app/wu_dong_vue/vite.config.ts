@@ -13,9 +13,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // 后端 FastAPI 就绪后，将 src/api 切换到真实接口即可
+      // wu_dong_midway 后端（端口 8001）
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:6666',
         changeOrigin: true,
       },
     },

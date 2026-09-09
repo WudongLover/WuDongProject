@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import * as api from '@/api'
 import type { Post } from '@/types'
@@ -7,7 +7,6 @@ import { useUserStore } from '@/stores/user'
 import PostCard from '@/components/PostCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
-import { img, scene } from '@/mock/images'
 
 const route = useRoute()
 const userStore = useUserStore()
@@ -18,13 +17,31 @@ const sort = ref<'hot' | 'new'>('hot')
 const activeTopic = ref('')
 
 const topics = ['#云海时刻', '#非遗体验', '#美食攻略', '#亲子出行', '#户外徒步', '#独行日记']
-const hotUsers = [
-  { id: 'u1', name: '追云者', bio: '在山里找到安静', avatar: img('chinese man avatar illustration minimal camera', 'square'), likes: '1.2万' },
-  { id: 'u4', name: '南方有雨', bio: '胶片与蓝染', avatar: img('chinese woman avatar illustration minimal glasses', 'square'), likes: '8600' },
-  { id: 'u2', name: '麦子', bio: '带孩子看世界', avatar: img('chinese woman avatar illustration minimal', 'square'), likes: '6400' },
-]
 
-const publishImg = scene('traveler writing journal notebook in wooden guesthouse warm light', 'landscape_4_3')
+/** 活跃村民：从帖子数据聚合 top3 作者（按总点赞数） */
+const hotUsers = computed(() => {
+  const map = new Map<string, { id: string; name: string; bio: string; avatar: string; likesNum: number }>()
+  for (const p of posts.value) {
+    const a = p.author
+    if (!a?.id) continue
+    const prev = map.get(a.id)
+    if (prev) {
+      prev.likesNum += p.likes
+    } else {
+      map.set(a.id, { id: a.id, name: a.name, bio: a.bio ?? '', avatar: a.avatar, likesNum: p.likes })
+    }
+  }
+  return [...map.values()]
+    .sort((a, b) => b.likesNum - a.likesNum)
+    .slice(0, 3)
+    .map((u) => ({
+      ...u,
+      likes: u.likesNum >= 10000 ? `${(u.likesNum / 10000).toFixed(1)}万` : String(u.likesNum),
+    }))
+})
+
+/** 发布弹窗装饰图（固定 URL，非 mock 生成） */
+const publishImg = 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&q=80'
 
 const showPublish = ref(false)
 const pubTitle = ref('')
