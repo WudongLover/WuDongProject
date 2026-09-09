@@ -8,6 +8,7 @@ import { ProductEntity } from '../modules/m1-goods/entity/product_entity';
 import { SkuEntity } from '../modules/m1-goods/entity/sku_entity';
 import { CategoryEntity } from '../modules/m1-goods/entity/category_entity';
 import { ReviewEntity } from '../modules/m1-goods/entity/review_entity';
+import { CartItemEntity } from '../modules/m1-goods/entity/cart_item_entity';
 
 /**
  * 通用配置（本地开发与生产一致）
@@ -47,6 +48,7 @@ export default {
           SkuEntity,
           CategoryEntity,
           ReviewEntity,
+          CartItemEntity,
         ],
       },
     },
