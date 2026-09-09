@@ -1,12 +1,13 @@
 import 'dotenv/config';
 import { MidwayConfig } from '@midwayjs/core';
+import { ProductEntity } from '../modules/m1-goods/entity/product_entity';
 
 /**
  * 通用配置（本地开发与生产一致）
  * 连接 MySQL wudong 业务库
  *
  * 实体显式注册约定：src/modules 下各模块 entity 目录内的 *_entity.ts → 表 wudong_{common|m1..m5}_*
- * 骨架阶段暂无实体实现；各模块填充 entity 后，在此追加 import + 加入 entities 数组
+ * 各模块填充 entity 后，在此追加 import + 加入 entities 数组
  */
 export default {
   // 各环境保持唯一即可（正式接入时更换）
@@ -30,7 +31,7 @@ export default {
         synchronize: false,
         logging: true,
         // 实体：显式注册（见文件顶部 import）
-        entities: [],
+        entities: [ProductEntity],
       },
     },
   },
