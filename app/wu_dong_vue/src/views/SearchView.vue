@@ -29,9 +29,16 @@ async function search() {
   const keyword = kw.value.trim()
   if (!keyword) return
   loading.value = true
-  results.value = (await api.searchAll(keyword)).data
-  loading.value = false
-  if (route.query.kw !== keyword) router.replace({ query: { kw: keyword } })
+  try {
+    const [searchResponse, routeResponse] = await Promise.all([
+      api.searchAll(keyword),
+      api.getRoutePage({ keyword, page: 1, size: 100, status: 'ON_SHELF' }),
+    ])
+    results.value = { ...searchResponse.data, routes: routeResponse.data.list }
+    if (route.query.kw !== keyword) router.replace({ query: { kw: keyword } })
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(search)

@@ -45,9 +45,10 @@ onMounted(async () => {
   goods.value = res.data.recommends.goods
   restaurants.value = res.data.recommends.restaurants
   homestays.value = res.data.recommends.homestays
-  routesList.value = res.data.recommends.routes
   posts.value = res.data.recommends.posts
   hotKeywords.value = res.data.hotKeywords
+  const routeRes = await api.getRoutePage({ page: 1, size: 3, status: 'ON_SHELF' })
+  routesList.value = routeRes.data.list
   timer = setInterval(() => go(cur.value + 1), 5200)
   await loadLive()
   liveTimer = setInterval(loadLive, 60 * 1000)

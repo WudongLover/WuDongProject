@@ -51,6 +51,10 @@ async function book() {
       amount: routeData.value!.price * guests.value,
       qty: guests.value,
       shop: '乌东旅行社',
+      routeId: routeData.value!.id,
+      travelDate: departDate.value,
+      contactName: visitorName.value.trim(),
+      contactPhone: visitorPhone.value,
     })
     router.push({ path: '/orders', query: { highlight: order.data.orderNo, pay: '1' } })
   } catch (e) {
