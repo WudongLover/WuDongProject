@@ -51,6 +51,10 @@ async function book() {
       amount: routeData.value!.price * guests.value,
       qty: guests.value,
       shop: '乌东旅行社',
+      routeId: routeData.value!.id,
+      travelDate: departDate.value,
+      contactName: visitorName.value.trim(),
+      contactPhone: visitorPhone.value,
     })
     router.push({ path: '/orders', query: { highlight: order.data.orderNo, pay: '1' } })
   } catch (e) {
@@ -77,7 +81,7 @@ async function book() {
       <div class="hero">
         <img :src="routeData.cover" :alt="routeData.title" />
         <div class="hero-info">
-          <span class="theme">{{ routeData.theme }} · {{ routeData.days === 1 ? '一日游' : `${routeData.days} 日游` }}</span>
+          <span class="theme">{{ routeData.theme }} · {{ routeData.days === 1 ? '一日游' : routeData.days === 2 ? '两日游' : `${routeData.days}日游` }}</span>
           <h1>{{ routeData.title }}</h1>
           <p class="meta">
             <span>★ {{ routeData.rating.toFixed(1) }}</span>

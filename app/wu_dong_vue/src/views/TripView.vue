@@ -16,7 +16,7 @@ const loading = ref(true)
 
 const theme = ref('全部')
 const themes = ['全部', '文化体验', '户外徒步', '亲子研学', '节庆限定']
-const dayFilter = ref<'all' | 1 | 2>('all')
+const dayFilter = ref<'all' | 1 | 2 | 3>('all')
 
 const heroImg = img('lusheng instrument Miao festival performance colorful costumes valley, wide banner', 'landscape_16_9')
 
@@ -65,6 +65,11 @@ async function submitBuy() {
       amount: buyTicket.value!.price * buyQty.value,
       qty: buyQty.value,
       shop: buyScenic.value!.name,
+      scenicId: buyScenic.value!.id,
+      ticketId: buyTicket.value!.id,
+      travelDate: useDate.value,
+      contactName: visitorName.value.trim(),
+      contactPhone: visitorPhone.value,
     })
     buyScenic.value = null
     userStore.toast('下单成功，支付后生成电子票')
@@ -91,7 +96,7 @@ const filteredRoutes = () =>
       <div class="ph-text container">
         <em>行 · JOURNEY</em>
         <h1 class="h-display">山水有约，芦笙为引</h1>
-        <p>景区门票 · 一日两日路线 · 苗年限定</p>
+        <p>景区门票 · 一日/两日/三日路线 · 苗年限定</p>
       </div>
     </div>
 
@@ -145,6 +150,7 @@ const filteredRoutes = () =>
           <button :class="{ on: dayFilter === 'all' }" @click="dayFilter = 'all'">全部天数</button>
           <button :class="{ on: dayFilter === 1 }" @click="dayFilter = 1">一日</button>
           <button :class="{ on: dayFilter === 2 }" @click="dayFilter = 2">两日</button>
+          <button :class="{ on: dayFilter === 3 }" @click="dayFilter = 3">三日</button>
         </div>
 
         <EmptyState v-if="!loading && !filteredRoutes().length" text="没有符合条件的路线" />

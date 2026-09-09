@@ -1,8 +1,5 @@
-/**
- * 轻量 HTTP 客户端：后端统一信封 { code, message, data }。
- * 仅用于社区模块联调；其余模块仍走 mock。
- */
-import { ApiError } from '@/mock/server'
+/** 轻量 HTTP 客户端：后端统一信封 { code, message, data }。 */
+import { ApiError } from './contracts'
 
 const BASE = '/api'
 
@@ -25,7 +22,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   if (!res.ok || body?.code !== 0) {
     throw new ApiError(body?.code ?? res.status, body?.message ?? '请求失败')
   }
-  // 返回完整信封（与 mock 的 Envelope<T> 一致：{ code, message, data }）
+  // 返回完整信封，调用方按模块解包 data。
   return body as T
 }
 

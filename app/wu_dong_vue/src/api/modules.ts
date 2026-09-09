@@ -1,13 +1,5 @@
-/** API 模块：每个函数对应一个后端接口（Mock 实现） */
+/** API 模块：每个函数对应一个后端接口或本地尚未迁移的能力 */
 import type {
-  Address,
-  CartItem,
-  CommentItem,
-  Homestay,
-  Message,
-  Order,
-  OrderStatus,
-  OrderType,
   Post,
   PostComment,
   Product,
@@ -23,14 +15,19 @@ import { apiFetch } from './http'
 
 /* 首页 */
 export const getHomeData = S.getHomeData
+export const getLiveInfo = S.getLiveInfo
 export const searchAll = S.searchAll
 
 /* 认证 */
-export const sendSmsCode = S.sendSmsCode
-export const login = S.login
-export const register = S.register
-export const fetchMe = S.fetchMe
-export const logout = S.logout
+export {
+  sendSmsCode,
+  login,
+  register,
+  fetchMe,
+  logout,
+  updateProfile,
+  refreshAccess as bootstrap,
+} from './auth'
 export const currentUser = S.currentUser
 
 /* 商品（衣 / 特产）：真实后端 m1-goods，路由前缀 /api/v1/m1 */
@@ -81,13 +78,21 @@ export const getRestaurants = S.getRestaurants
 export const getRestaurantDetail = S.getRestaurantDetail
 
 /* 住 */
-export const getHomestays = S.getHomestays
-export const getHomestayDetail = S.getHomestayDetail
-export const getRoomCalendar = S.getRoomCalendar
+export async function getHomestays() {
+  return apiFetch<Envelope<Homestay[]>>('/app/m3/homestay')
+}
 
-/* 行 */
-export const getTrips = S.getTrips
-export const getRouteDetail = S.getRouteDetail
+export async function getHomestayDetail(id: string) {
+  return apiFetch<Envelope<Homestay>>(`/app/m3/homestay/detail/${id}`)
+}
+
+export async function getRoomCalendar(roomTypeId: string | number) {
+  return apiFetch<Envelope<any>>(`/app/m3/homestay/room-calendar/${roomTypeId}`)
+}
+
+/* 行：门票、景区和路线均使用真实后端接口 */
+export * from './m4'
+export * from './m4-order'
 
 /* 社区（真实后端 http://127.0.0.1:8001，vite 代理 /api） */
 
@@ -135,17 +140,8 @@ export const updateCartItem = S.updateCartItem
 export const removeCartItem = S.removeCartItem
 export const checkCart = S.checkCart
 
-/* 订单 */
-export const createOrder = S.createOrder
-export const payOrder = S.payOrder
-export const cancelOrder = S.cancelOrder
-export const refundOrder = S.refundOrder
-export const getOrders = S.getOrders
-export type CreateOrderPayload = S.CreateOrderPayload
-
 /* 消息 / 地址 / 资料 */
 export const getMessages = S.getMessages
 export const markMessageRead = S.markMessageRead
 export const markAllMessagesRead = S.markAllMessagesRead
 export const getAddresses = S.getAddresses
-export const updateProfile = S.updateProfile
