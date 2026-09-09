@@ -1,10 +1,11 @@
 import { Configuration, App } from '@midwayjs/core';
 import * as koa from '@midwayjs/koa';
 import * as orm from '@midwayjs/typeorm';
+import * as validate from '@midwayjs/validate';
 import DefaultConfig from './config/config.default';
 
 @Configuration({
-  imports: [koa, orm],
+  imports: [koa, orm, validate],
   importConfigs: [{ default: DefaultConfig }],
 })
 export class MainConfiguration {
