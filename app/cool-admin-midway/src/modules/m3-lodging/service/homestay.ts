@@ -1,4 +1,6 @@
 import { M3HomestayEntity } from './../entity/homestay';
+import { M3RoomTypeEntity } from './../entity/room-type';
+import { M3RoomCalendarEntity } from './../entity/room-calendar';
 import { Provide } from '@midwayjs/core';
 import { BaseService } from '@cool-midway/core';
 import { InjectEntityModel } from '@midwayjs/typeorm';
@@ -11,6 +13,12 @@ import { Repository } from 'typeorm';
 export class M3HomestayService extends BaseService {
   @InjectEntityModel(M3HomestayEntity)
   homestayEntity: Repository<M3HomestayEntity>;
+
+  @InjectEntityModel(M3RoomTypeEntity)
+  roomTypeEntity: Repository<M3RoomTypeEntity>;
+
+  @InjectEntityModel(M3RoomCalendarEntity)
+  roomCalendarEntity: Repository<M3RoomCalendarEntity>;
 
   /**
    * 执行entity分页
