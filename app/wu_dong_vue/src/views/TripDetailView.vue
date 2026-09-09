@@ -77,7 +77,7 @@ async function book() {
       <div class="hero">
         <img :src="routeData.cover" :alt="routeData.title" />
         <div class="hero-info">
-          <span class="theme">{{ routeData.theme }} · {{ routeData.days === 1 ? '一日游' : `${routeData.days} 日游` }}</span>
+          <span class="theme">{{ routeData.theme }} · {{ routeData.days === 1 ? '一日游' : routeData.days === 2 ? '两日游' : `${routeData.days}日游` }}</span>
           <h1>{{ routeData.title }}</h1>
           <p class="meta">
             <span>★ {{ routeData.rating.toFixed(1) }}</span>
