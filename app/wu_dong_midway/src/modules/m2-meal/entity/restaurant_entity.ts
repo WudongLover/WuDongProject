@@ -15,7 +15,7 @@ import {
 @Entity('wudong_m2_restaurant')
 export class RestaurantEntity {
   @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true, comment: 'ID' })
-  id: number;
+  id!: number;
 
   @Index()
   @Column({
@@ -25,13 +25,13 @@ export class RestaurantEntity {
     default: 0,
     comment: '商家ID（鉴权接入前 mock 0）',
   })
-  merchantId: number;
+  merchantId!: number;
 
   @Column({ name: 'name', type: 'varchar', length: 128, comment: '名称' })
-  name: string;
+  name!: string;
 
   @Column({ name: 'cover', type: 'varchar', length: 500, comment: '主图' })
-  cover: string;
+  cover!: string;
 
   @Column({ name: 'images', type: 'json', nullable: true, comment: '详情图集' })
   images: any;
@@ -44,7 +44,7 @@ export class RestaurantEntity {
     default: 5.0,
     comment: '评分',
   })
-  rating: number;
+  rating!: number;
 
   @Column({
     name: 'price_per_capita',
@@ -54,7 +54,7 @@ export class RestaurantEntity {
     default: 0,
     comment: '人均',
   })
-  pricePerCapita: number;
+  pricePerCapita!: number;
 
   @Column({
     name: 'address',
@@ -63,7 +63,7 @@ export class RestaurantEntity {
     default: '',
     comment: '地址',
   })
-  address: string;
+  address!: string;
 
   @Column({
     name: 'hours',
@@ -72,7 +72,7 @@ export class RestaurantEntity {
     default: '',
     comment: '营业时间',
   })
-  hours: string;
+  hours!: string;
 
   @Column({
     name: 'capacity',
@@ -81,7 +81,7 @@ export class RestaurantEntity {
     default: 0,
     comment: '总容量',
   })
-  capacity: number;
+  capacity!: number;
 
   @Column({ name: 'tags', type: 'json', nullable: true, comment: '标签数组' })
   tags: any;
@@ -93,7 +93,7 @@ export class RestaurantEntity {
     nullable: true,
     comment: '介绍',
   })
-  intro: string;
+  intro!: string;
 
   @Column({
     name: 'status',
@@ -102,21 +102,21 @@ export class RestaurantEntity {
     default: 'ENABLED',
     comment: 'ENABLED / DISABLED',
   })
-  status: string;
+  status!: string;
 
   @CreateDateColumn({
     name: 'created_at',
     type: 'datetime',
     comment: '创建时间',
   })
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn({
     name: 'updated_at',
     type: 'datetime',
     comment: '更新时间',
   })
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @DeleteDateColumn({
     name: 'deleted_at',
@@ -124,5 +124,5 @@ export class RestaurantEntity {
     nullable: true,
     comment: '逻辑删除时间',
   })
-  deletedAt: Date;
+  deletedAt!: Date;
 }
