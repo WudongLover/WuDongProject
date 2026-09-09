@@ -46,7 +46,7 @@ const modules = [
   { to: '/goods', glyph: '衣', name: '非遗好物', desc: '银饰 · 蜡染 · 刺绣', cls: 'c1' },
   { to: '/food', glyph: '食', name: '苗家风味', desc: '长桌宴 · 高山特产', cls: 'c2' },
   { to: '/stay', glyph: '住', name: '山居民宿', desc: '吊脚楼 · 观云海', cls: 'c3' },
-  { to: '/trip', glyph: '行', name: '门票路线', desc: '一日游 · 苗年节庆', cls: 'c4' },
+  { to: '/trip', glyph: '行', name: '门票路线', desc: '一日游 · 多日套餐', cls: 'c4' },
   { to: '/community', glyph: '记', name: '社区', desc: '游记 · 攻略 · 相遇', cls: 'c5' },
 ]
 </script>
