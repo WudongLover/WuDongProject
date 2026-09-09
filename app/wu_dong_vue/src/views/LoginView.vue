@@ -143,7 +143,7 @@ const submitText = computed(() =>
 
         <button class="btn btn-primary btn-lg submit" :disabled="loading" @click="submit">{{ submitText }}</button>
 
-        <p class="hint">演示环境：验证码固定为 123456，任意手机号均可登录</p>
+        <p class="hint">演示环境：验证码发送至后端控制台，任意手机号均可登录</p>
       </div>
     </div>
   </div>

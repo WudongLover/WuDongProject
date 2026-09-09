@@ -13,11 +13,15 @@ export const getLiveInfo = S.getLiveInfo
 export const searchAll = S.searchAll
 
 /* 认证 */
-export const sendSmsCode = S.sendSmsCode
-export const login = S.login
-export const register = S.register
-export const fetchMe = S.fetchMe
-export const logout = S.logout
+export {
+  sendSmsCode,
+  login,
+  register,
+  fetchMe,
+  logout,
+  updateProfile,
+  refreshAccess as bootstrap,
+} from './auth'
 export const currentUser = S.currentUser
 
 /* 商品（衣 / 特产） */
@@ -89,4 +93,3 @@ export const getMessages = S.getMessages
 export const markMessageRead = S.markMessageRead
 export const markAllMessagesRead = S.markAllMessagesRead
 export const getAddresses = S.getAddresses
-export const updateProfile = S.updateProfile

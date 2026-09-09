@@ -42,9 +42,21 @@ export const useUserStore = defineStore('user', {
       return res.data
     },
     logout() {
-      api.logout()
+      // 先清本地，服务端撤销异步执行；后端不可达也不影响本地退出
+      api.logout().catch(() => {})
       this.user = null
       sessionStorage.removeItem(KEY)
+    },
+    /** 应用启动时用 refresh Cookie 静默恢复登录态 */
+    async bootstrap() {
+      try {
+        const res = await api.fetchMe()
+        this.user = res.data
+        sessionStorage.setItem(KEY, JSON.stringify(this.user))
+      } catch {
+        this.user = null
+        sessionStorage.removeItem(KEY)
+      }
     },
     requireLogin(): boolean {
       if (this.user) return true
