@@ -40,13 +40,26 @@ const nights = computed(() => {
   return Math.max(1, Math.round((b - a) / 86400000) || 1)
 })
 
+/** 计算预订总价（含每日浮动价） */
+const totalPrice = computed(() => {
+  if (!openRoom.value) return 0
+  let total = 0
+  for (let i = 0; i < nights.value; i++) {
+    const d = new Date(checkIn.value)
+    d.setDate(d.getDate() + i)
+    const dateStr = d.toISOString().slice(0, 10)
+    const cal = calendar.value.find((c) => c.date === dateStr)
+    total += openRoom.value.price + (cal?.priceDelta || 0)
+  }
+  return total
+})
+
 onMounted(async () => {
   checkIn.value = dayStr(1)
   checkOut.value = dayStr(2)
   try {
     const res = await api.getHomestayDetail(route.params.id as string)
     stay.value = res.data
-    favorited.value = api.isFavorite(res.data.id)
   } catch {
     notFound.value = true
   }
@@ -63,10 +76,6 @@ async function openCalendar(room: RoomType) {
   calendar.value = res.data
 }
 
-function stockOf(date: string) {
-  return calendar.value.find((c) => c.date === date)?.stock ?? 0
-}
-
 async function bookRoom() {
   bookErr.value = ''
   if (!guestName.value.trim()) return (bookErr.value = '请填写入住人姓名')
@@ -77,12 +86,21 @@ async function bookRoom() {
   submitting.value = true
   try {
     const room = openRoom.value!
+    // 计算总价：每晚价格 = 房型基础价 + 当日浮动价
+    let totalAmount = 0
+    for (let i = 0; i < nights.value; i++) {
+      const d = new Date(checkIn.value)
+      d.setDate(d.getDate() + i)
+      const dateStr = d.toISOString().slice(0, 10)
+      const cal = calendar.value.find((c) => c.date === dateStr)
+      totalAmount += room.price + (cal?.priceDelta || 0)
+    }
     const order = await api.createOrder({
       type: 'LODGING',
       title: `${stay.value!.name} · ${room.name}`,
       cover: stay.value!.cover,
       summary: `${checkIn.value} 入住 · ${checkOut.value} 离店 · ${nights.value} 晚 · ${guestName.value}`,
-      amount: (room.price + (calendar.value.find((c) => c.date === checkIn.value)?.priceDelta || 0)) * nights.value,
+      amount: totalAmount,
       qty: nights.value,
       shop: stay.value!.name,
     })
@@ -241,7 +259,7 @@ async function bookRoom() {
 
           <div class="amount-row">
             <span>{{ openRoom.price }} × {{ nights }} 晚</span>
-            <span class="price">{{ openRoom.price * nights }}</span>
+            <span class="price">¥{{ totalPrice }}</span>
           </div>
 
           <p v-if="bookErr" class="err">{{ bookErr }}</p>

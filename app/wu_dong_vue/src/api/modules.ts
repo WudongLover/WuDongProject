@@ -41,16 +41,25 @@ export const getRestaurants = S.getRestaurants
 export const getRestaurantDetail = S.getRestaurantDetail
 
 /* 住 */
-export const getHomestays = S.getHomestays
-export const getHomestayDetail = S.getHomestayDetail
-export const getRoomCalendar = S.getRoomCalendar
+import { apiFetch } from './http'
+
+export async function getHomestays() {
+  return apiFetch<Envelope<Homestay[]>>('/app/m3/homestay')
+}
+
+export async function getHomestayDetail(id: string) {
+  return apiFetch<Envelope<Homestay>>(`/app/m3/homestay/detail/${id}`)
+}
+
+export async function getRoomCalendar(roomTypeId: string | number) {
+  return apiFetch<Envelope<any>>(`/app/m3/homestay/room-calendar/${roomTypeId}`)
+}
 
 /* 行 */
 export const getTrips = S.getTrips
 export const getRouteDetail = S.getRouteDetail
 
 /* 社区（真实后端 http://127.0.0.1:8001，vite 代理 /api） */
-import { apiFetch } from './http'
 import type { Envelope } from '@/mock/server'
 
 export function getPosts(): Promise<Envelope<Post[]>> {
