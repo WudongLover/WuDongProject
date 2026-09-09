@@ -4,7 +4,7 @@
  */
 import { Provide } from '@midwayjs/core';
 import { InjectEntityModel } from '@midwayjs/typeorm';
-import { FindOptionsWhere, Like, Repository } from 'typeorm';
+import { FindOptionsWhere, IsNull, Like, Repository } from 'typeorm';
 import {
   ProductEntity,
   ProductModule,
@@ -61,10 +61,14 @@ export class ProductMapper {
 
   /**
    * 逻辑删除：写入 deleted_at，不物理删行
+   * 显式限定 deleted_at IS NULL，避免重复删除已删记录时误报成功
    * @returns 是否命中记录（false 表示不存在或已删除）
    */
   async softDeleteById(id: string): Promise<boolean> {
-    const result = await this.productModel.softDelete(id);
+    const result = await this.productModel.softDelete({
+      id,
+      deletedAt: IsNull(),
+    });
     return result.affected > 0;
   }
 }
