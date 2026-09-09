@@ -1,11 +1,16 @@
-import { Provide, Config, Inject, Init, InjectClient } from '@midwayjs/core';
+import {
+  Config,
+  InjectClient,
+  Logger,
+  Provide,
+  ILogger,
+} from '@midwayjs/core';
 import { BaseService, CoolCommException } from '@cool-midway/core';
-import * as _ from 'lodash';
 import { CachingFactory, MidwayCache } from '@midwayjs/cache-manager';
-import { PluginService } from '../../plugin/service/info';
+import { randomInt } from 'crypto';
 
 /**
- * 描述
+ * 短信服务：演示环境只把验证码打印到后端控制台，不接入真实短信平台。
  */
 @Provide()
 export class UserSmsService extends BaseService {
@@ -16,51 +21,25 @@ export class UserSmsService extends BaseService {
   @InjectClient(CachingFactory, 'default')
   midwayCache: MidwayCache;
 
-  @Inject()
-  pluginService: PluginService;
-
-  plugin;
-
-  @Init()
-  async init() {
-    for (const key of ['sms-tx', 'sms-ali']) {
-      try {
-        this.plugin = await this.pluginService.getInstance(key);
-        if (this.plugin) {
-          this.config.pluginKey = key;
-          break;
-        }
-      } catch (e) {
-        continue;
-      }
-    }
-  }
+  @Logger()
+  logger: ILogger;
 
   /**
    * 发送验证码
    * @param phone
    */
   async sendSms(phone) {
-    // 随机四位验证码
-    const code = _.random(1000, 9999);
-    const pluginKey = this.config.pluginKey;
-    if (!this.plugin)
-      throw new CoolCommException(
-        '未配置短信插件，请到插件市场下载安装配置：https://cool-js.com/plugin?keyWord=短信'
-      );
-    try {
-      if (pluginKey == 'sms-tx') {
-        await this.plugin.send([phone], [code]);
-      }
-      if (pluginKey == 'sms-ali') {
-        await this.plugin.send([phone], {
-          code,
-        });
-      }
-      this.midwayCache.set(`sms:${phone}`, code, this.config.timeout * 1000);
-    } catch (error) {
+    const throttleKey = `sms:throttle:${phone}`;
+    if (await this.midwayCache.get(throttleKey)) {
       throw new CoolCommException('发送过于频繁，请稍后再试');
     }
+    // 随机 6 位验证码，仅打印到控制台（未实际发送）
+    const code = String(randomInt(100000, 1000000));
+    this.logger.info(
+      `[MockSMS] 发送验证码 phone=${phone} code=${code}（演示环境仅打印到后端控制台）`
+    );
+    this.midwayCache.set(`sms:${phone}`, code, this.config.timeout * 1000);
+    this.midwayCache.set(throttleKey, 1, this.config.throttle * 1000);
   }
 
   /**
