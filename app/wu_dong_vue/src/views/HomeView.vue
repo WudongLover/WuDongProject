@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import * as api from '@/api'
-import type { Banner, Homestay, Post, Product, Restaurant, TravelRoute } from '@/types'
+import type { Banner, Homestay, LiveInfo, Post, Product, Restaurant, TravelRoute } from '@/types'
 import SectionTitle from '@/components/SectionTitle.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import RestaurantCard from '@/components/RestaurantCard.vue'
@@ -19,12 +19,23 @@ const homestays = ref<Homestay[]>([])
 const routesList = ref<TravelRoute[]>([])
 const posts = ref<Post[]>([])
 const hotKeywords = ref<string[]>([])
+const live = ref<LiveInfo | null>(null)
 
 const cur = ref(0)
 let timer: ReturnType<typeof setInterval> | undefined
+let liveTimer: ReturnType<typeof setInterval> | undefined
 
 function go(i: number) {
   cur.value = (i + banners.value.length) % banners.value.length
+}
+
+async function loadLive() {
+  try {
+    const res = await api.getLiveInfo()
+    live.value = res.data
+  } catch {
+    live.value = null
+  }
 }
 
 onMounted(async () => {
@@ -38,17 +49,14 @@ onMounted(async () => {
   posts.value = res.data.recommends.posts
   hotKeywords.value = res.data.hotKeywords
   timer = setInterval(() => go(cur.value + 1), 5200)
+  await loadLive()
+  liveTimer = setInterval(loadLive, 60 * 1000)
 })
 
-onUnmounted(() => clearInterval(timer))
-
-const modules = [
-  { to: '/goods', glyph: '衣', name: '非遗好物', desc: '银饰 · 蜡染 · 刺绣', cls: 'c1' },
-  { to: '/food', glyph: '食', name: '苗家风味', desc: '长桌宴 · 高山特产', cls: 'c2' },
-  { to: '/stay', glyph: '住', name: '山居民宿', desc: '吊脚楼 · 观云海', cls: 'c3' },
-  { to: '/trip', glyph: '行', name: '门票路线', desc: '一日游 · 多日套餐', cls: 'c4' },
-  { to: '/community', glyph: '记', name: '社区', desc: '游记 · 攻略 · 相遇', cls: 'c5' },
-]
+onUnmounted(() => {
+  clearInterval(timer)
+  clearInterval(liveTimer)
+})
 </script>
 
 <template>
@@ -81,10 +89,10 @@ const modules = [
       <div class="hero-side">
         <div class="side-card fade">
           <h4>云上乌东</h4>
-          <p>海拔 1300m · 今日多云 22℃</p>
+          <p>海拔 {{ live?.altitude ?? '--' }}m · 今日{{ live?.weather.text ?? '--' }} {{ live?.weather.temp ?? '--' }}℃</p>
           <ul>
-            <li><AppIcon name="fire" :size="14" /> 今日游客 862 人</li>
-            <li><AppIcon name="star" :size="14" /> 苗年节倒计时 63 天</li>
+            <li><AppIcon name="fire" :size="14" /> 今日游客 {{ live?.visitorsToday ?? '--' }} 人</li>
+            <li><AppIcon name="star" :size="14" /> {{ live?.festival.name ?? '苗年节' }}倒计时 {{ live?.festival.daysLeft ?? '--' }} 天</li>
           </ul>
         </div>
       </div>
@@ -105,15 +113,6 @@ const modules = [
         <router-link v-for="k in hotKeywords.slice(0, 4)" :key="k" :to="`/search?kw=${k}`">{{ k }}</router-link>
       </div>
     </div>
-
-    <!-- 金刚区 -->
-    <section class="container kingkong">
-      <router-link v-for="(m, i) in modules" :key="m.to" :to="m.to" class="kk-card rise" :style="{ animationDelay: `${i * 70}ms` }">
-        <span class="kk-glyph" :class="m.cls">{{ m.glyph }}</span>
-        <span class="kk-name">{{ m.name }}</span>
-        <span class="kk-desc">{{ m.desc }}</span>
-      </router-link>
-    </section>
 
     <!-- 衣 -->
     <section class="container sec">
@@ -419,81 +418,6 @@ const modules = [
   }
 }
 
-/* ---------- 金刚区 ---------- */
-.kingkong {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-  padding: 30px 0 6px;
-}
-
-.kk-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 7px;
-  padding: 22px 10px 18px;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
-  transition: all 0.3s var(--ease);
-  position: relative;
-  overflow: hidden;
-}
-
-.kk-card::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 100%;
-  height: 3px;
-  background: var(--indigo);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.35s var(--ease);
-}
-
-.kk-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-2);
-}
-
-.kk-card:hover::after {
-  transform: scaleX(1);
-}
-
-.kk-glyph {
-  width: 54px;
-  height: 54px;
-  display: grid;
-  place-items: center;
-  font-family: var(--font-display);
-  font-size: 26px;
-  font-weight: 900;
-  border-radius: 8px;
-  margin-bottom: 4px;
-}
-
-.c1 { background: #e8eef5; color: var(--indigo); }
-.c2 { background: #f7e9e4; color: var(--accent); }
-.c3 { background: #eaf1ea; color: #3d6b4f; }
-.c4 { background: #f5efdf; color: var(--amber); }
-.c5 { background: #ece9f2; color: #5a4d7c; }
-
-.kk-name {
-  font-size: 14.5px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--ink);
-}
-
-.kk-desc {
-  font-size: 11.5px;
-  color: var(--text-3);
-  letter-spacing: 0.05em;
-}
-
 /* ---------- 通用区块 ---------- */
 .sec {
   padding-top: 58px;
@@ -514,12 +438,10 @@ const modules = [
 @media (max-width: 1023px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
-  .kingkong { grid-template-columns: repeat(3, 1fr); }
 }
 
 @media (max-width: 599px) {
   .grid-4, .grid-3 { grid-template-columns: 1fr; }
-  .kingkong { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ---------- 深色带 ---------- */

@@ -4,11 +4,13 @@ import type {
   CartItem,
   CommentItem,
   Homestay,
+  LiveInfo,
   Message,
   Order,
   OrderStatus,
   OrderType,
   Post,
+  PostComment,
   Product,
   Restaurant,
   Scenic,
@@ -19,6 +21,7 @@ import * as S from '@/mock/server'
 
 /* 首页 */
 export const getHomeData = S.getHomeData
+export const getLiveInfo = S.getLiveInfo
 export const searchAll = S.searchAll
 
 /* 认证 */
@@ -46,11 +49,41 @@ export const getRoomCalendar = S.getRoomCalendar
 export const getTrips = S.getTrips
 export const getRouteDetail = S.getRouteDetail
 
-/* 社区 */
-export const getPosts = S.getPosts
-export const getPostDetail = S.getPostDetail
-export const togglePostLike = S.togglePostLike
-export const addComment = S.addComment
+/* 社区（真实后端 http://127.0.0.1:8001，vite 代理 /api） */
+import { apiFetch } from './http'
+import type { Envelope } from '@/mock/server'
+
+export function getPosts(): Promise<Envelope<Post[]>> {
+  return apiFetch<Envelope<Post[]>>('/posts')
+}
+export function getPostDetail(id: string): Promise<Envelope<Post>> {
+  return apiFetch<Envelope<Post>>(`/posts/${id}`)
+}
+/** 点赞切换：PUT（幂等） */
+export function togglePostLike(id: string): Promise<Envelope<{ liked: boolean; likes: number }>> {
+  return apiFetch<Envelope<{ liked: boolean; likes: number }>>(`/posts/${id}/like`, { method: 'PUT' })
+}
+/** 获取帖子评论列表 */
+export function getComments(postId: string): Promise<Envelope<PostComment[]>> {
+  return apiFetch<Envelope<PostComment[]>>(`/posts/${postId}/comments`)
+}
+/** 新增评论 */
+export function addComment(postId: string, content: string): Promise<Envelope<PostComment[]>> {
+  return apiFetch<Envelope<PostComment[]>>(`/posts/${postId}/comments`, {
+    method: 'POST',
+    body: JSON.stringify({ content }),
+  })
+}
+
+/** 逻辑删除帖子 */
+export function deletePost(postId: string): Promise<Envelope<boolean>> {
+  return apiFetch<Envelope<boolean>>(`/posts/${postId}`, { method: 'DELETE' })
+}
+
+/** 逻辑删除评论 */
+export function deleteComment(postId: string, commentId: string): Promise<Envelope<boolean>> {
+  return apiFetch<Envelope<boolean>>(`/posts/${postId}/comments/${commentId}`, { method: 'DELETE' })
+}
 
 /* 收藏 */
 export const getFavorites = S.getFavorites
