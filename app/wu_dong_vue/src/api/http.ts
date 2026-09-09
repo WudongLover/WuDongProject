@@ -27,12 +27,12 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 }
 
 /**
- * 模拟用户 ID：localStorage 读取，缺省 '1'（与后端 DEMO_USER_ID 兜底一致）
+ * 模拟用户 ID：sessionStorage 读取，缺省 '1'（与后端 DEMO_USER_ID 兜底一致）
  * 待登录鉴权模块实现后替换为真实 token
  */
 function getMockUserId(): string {
   try {
-    const u = localStorage.getItem('wudong_user')
+    const u = sessionStorage.getItem('wudong_user')
     if (u) {
       const parsed = JSON.parse(u)
       if (parsed?.id) return String(parsed.id)

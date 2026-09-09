@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cart'
 import { useUserStore } from '@/stores/user'
+import { unwrapError } from '@/api'
 import QtyStepper from '@/components/QtyStepper.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
@@ -34,9 +35,13 @@ async function checkout() {
     userStore.toast('请先勾选商品')
     return
   }
-  const order = await cartStore.checkout()
-  userStore.toast('下单成功，去支付')
-  router.push({ path: '/orders', query: { highlight: order.orderNo, pay: '1' } })
+  try {
+    const order = await cartStore.checkout()
+    userStore.toast('下单成功，去支付')
+    router.push({ path: '/orders', query: { highlight: order.orderNo, pay: '1' } })
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  }
 }
 </script>
 

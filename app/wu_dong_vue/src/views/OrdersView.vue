@@ -38,9 +38,14 @@ const statusMap: Record<OrderStatus, { text: string; cls: string }> = {
 
 async function load() {
   loading.value = true
-  const res = await api.getOrders({ type: typeTab.value })
-  orders.value = res.data
-  loading.value = false
+  try {
+    const res = await api.getOrders({ type: typeTab.value })
+    orders.value = res.data
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  } finally {
+    loading.value = false
+  }
 }
 
 onMounted(async () => {

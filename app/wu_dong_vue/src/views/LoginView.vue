@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import * as api from '@/api'
 import { unwrapError } from '@/api'
@@ -25,6 +25,12 @@ const loading = ref(false)
 
 const sideImg = scene('Miao village wooden stilt houses in morning mist, indigo tone', 'portrait_16_9')
 
+let countdownTimer: ReturnType<typeof setInterval> | null = null
+
+onUnmounted(() => {
+  if (countdownTimer) clearInterval(countdownTimer)
+})
+
 async function sendCode() {
   errText.value = ''
   if (sending.value || countdown.value) return
@@ -33,9 +39,12 @@ async function sendCode() {
     const res = await api.sendSmsCode(phone.value)
     userStore.toast(res.data.hint)
     countdown.value = 60
-    const t = setInterval(() => {
+    countdownTimer = setInterval(() => {
       countdown.value -= 1
-      if (countdown.value <= 0) clearInterval(t)
+      if (countdown.value <= 0) {
+        clearInterval(countdownTimer!)
+        countdownTimer = null
+      }
     }, 1000)
   } catch (e) {
     errText.value = unwrapError(e).message
@@ -55,7 +64,9 @@ async function submit() {
       await userStore.register({ phone: phone.value, smsCode: smsCode.value, password: password.value, name: name.value })
     }
     userStore.toast(`欢迎回来，${userStore.user?.name}`)
-    const redirect = (route.query.redirect as string) || '/'
+    // 开放重定向防护：只允许站内路径，阻止跳到外部网站
+    const raw = (route.query.redirect as string) || '/'
+    const redirect = raw.startsWith('/') && !raw.startsWith('//') ? raw : '/'
     router.push(redirect)
   } catch (e) {
     errText.value = unwrapError(e).message

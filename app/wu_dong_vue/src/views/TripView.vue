@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import * as api from '@/api'
 import { unwrapError } from '@/api'
 import type { Scenic, TravelRoute } from '@/types'
 import { useUserStore } from '@/stores/user'
+
+const router = useRouter()
 import RouteCard from '@/components/RouteCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'

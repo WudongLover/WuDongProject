@@ -26,6 +26,20 @@ const tab = ref<'craft' | 'detail' | 'reviews'>('detail')
 const favorited = ref(false)
 const buying = ref(false)
 
+/** 简单的 HTML 消毒：剥离 script/iframe/event handler，防止存储型 XSS */
+function sanitizeHtml(html: string): string {
+  if (!html) return ''
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<iframe[\s\S]*?<\/iframe>/gi, '')
+    .replace(/<object[\s\S]*?<\/object>/gi, '')
+    .replace(/<embed[^>]*>/gi, '')
+    .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
+    .replace(/\son\w+\s*=\s*'[^']*'/gi, '')
+    .replace(/\son\w+\s*=\s*[^\s>]+/gi, '')
+    .replace(/javascript\s*:/gi, '')
+}
+
 const curSku = computed(() => product.value?.skus.find((s) => s.id === skuId.value) || product.value?.skus[0])
 const curPrice = computed(() => curSku.value?.price ?? product.value?.price ?? 0)
 const isSpecialty = computed(() => product.value?.module === 'SPECIALTY')
@@ -212,7 +226,7 @@ async function buyNow() {
             <img v-if="product.artisan" :src="product.images[product.images.length - 1]" alt="工艺细节" />
           </div>
 
-          <div v-else-if="tab === 'detail'" class="detail-body" v-html="product.detail"></div>
+          <div v-else-if="tab === 'detail'" class="detail-body" v-html="sanitizeHtml(product.detail)"></div>
 
           <div v-else class="reviews">
             <EmptyState v-if="!product.reviews.length" text="还没有评价，期待你成为第一位" />
