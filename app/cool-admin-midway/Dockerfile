@@ -1,5 +1,5 @@
 
-FROM m.daocloud.io/docker.io/library/node:20-alpine
+FROM node:lts-alpine
 
 WORKDIR /app
 
@@ -17,15 +17,15 @@ RUN npm config set registry https://registry.npmmirror.com
 
 # 复制package.json
 COPY package.json ./package.json
-# 后端当前没有 lockfile，使用 npm install；固定 Node 20 以匹配 Midway 运行时
-RUN npm install --no-audit --no-fund
+# 安装依赖
+RUN npm install
 # 构建项目
 COPY . .
 RUN npm run build
 # 删除开发期依赖
-RUN rm -rf node_modules && rm -f package-lock.json
+RUN rm -rf node_modules && rm package-lock.json    
 # 安装生产环境依赖   
-RUN npm install --omit=dev --no-audit --no-fund
+RUN npm install                        
 
 # 如果端口更换，这边可以更新一下
 EXPOSE 8001
