@@ -1,5 +1,6 @@
 /** API 模块：每个函数对应一个后端接口或本地尚未迁移的能力 */
 import type {
+  Homestay,
   Post,
   PostComment,
   Product,
