@@ -5,10 +5,14 @@ import type {
   PostComment,
   Product,
   ProductModule,
+  Restaurant,
+  Scenic,
+  TravelRoute,
+  UserProfile,
 } from '@/types'
 import * as S from '@/mock/server'
+import type { Envelope } from '@/mock/server'
 import { apiFetch } from './http'
-import type { Envelope } from './contracts'
 
 /* 首页 */
 export const getHomeData = S.getHomeData
