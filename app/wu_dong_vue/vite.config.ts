@@ -13,7 +13,11 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // wu_dong_midway 后端（端口 8001）
+      // C 端认证接口已切换到 cool-admin-midway（8001）
+      '/app': {
+        target: 'http://localhost:8001',
+        changeOrigin: true,
+      },
       '/api': {
         target: 'http://localhost:6666',
         changeOrigin: true,
