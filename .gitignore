@@ -2,36 +2,48 @@
 node_modules/
 .pnp
 .pnp.js
+pnpm-lock.yaml
+yarn.lock
 
 # Build outputs
 dist/
+dist-ssr/
 build/
 out/
 .next/
+!app/cool_admin_vue/build/cool/
 
 # Runtime data
 logs/
+run/
+cache/
+data/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
 # Environment files
 .env
 .env.local
 .env.*.local
+*.local
 
 # IDE files
 .idea/
 .vscode/
+.cursor/
+.cursorrules
 *.swp
 *.swo
 *~
-.DS_Store
-Thumbs.db
-
-# TypeScript cache
-*.tsbuildinfo
+.project
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+launch.json
 
 # OS generated files
 .DS_Store?
@@ -40,6 +52,13 @@ Thumbs.db
 .Trashes
 ehthumbs.db
 Desktop.ini
+Thumbs.db
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Vite
+vite.config.ts.timestamp*
 
 # Testing
 coverage/
