@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import * as api from '@/api'
-import type { CartItem } from '@/types'
+import type { CartItem, Order } from '@/types'
 
 export const useCartStore = defineStore('cart', {
   state: () => ({
