@@ -4,6 +4,7 @@ import type {
   CartItem,
   CommentItem,
   Homestay,
+  LiveInfo,
   Message,
   Order,
   OrderStatus,
@@ -20,6 +21,7 @@ import * as S from '@/mock/server'
 
 /* 首页 */
 export const getHomeData = S.getHomeData
+export const getLiveInfo = S.getLiveInfo
 export const searchAll = S.searchAll
 
 /* 认证 */

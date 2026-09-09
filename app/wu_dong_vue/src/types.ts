@@ -256,6 +256,25 @@ export interface Banner {
   link: string
 }
 
+export interface LiveWeather {
+  /** 天气文本，如 多云 / 晴 */
+  text: string
+  /** 当前温度（℃） */
+  temp: number
+  high: number
+  low: number
+}
+
+export interface LiveInfo {
+  /** 海拔高度（米） */
+  altitude: number
+  weather: LiveWeather
+  /** 今日实时在园/到访游客数 */
+  visitorsToday: number
+  /** 苗年节倒计时 */
+  festival: { name: string; date: string; daysLeft: number }
+}
+
 export interface UserProfile {
   id: string
   name: string
