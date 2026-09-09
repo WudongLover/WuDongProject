@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia'
 import * as api from '@/api'
-import { cartApi } from '@/api/cart'
 import type { CartItem, Order } from '@/types'
 
 export const useCartStore = defineStore('cart', {
@@ -10,57 +9,32 @@ export const useCartStore = defineStore('cart', {
   }),
   getters: {
     count: (s) => s.items.reduce((n, c) => n + c.qty, 0),
-    checkedItems: (s) => s.items.filter((c) => c.checked === true),
+    checkedItems: (s) => s.items.filter((c) => c.checked),
     checkedTotal(): number {
       return this.checkedItems.reduce((n, c) => n + c.price * c.qty, 0)
     },
   },
   actions: {
-    normalize(items: CartItem[]) {
-      return items.map((item) => ({
-        ...item,
-        price: Number(item.price) || 0,
-        qty: Number(item.qty) || 0,
-        stock: Number(item.stock) || 0,
-        checked: item.checked === true || (item.checked as unknown) === 1 || (item.checked as unknown) === '1' || (item.checked as unknown) === 'true',
-      }))
-    },
     async load() {
-      const res = await cartApi.list()
-      this.items = this.normalize(res.data)
+      const res = await api.getCart()
+      this.items = res.data
       this.loaded = true
     },
-    async add(payload: { productId: string; skuId?: string; title: string; cover: string; sku: string; price: number; qty: number; stock: number; shop: string }) {
-      const res = await cartApi.add({ productId: payload.productId, skuId: payload.skuId, qty: payload.qty, shop: payload.shop })
-      this.items = this.normalize(res.data)
+    async add(payload: { productId: string; title: string; cover: string; sku: string; price: number; qty: number; stock: number; shop: string }) {
+      const res = await api.addToCart(payload)
+      this.items = res.data
     },
     async updateQty(id: string, qty: number) {
-      const item = this.items.find((entry) => entry.id === id)
-      const previous = item?.qty
-      if (item) item.qty = qty
-      try {
-        const res = await cartApi.update(id, { qty })
-        this.items = this.normalize(res.data)
-      } catch (error) {
-        if (item && previous !== undefined) item.qty = previous
-        throw error
-      }
+      const res = await api.updateCartItem(id, { qty })
+      this.items = res.data
     },
     async toggleChecked(id: string, checked: boolean) {
-      const item = this.items.find((entry) => entry.id === id)
-      const previous = item?.checked
-      if (item) item.checked = checked
-      try {
-        const res = await cartApi.update(id, { checked })
-        this.items = this.normalize(res.data)
-      } catch (error) {
-        if (item && previous !== undefined) item.checked = previous
-        throw error
-      }
+      const res = await api.updateCartItem(id, { checked })
+      this.items = res.data
     },
     async remove(id: string) {
-      const res = await cartApi.remove(id)
-      this.items = this.normalize(res.data)
+      const res = await api.removeCartItem(id)
+      this.items = res.data
     },
     async checkout(): Promise<Order> {
       const ids = this.checkedItems.map((c) => c.id)
