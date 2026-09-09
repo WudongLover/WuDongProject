@@ -49,3 +49,5 @@ coverage/
 tmp/
 temp/
 public/uploads/*
+app/wu_dong_vue/.npm-cache/*
+app/cool_admin_vue/.npm-cache/*

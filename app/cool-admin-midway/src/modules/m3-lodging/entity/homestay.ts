@@ -9,11 +9,9 @@ export class M3HomestayEntity extends BaseEntity {
   @PrimaryGeneratedColumn('increment', { comment: 'ID' })
   id: number;
 
-  @Index()
   @Column({ name: 'created_at', comment: '创建时间', type: 'varchar', transformer: transformerTime })
   createTime: Date;
 
-  @Index()
   @Column({ name: 'updated_at', comment: '更新时间', type: 'varchar', transformer: transformerTime })
   updateTime: Date;
 

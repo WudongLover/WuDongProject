@@ -63,6 +63,7 @@ async function addToCart() {
   try {
     await cartStore.add({
       productId: product.value!.id,
+      skuId: skuId.value || undefined,
       title: product.value!.title,
       cover: product.value!.cover,
       sku: curSku.value?.name || '默认规格',
