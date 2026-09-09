@@ -1,5 +1,9 @@
 import 'dotenv/config';
 import { MidwayConfig } from '@midwayjs/core';
+import { PostEntity } from '../modules/m5-community/entity/post_entity';
+import { CommentEntity } from '../modules/m5-community/entity/comment_entity';
+import { PostLikeEntity } from '../modules/m5-community/entity/post_like_entity';
+import { UserEntity } from '../modules/m5-community/entity/user_entity';
 
 /**
  * 通用配置（本地开发与生产一致）
@@ -30,7 +34,7 @@ export default {
         synchronize: false,
         logging: true,
         // 实体：显式注册（见文件顶部 import）
-        entities: [],
+        entities: [PostEntity, CommentEntity, PostLikeEntity, UserEntity],
       },
     },
   },
