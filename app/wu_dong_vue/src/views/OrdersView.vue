@@ -53,7 +53,7 @@ onMounted(async () => {
 async function pay(o: Order) {
   try {
     await api.payOrder(o.orderNo)
-    userStore.toast('模拟支付成功')
+    userStore.toast('支付成功')
     await load()
   } catch (e) {
     userStore.toast(unwrapError(e).message)

@@ -65,6 +65,11 @@ async function submitBuy() {
       amount: buyTicket.value!.price * buyQty.value,
       qty: buyQty.value,
       shop: buyScenic.value!.name,
+      scenicId: buyScenic.value!.id,
+      ticketId: buyTicket.value!.id,
+      travelDate: useDate.value,
+      contactName: visitorName.value.trim(),
+      contactPhone: visitorPhone.value,
     })
     buyScenic.value = null
     userStore.toast('下单成功，支付后生成电子票')

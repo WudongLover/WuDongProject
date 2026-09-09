@@ -3,6 +3,7 @@ import { Provide } from '@midwayjs/core';
 import { InjectEntityModel } from '@midwayjs/typeorm';
 import { Repository } from 'typeorm';
 import { M4RouteEntity } from '../entity/route';
+import { M4RouteDayEntity } from '../entity/route-day';
 
 export interface RoutePageQuery {
   page?: number | string;
@@ -34,6 +35,9 @@ export class M4RouteService {
   @InjectEntityModel(M4RouteEntity)
   routeEntity: Repository<M4RouteEntity>;
 
+  @InjectEntityModel(M4RouteDayEntity)
+  routeDayEntity: Repository<M4RouteDayEntity>;
+
   async page(query: RoutePageQuery) {
     const page = Math.max(1, Number(query.page) || 1);
     const size = Math.min(100, Math.max(1, Number(query.size) || 10));
@@ -63,7 +67,24 @@ export class M4RouteService {
   async info(id: number | string) {
     const route = await this.routeEntity.findOneBy({ id: Number(id) });
     if (!route) throw new CoolCommException('路线套餐不存在或已删除');
-    return route;
+    const days = await this.routeDayEntity.find({
+      where: { routeId: route.id },
+      order: { day: 'ASC' },
+    });
+    return {
+      ...route,
+      price: Number(route.price),
+      rating: Number(route.rating),
+      includes: route.includes ?? [],
+      notice: route.notice ?? [],
+      schedule: days.map((item) => ({
+        day: item.day,
+        title: item.title,
+        desc: item.description ?? '',
+        meals: item.meals,
+        stay: item.stay,
+      })),
+    };
   }
 
   async add(payload: RouteAddPayload) {

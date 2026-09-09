@@ -1,26 +1,11 @@
-/**
- * API 模块：认证与个人资料走真实后端（/app/user/auth/*），
- * 其余业务数据暂由本地 Mock 提供。
- */
+/** API 模块：每个函数对应一个后端接口或本地尚未迁移的能力 */
 import type {
-  Address,
-  CartItem,
-  CommentItem,
-  Homestay,
-  LiveInfo,
-  Message,
-  Order,
-  OrderStatus,
-  OrderType,
   Post,
   PostComment,
-  Product,
-  Restaurant,
-  Scenic,
-  TravelRoute,
-  UserProfile,
 } from '@/types'
 import * as S from '@/mock/server'
+import { apiFetch } from './http'
+import type { Envelope } from './contracts'
 
 /* 首页 */
 export const getHomeData = S.getHomeData
@@ -48,17 +33,23 @@ export const getRestaurants = S.getRestaurants
 export const getRestaurantDetail = S.getRestaurantDetail
 
 /* 住 */
-export const getHomestays = S.getHomestays
-export const getHomestayDetail = S.getHomestayDetail
-export const getRoomCalendar = S.getRoomCalendar
+export async function getHomestays() {
+  return apiFetch<Envelope<Homestay[]>>('/app/m3/homestay')
+}
 
-/* 行 */
-export const getTrips = S.getTrips
-export const getRouteDetail = S.getRouteDetail
+export async function getHomestayDetail(id: string) {
+  return apiFetch<Envelope<Homestay>>(`/app/m3/homestay/detail/${id}`)
+}
+
+export async function getRoomCalendar(roomTypeId: string | number) {
+  return apiFetch<Envelope<any>>(`/app/m3/homestay/room-calendar/${roomTypeId}`)
+}
+
+/* 行：门票、景区和路线均使用真实后端接口 */
+export * from './m4'
+export * from './m4-order'
 
 /* 社区（真实后端 http://127.0.0.1:8001，vite 代理 /api） */
-import { apiFetch } from './http'
-import type { Envelope } from '@/mock/server'
 
 export function getPosts(): Promise<Envelope<Post[]>> {
   return apiFetch<Envelope<Post[]>>('/posts')
@@ -103,14 +94,6 @@ export const addToCart = S.addToCart
 export const updateCartItem = S.updateCartItem
 export const removeCartItem = S.removeCartItem
 export const checkCart = S.checkCart
-
-/* 订单 */
-export const createOrder = S.createOrder
-export const payOrder = S.payOrder
-export const cancelOrder = S.cancelOrder
-export const refundOrder = S.refundOrder
-export const getOrders = S.getOrders
-export type CreateOrderPayload = S.CreateOrderPayload
 
 /* 消息 / 地址 / 资料 */
 export const getMessages = S.getMessages

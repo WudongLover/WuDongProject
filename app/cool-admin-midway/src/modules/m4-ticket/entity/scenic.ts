@@ -1,0 +1,44 @@
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+
+@Entity('wudong_m4_scenic')
+export class M4ScenicEntity {
+  @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
+  id: number;
+
+  @Column({ length: 128 })
+  name: string;
+
+  @Column({ length: 500 })
+  cover: string;
+
+  @Column({ name: 'open_time', length: 128, default: '' })
+  openTime: string;
+
+  @Column({ length: 255, default: '' })
+  address: string;
+
+  @Column({ type: 'text', nullable: true })
+  intro: string | null;
+
+  @Column({ type: 'decimal', precision: 2, scale: 1, default: 5 })
+  rating: string;
+
+  @Column({ length: 16, default: 'ENABLED' })
+  status: string;
+
+  @CreateDateColumn({ name: 'created_at', type: 'datetime' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'datetime' })
+  updatedAt: Date;
+
+  @DeleteDateColumn({ name: 'deleted_at', type: 'datetime', nullable: true })
+  deletedAt: Date | null;
+}
