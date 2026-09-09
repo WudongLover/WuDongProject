@@ -4,7 +4,15 @@
  */
 import { Provide } from '@midwayjs/core';
 import { InjectEntityModel } from '@midwayjs/typeorm';
-import { FindOptionsWhere, IsNull, Like, Repository } from 'typeorm';
+import {
+  FindOptionsOrder,
+  FindOptionsWhere,
+  IsNull,
+  LessThanOrEqual,
+  Like,
+  Repository,
+} from 'typeorm';
+import { ProductSort } from '../dto/product.dto';
 import {
   ProductEntity,
   ProductModule,
@@ -19,7 +27,18 @@ export interface ProductPageCondition {
   categoryId?: string;
   keyword?: string;
   status?: ProductStatus;
+  sort?: ProductSort;
+  maxPrice?: number;
 }
+
+/** 排序方式 → ORDER BY，default 与未传排序都走最新优先 */
+const SORT_ORDER: Record<ProductSort, FindOptionsOrder<ProductEntity>> = {
+  default: { createdAt: 'DESC', id: 'DESC' },
+  sales: { sales: 'DESC', id: 'DESC' },
+  'price-asc': { price: 'ASC', id: 'DESC' },
+  'price-desc': { price: 'DESC', id: 'DESC' },
+  rating: { rating: 'DESC', id: 'DESC' },
+};
 
 @Provide()
 export class ProductMapper {
@@ -38,10 +57,13 @@ export class ProductMapper {
     if (condition.categoryId) where.categoryId = condition.categoryId;
     if (condition.status) where.status = condition.status;
     if (condition.keyword) where.title = Like(`%${condition.keyword}%`);
+    if (condition.maxPrice !== undefined) {
+      where.price = LessThanOrEqual(condition.maxPrice);
+    }
 
     const [items, total] = await this.productModel.findAndCount({
       where,
-      order: { createdAt: 'DESC', id: 'DESC' },
+      order: SORT_ORDER[condition.sort ?? 'default'],
       skip: (condition.page - 1) * condition.pageSize,
       take: condition.pageSize,
     });

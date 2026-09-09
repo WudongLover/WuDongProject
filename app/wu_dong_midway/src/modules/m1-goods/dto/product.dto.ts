@@ -8,6 +8,14 @@
 import { Rule, RuleType } from '@midwayjs/validate';
 import { Artisan, ProductModule, ProductStatus } from '../entity/product_entity';
 
+/** 列表排序方式，取值与前端 GoodsListView 的 sorts 一致 */
+export type ProductSort =
+  | 'default'
+  | 'sales'
+  | 'price-asc'
+  | 'price-desc'
+  | 'rating';
+
 /** 分页查询入参 */
 export class ProductPageQueryDTO {
   @Rule(RuleType.number().integer().min(1).default(1))
@@ -29,6 +37,22 @@ export class ProductPageQueryDTO {
 
   @Rule(RuleType.string().valid('ON_SHELF', 'OFF_SHELF'))
   status?: ProductStatus;
+
+  /** 排序：不传按默认（最新优先） */
+  @Rule(
+    RuleType.string().valid(
+      'default',
+      'sales',
+      'price-asc',
+      'price-desc',
+      'rating'
+    )
+  )
+  sort?: ProductSort;
+
+  /** 价格上限（含），对应前端筛选栏的「价格上限」 */
+  @Rule(RuleType.number().min(0))
+  max_price?: number;
 }
 
 /** 新增商品入参（sales / rating 由系统维护，不接受传入） */
