@@ -180,6 +180,38 @@ export class PostService {
     return this.buildCommentTree(await this.postMapper.findCommentsByPost(postId));
   }
 
+  /** 逻辑删除帖子（仅作者可删除） */
+  async deletePost(ctx: Context, postId: number): Promise<boolean> {
+    const userId = this.currentUserId(ctx);
+    const post = await this.postMapper.findPostById(postId);
+    if (!post) {
+      throw new ApiError(1003, '资源不存在', 404);
+    }
+    if (Number(post.userId) !== userId) {
+      throw new ApiError(403, '无权删除此帖子', 403);
+    }
+    return this.postMapper.softDeletePost(postId);
+  }
+
+  /** 逻辑删除评论（评论作者或帖子作者可删除） */
+  async deleteComment(ctx: Context, postId: number, commentId: number): Promise<boolean> {
+    const userId = this.currentUserId(ctx);
+    const post = await this.postMapper.findActivePost(postId);
+    if (!post) {
+      throw new ApiError(1003, '资源不存在', 404);
+    }
+    const comment = await this.postMapper.findCommentById(commentId);
+    if (!comment || Number(comment.postId) !== postId) {
+      throw new ApiError(1003, '评论不存在', 404);
+    }
+    const isCommentAuthor = Number(comment.userId) === userId;
+    const isPostAuthor = Number(post.userId) === userId;
+    if (!isCommentAuthor && !isPostAuthor) {
+      throw new ApiError(403, '无权删除此评论', 403);
+    }
+    return this.postMapper.softDeleteComment(commentId, postId);
+  }
+
   /* ---------- 私有：校验 / VO ---------- */
 
   /** 发布校验：title 非空≤128、content 非空、images 必须 string[] */

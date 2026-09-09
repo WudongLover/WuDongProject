@@ -2,7 +2,7 @@
  * 【m5-community 模块】帖子（wudong_m5_post）
  * controller 层：接口与路由，统一响应 { code, message, data }（对齐前端契约）
  */
-import { Body, Controller, Get, Inject, Param, Post, Put, Query } from '@midwayjs/core';
+import { Body, Controller, Del, Get, Inject, Param, Post, Put, Query } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
 import { PostService, PublishBody, CommentBody } from '../service/post_service';
 
@@ -52,6 +52,18 @@ export class PostController {
   @Post('/posts/:id/comments')
   async comment(@Param('id') id: string, @Body() body: CommentBody) {
     return this.ok(await this.postService.addComment(this.ctx, this.toId(id), (body ?? {}) as CommentBody));
+  }
+
+  /** 逻辑删除帖子（仅作者可删除） */
+  @Del('/posts/:id')
+  async deletePost(@Param('id') id: string) {
+    return this.ok(await this.postService.deletePost(this.ctx, this.toId(id)));
+  }
+
+  /** 逻辑删除评论（评论作者或帖子作者可删除） */
+  @Del('/posts/:postId/comments/:commentId')
+  async deleteComment(@Param('postId') postId: string, @Param('commentId') commentId: string) {
+    return this.ok(await this.postService.deleteComment(this.ctx, this.toId(postId), this.toId(commentId)));
   }
 
   /** 路径参数 → 正整数 id，非法一律视为不存在 */

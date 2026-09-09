@@ -258,6 +258,22 @@ export class PostMapper {
     });
   }
 
+  /** 逻辑删除帖子（设置 deleted_at） */
+  softDeletePost(id: number): Promise<boolean> {
+    return this.dataSource
+      .getRepository(PostEntity)
+      .update({ id, deletedAt: IsNull() }, { deletedAt: new Date() })
+      .then((r) => (r.affected ?? 0) > 0);
+  }
+
+  /** 逻辑删除评论（设置 deleted_at） */
+  softDeleteComment(id: number, postId: number): Promise<boolean> {
+    return this.dataSource
+      .getRepository(CommentEntity)
+      .update({ id, postId, deletedAt: IsNull() }, { deletedAt: new Date() })
+      .then((r) => (r.affected ?? 0) > 0);
+  }
+
   /** 插入结果主键提取（insertId 可能为 string/number，统一转 Number） */
   private extractInsertId(identifier: { id?: unknown } | undefined): number {
     const id = identifier?.id;

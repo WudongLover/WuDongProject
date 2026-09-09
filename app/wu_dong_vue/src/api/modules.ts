@@ -73,6 +73,16 @@ export function addComment(postId: string, content: string): Promise<Envelope<Po
   })
 }
 
+/** 逻辑删除帖子 */
+export function deletePost(postId: string): Promise<Envelope<boolean>> {
+  return apiFetch<Envelope<boolean>>(`/posts/${postId}`, { method: 'DELETE' })
+}
+
+/** 逻辑删除评论 */
+export function deleteComment(postId: string, commentId: string): Promise<Envelope<boolean>> {
+  return apiFetch<Envelope<boolean>>(`/posts/${postId}/comments/${commentId}`, { method: 'DELETE' })
+}
+
 /* 收藏 */
 export const getFavorites = S.getFavorites
 export const toggleFavorite = S.toggleFavorite
