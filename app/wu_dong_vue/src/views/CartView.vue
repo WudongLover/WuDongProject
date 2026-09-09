@@ -22,8 +22,10 @@ function shopGroups() {
   return [...map.entries()].map(([shop, items]) => ({ shop, items }))
 }
 
-function toggleShop(items: { checked: boolean; id: string }[], checked: boolean) {
-  items.forEach((i) => i.checked !== checked && cartStore.toggleChecked(i.id, checked))
+async function toggleShop(items: { checked: boolean; id: string }[], checked: boolean) {
+  for (const item of items) {
+    if (item.checked !== checked) await cartStore.toggleChecked(item.id, checked)
+  }
 }
 
 async function checkout() {
