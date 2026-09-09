@@ -13,13 +13,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // C 端认证接口已切换到 cool-admin-midway（8001）
-      '/app': {
-        target: 'http://localhost:8001',
-        changeOrigin: true,
-      },
+      // cool-admin-midway 后端（端口 8001）
       '/api': {
-        target: 'http://localhost:6666',
+        target: 'http://localhost:8001',
         changeOrigin: true,
       },
     },
