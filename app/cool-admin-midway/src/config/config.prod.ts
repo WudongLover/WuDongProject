@@ -18,7 +18,8 @@ export default {
         password: process.env.MYSQL_PASSWORD || '123456',
         database: process.env.MYSQL_DATABASE || 'cool',
         // 自动建表 注意：线上部署的时候不要使用，有可能导致数据丢失
-        synchronize: false,
+        // Docker 本地环境可通过 MYSQL_SYNCHRONIZE=true 初始化新数据库，生产默认关闭
+        synchronize: process.env.MYSQL_SYNCHRONIZE === 'true',
         // 打印日志
         logging: false,
         // 字符集
@@ -36,10 +37,10 @@ export default {
     // 实体与路径，跟生成代码、前端请求、swagger文档相关 注意：线上不建议开启，以免暴露敏感信息
     eps: false,
     // 是否自动导入模块数据库
-    initDB: false,
+    initDB: process.env.COOL_INIT_DB === 'true',
     // 判断是否初始化的方式
     initJudge: 'db',
     // 是否自动导入模块菜单
-    initMenu: false,
+    initMenu: process.env.COOL_INIT_MENU === 'true',
   } as CoolConfig,
 } as MidwayConfig;
