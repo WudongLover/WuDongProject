@@ -1,8 +1,3 @@
-import { Provide } from '@midwayjs/core';
-import { InjectEntityModel } from '@midwayjs/typeorm';
-import { FindOptionsWhere, Repository } from 'typeorm';
-import { ProductEntity } from '../entity/product_entity';
-
 /**
  * 【m1-goods 模块】商品（wudong_m1_product，衣/特产统一表）
  * mapper 层：数据访问（封装 Repository / SQL，Service 只依赖本文件）

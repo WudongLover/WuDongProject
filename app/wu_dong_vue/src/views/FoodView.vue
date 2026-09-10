@@ -18,9 +18,10 @@ const loading = ref(true)
 const heroImg = img('Miao long table banquet dishes overhead view, vibrant food photography, wide banner', 'landscape_16_9')
 
 onMounted(async () => {
-  const [r, s] = await Promise.all([getRestaurants(), getSpecialties()])
-  restaurants.value = r.data
-  specialties.value = s.data.items
+  // 两个 tab 各自独立取数：任一接口失败只影响自己那一栏，不能让整页卡在 loading
+  const [r, s] = await Promise.allSettled([getRestaurants(), getSpecialties()])
+  if (r.status === 'fulfilled') restaurants.value = r.value.data
+  if (s.status === 'fulfilled') specialties.value = s.value.data.items
   loading.value = false
 })
 
