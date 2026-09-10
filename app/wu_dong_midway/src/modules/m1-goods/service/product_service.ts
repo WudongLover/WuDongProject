@@ -1,3 +1,8 @@
+import { Inject, Provide } from '@midwayjs/core';
+import { FindOptionsWhere, Like } from 'typeorm';
+import { ProductEntity } from '../entity/product_entity';
+import { ProductMapper } from '../mapper/product_mapper';
+
 /**
  * 【m1-goods 模块】商品（wudong_m1_product，衣/特产统一表）
  * service 层：业务逻辑（跨模块只经对方 Service）

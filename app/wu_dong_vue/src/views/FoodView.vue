@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import * as api from '@/api'
+import { getRestaurants, getSpecialties } from '@/api/food'
 import type { Product, Restaurant } from '@/types'
 import RestaurantCard from '@/components/RestaurantCard.vue'
 import ProductCard from '@/components/ProductCard.vue'
@@ -18,7 +18,7 @@ const loading = ref(true)
 const heroImg = img('Miao long table banquet dishes overhead view, vibrant food photography, wide banner', 'landscape_16_9')
 
 onMounted(async () => {
-  const [r, s] = await Promise.all([api.getRestaurants(), api.getGoodsList({ module: 'SPECIALTY' })])
+  const [r, s] = await Promise.all([getRestaurants(), getSpecialties()])
   restaurants.value = r.data
   specialties.value = s.data.items
   loading.value = false
