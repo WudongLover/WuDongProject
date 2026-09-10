@@ -3,6 +3,7 @@ import { MidwayConfig } from '@midwayjs/core';
 import { PostEntity } from '../modules/m5-community/entity/post_entity';
 import { CommentEntity } from '../modules/m5-community/entity/comment_entity';
 import { PostLikeEntity } from '../modules/m5-community/entity/post_like_entity';
+import { FavoriteEntity } from '../modules/m5-community/entity/favorite_entity';
 import { UserEntity } from '../modules/m5-community/entity/user_entity';
 import { ProductEntity } from '../modules/m1-goods/entity/product_entity';
 import { SkuEntity } from '../modules/m1-goods/entity/sku_entity';
@@ -56,6 +57,7 @@ export default {
           CommentEntity,
           PostLikeEntity,
           UserEntity,
+          FavoriteEntity,
           ProductEntity,
           SkuEntity,
           CategoryEntity,

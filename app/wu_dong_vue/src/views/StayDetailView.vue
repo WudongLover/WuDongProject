@@ -60,13 +60,17 @@ onMounted(async () => {
   try {
     const res = await api.getHomestayDetail(route.params.id as string)
     stay.value = res.data
+    if (userStore.isLoggedIn) {
+      const r = await api.checkFavorite('HOMESTAY', stay.value!.id)
+      favorited.value = r.data.favorited
+    }
   } catch {
     notFound.value = true
   }
 })
 
 async function toggleFav() {
-  favorited.value = await favStore.toggle(stay.value!.id)
+  favorited.value = await favStore.toggle('HOMESTAY', stay.value!.id)
   userStore.toast(favorited.value ? '已收藏民宿' : '已取消收藏')
 }
 
