@@ -1,5 +1,5 @@
-/**
- * 【m4-ticket 模块】门票（wudong_m4_ticket）
- * mapper 层骨架占位：数据访问（封装 Repository / SQL，Service 只依赖本文件）
- * TODO: 由模块负责人填充实现
- */
+import { Provide } from '@midwayjs/core'; import { InjectEntityModel } from '@midwayjs/typeorm'; import { Like, Repository } from 'typeorm'; import { TicketEntity } from '../entity/ticket_entity'; import { RouteEntity } from '../entity/route_entity'; import { ScenicEntity } from '../entity/scenic_entity'; import { RouteDayEntity } from '../entity/route_day_entity';
+@Provide() export class TicketMapper { @InjectEntityModel(TicketEntity) ticket:Repository<TicketEntity>; @InjectEntityModel(RouteEntity) route:Repository<RouteEntity>; @InjectEntityModel(ScenicEntity) scenic:Repository<ScenicEntity>; @InjectEntityModel(RouteDayEntity) day:Repository<RouteDayEntity>;
+  async tickets(q:any){const page=Math.max(1,Number(q.page)||1),size=Math.min(100,Math.max(1,Number(q.size)||10)); const where:any={};if(q.scenicId)where.scenicId=String(q.scenicId);if(q.keyword)where.name=Like('%'+q.keyword.trim()+'%');const [list,total]=await this.ticket.findAndCount({where,order:{id:'DESC'},skip:(page-1)*size,take:size});return{list,total,page,size};}
+  async routes(q:any){const page=Math.max(1,Number(q.page)||1),size=Math.min(100,Math.max(1,Number(q.size)||10));const where:any={};if(q.status)where.status=q.status;if(q.theme)where.theme=q.theme;if(q.merchantId)where.merchantId=String(q.merchantId);const [list,total]=await this.route.findAndCount({where,order:{id:'DESC'},skip:(page-1)*size,take:size});return{list,total,page,size};}
+}
