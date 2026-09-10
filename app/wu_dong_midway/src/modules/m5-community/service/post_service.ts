@@ -287,10 +287,10 @@ export class PostService {
     if (!rows.length) {
       return [];
     }
-    // 全量索引
+    // 全量索引，key 统一转 number（MySQL BIGINT 可能返回字符串）
     const map = new Map<number, CommentRow>();
     for (const r of rows) {
-      map.set(r.id, r);
+      map.set(Number(r.id), r);
     }
     // 按发布时间升序排列
     const sorted = [...rows].sort(
@@ -304,7 +304,7 @@ export class PostService {
       if (row.parentId == null) {
         roots.push(this.toCommentVo(row));
       } else {
-        const rootId = this.backtrackRoot(row.id, map, 10);
+        const rootId = this.backtrackRoot(Number(row.id), map, 10);
         const list = children.get(rootId) ?? [];
         list.push(this.toReplyVo(row));
         children.set(rootId, list);
@@ -329,7 +329,7 @@ export class PostService {
     if (!row || row.parentId == null) {
       return id;
     }
-    return this.backtrackRoot(row.parentId, map, depth - 1);
+    return this.backtrackRoot(Number(row.parentId), map, depth - 1);
   }
 
   private toPostVo(row: PostRow, liked: boolean): PostVo {
