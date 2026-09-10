@@ -16,6 +16,7 @@ const notFound = ref(false)
 const liked = ref(false)
 const likes = ref(0)
 const collected = ref(false)
+const collects = ref(0)
 const commentText = ref('')
 const sending = ref(false)
 
@@ -35,6 +36,11 @@ onMounted(async () => {
     post.value = res.data
     liked.value = !!res.data.liked
     likes.value = res.data.likes
+    collects.value = res.data.collects
+    if (userStore.isLoggedIn) {
+      const r = await api.checkFavorite('POST', route.params.id as string)
+      collected.value = r.data.favorited
+    }
   } catch {
     notFound.value = true
   }
@@ -47,9 +53,20 @@ async function doLike() {
   likes.value = res.data.likes
 }
 
-function doCollect() {
-  collected.value = !collected.value
-  userStore.toast(collected.value ? '已收藏游记' : '已取消收藏')
+async function doCollect() {
+  if (!userStore.requireLogin()) return
+  if (!post.value) return
+  try {
+    const res = await api.toggleFavorite('POST', post.value.id)
+    const prev = collected.value
+    collected.value = res.data.favorited
+    if (prev !== collected.value) {
+      collects.value += collected.value ? 1 : -1
+    }
+    userStore.toast(collected.value ? '已收藏游记' : '已取消收藏')
+  } catch (e: any) {
+    userStore.toast(e?.message || '操作失败')
+  }
 }
 
 function share() {
@@ -65,6 +82,8 @@ async function sendComment() {
     post.value!.comments = res.data as typeof post.value.comments
     commentText.value = ''
     userStore.toast('评论成功')
+  } catch (e: any) {
+    userStore.toast(e?.message || '评论发送失败')
   } finally {
     sending.value = false
   }
@@ -90,6 +109,8 @@ async function sendReply() {
     userStore.toast('回复成功')
     replyTo.value = null
     replyText.value = ''
+  } catch (e: any) {
+    userStore.toast(e?.message || '回复发送失败')
   } finally {
     replying.value = false
   }
@@ -180,7 +201,7 @@ function isReplyingToRoot(c: PostComment): boolean {
             </button>
             <button :class="{ on: collected }" @click="doCollect">
               <AppIcon name="star" :size="18" />
-              {{ post.collects + (collected ? 1 : 0) }}
+              {{ collects }}
             </button>
             <button @click="share">
               <AppIcon name="arrow" :size="18" />
