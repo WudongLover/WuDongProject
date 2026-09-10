@@ -10,11 +10,27 @@ export interface CreateOrderPayload {
   amount: number
   qty: number
   shop: string
+  /** 购物车结算：待并入本单的购物车项 */
   cartItemIds?: string[]
+  /** TICKET */
   scenicId?: string
   ticketId?: string
+  /** ROUTE */
   routeId?: string
+  /** TICKET / ROUTE */
   travelDate?: string
+  /** LODGING */
+  homestayId?: string
+  roomTypeId?: string
+  checkIn?: string
+  checkOut?: string
+  /** MEAL */
+  restaurantId?: string
+  slotId?: string
+  diningDate?: string
+  diningTime?: string
+  /** MEAL / LODGING，缺省 1 */
+  guests?: number
   contactName?: string
   contactPhone?: string
 }

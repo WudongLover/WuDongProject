@@ -103,6 +103,13 @@ async function bookRoom() {
       amount: totalAmount,
       qty: nights.value,
       shop: stay.value!.name,
+      // 写 wudong_m3_order_ext 的预订参数（后端 m3_order_ext 这三列 NOT NULL）
+      homestayId: stay.value!.id,
+      roomTypeId: room.id,
+      checkIn: checkIn.value,
+      checkOut: checkOut.value,
+      contactName: guestName.value.trim(),
+      contactPhone: guestPhone.value,
     })
     openRoom.value = null
     router.push({ path: '/orders', query: { highlight: order.data.orderNo, pay: '1' } })

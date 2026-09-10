@@ -23,8 +23,11 @@ export interface AddCartPayload {
 export interface CartItemVo {
   id: string;
   productId: string;
+  /** SKU 主键，无 SKU 商品为 '0'；结算写订单明细需要 */
+  skuId: string;
   title: string;
   cover: string;
+  /** SKU 名快照（实体 sku_name） */
   sku: string;
   price: number;
   qty: number;
@@ -173,6 +176,7 @@ export class CartService {
     return {
       id: item.id,
       productId: item.productId,
+      skuId: item.skuId,
       title: item.title,
       cover: item.cover,
       sku: item.skuName,

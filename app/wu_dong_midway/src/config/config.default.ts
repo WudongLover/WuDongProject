@@ -21,6 +21,16 @@ import { RefreshTokenEntity } from '../modules/user/entity/refresh_token_entity'
 // user 模块（C 端鉴权）实体：与 m5 的临时只读实体同表不同用途，二者都要注册，
 // 否则 AuthService 注入的 UserEntity 没有 metadata，登录接口直接 500
 import { UserEntity as AuthUserEntity } from '../modules/user/entity/user_entity';
+// order 模块（公共订单链路）实体：四张 common 表 + 四张模块订单扩展表。
+// 扩展表在业务上属 m1~m4，但 schema 8.3 授权订单中心同事务写入，故由本模块注册。
+import { OrderEntity } from '../modules/order/entity/order_entity';
+import { OrderItemEntity } from '../modules/order/entity/order_item_entity';
+import { PaymentEntity } from '../modules/order/entity/payment_entity';
+import { OrderEventEntity } from '../modules/order/entity/order_event_entity';
+import { M1OrderExtEntity } from '../modules/order/entity/m1_order_ext_entity';
+import { M2OrderExtEntity } from '../modules/order/entity/m2_order_ext_entity';
+import { M3OrderExtEntity } from '../modules/order/entity/m3_order_ext_entity';
+import { M4OrderExtEntity } from '../modules/order/entity/m4_order_ext_entity';
 
 /**
  * 通用配置（本地开发与生产一致）
@@ -66,6 +76,14 @@ export default {
           TicketEntity, ScenicEntity, RouteEntity, RouteDayEntity,
           RefreshTokenEntity,
           AuthUserEntity,
+          OrderEntity,
+          OrderItemEntity,
+          PaymentEntity,
+          OrderEventEntity,
+          M1OrderExtEntity,
+          M2OrderExtEntity,
+          M3OrderExtEntity,
+          M4OrderExtEntity,
         ],
       },
     },

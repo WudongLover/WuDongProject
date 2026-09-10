@@ -62,6 +62,14 @@ async function submitBooking() {
       amount: rest.value!.pricePerCapita * guests.value,
       qty: guests.value,
       shop: rest.value!.name,
+      // 写 wudong_m2_order_ext 的预订参数（后端 dining_date 列 NOT NULL）
+      restaurantId: rest.value!.id,
+      slotId: slotId.value,
+      diningDate: bookDate.value,
+      diningTime: slot.value?.name || '',
+      guests: guests.value,
+      contactName: contact.value.trim(),
+      contactPhone: phoneTail.value,
     })
     showBook.value = false
     router.push({ path: '/orders', query: { highlight: order.data.orderNo, pay: '1' } })
