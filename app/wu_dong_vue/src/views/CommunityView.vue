@@ -41,7 +41,7 @@ const hotUsers = computed(() => {
 })
 
 /** 发布弹窗装饰图（固定 URL，非 mock 生成） */
-const publishImg = 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&q=80'
+const publishImg = '/images/community-publish.jpg'
 
 const showPublish = ref(false)
 const pubTitle = ref('')
