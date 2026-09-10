@@ -63,11 +63,11 @@ export class PostService {
   postMapper: PostMapper;
 
   /**
-   * 当前用户 id，优先级：
+   * 可选身份：游客/未登录返回 0（列表/详情公开可浏览，liked 恒 false）。
+   * 优先级：
    * 1. ctx.userId（AuthMiddleware 校验 Bearer token 后写入，真实身份）
    * 2. X-User-Id 请求头（仅非生产环境，联调兜底）
    * 3. DEMO_USER_ID 环境变量（仅非生产环境）
-   * 生产环境无合法身份时直接 401，杜绝身份伪造
    */
   currentUserId(ctx: Context): number {
     const authedId = Number((ctx as any).userId);
@@ -86,7 +86,16 @@ export class PostService {
         return fallback;
       }
     }
-    throw new ApiError(1001, '未登录', 401);
+    return 0;
+  }
+
+  /** 必须身份：写操作（发布/点赞/评论/删除）调用，未登录抛 401 */
+  requireUserId(ctx: Context): number {
+    const id = this.currentUserId(ctx);
+    if (!id) {
+      throw new ApiError(1001, '未登录', 401);
+    }
+    return id;
   }
 
   /** 列表：status=PASSED 且未删除；comments 恒 []（契约），liked 按当前用户批量填充 */
@@ -129,7 +138,7 @@ export class PostService {
   async create(ctx: Context, body: PublishBody): Promise<PostVo> {
     const data = this.validatePublish(body);
     const id = await this.postMapper.createPost({
-      userId: this.currentUserId(ctx),
+      userId: this.requireUserId(ctx),
       title: data.title,
       content: data.content,
       images: data.images,
@@ -147,7 +156,7 @@ export class PostService {
 
   /** 点赞切换：返回最新 { liked, likes } */
   async toggleLike(ctx: Context, id: number): Promise<{ liked: boolean; likes: number }> {
-    const userId = this.currentUserId(ctx);
+    const userId = this.requireUserId(ctx);
     const result = await this.postMapper.toggleLike(id, userId);
     if (!result.postExists) {
       throw new ApiError(1003, '资源不存在', 404);
@@ -182,7 +191,7 @@ export class PostService {
 
     await this.postMapper.createComment({
       postId,
-      userId: this.currentUserId(ctx),
+      userId: this.requireUserId(ctx),
       parentId,
       replyToUserId,
       content: body.content.trim(),
@@ -193,7 +202,7 @@ export class PostService {
 
   /** 逻辑删除帖子（仅作者可删除） */
   async deletePost(ctx: Context, postId: number): Promise<boolean> {
-    const userId = this.currentUserId(ctx);
+    const userId = this.requireUserId(ctx);
     const post = await this.postMapper.findPostById(postId);
     if (!post) {
       throw new ApiError(1003, '资源不存在', 404);
@@ -206,7 +215,7 @@ export class PostService {
 
   /** 逻辑删除评论（评论作者或帖子作者可删除） */
   async deleteComment(ctx: Context, postId: number, commentId: number): Promise<boolean> {
-    const userId = this.currentUserId(ctx);
+    const userId = this.requireUserId(ctx);
     const post = await this.postMapper.findActivePost(postId);
     if (!post) {
       throw new ApiError(1003, '资源不存在', 404);
