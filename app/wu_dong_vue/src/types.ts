@@ -282,4 +282,6 @@ export interface UserProfile {
   avatar: string
   bio: string
   favorites: string[]
+  /** 是否已设置登录密码（未设置时个人中心显示「设置密码」） */
+  hasPassword?: boolean
 }
