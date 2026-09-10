@@ -16,14 +16,26 @@ export interface PostAuthorVo {
   bio?: string;
 }
 
-/** PostComment（前端 types.ts） */
-export interface PostCommentVo {
+/** 评论回复（扁平挂在根评论下） */
+export interface PostReplyVo {
   id: string;
+  userId: string;
   user: string;
   avatar: string;
   content: string;
   date: string;
-  replies?: { user: string; content: string; date: string }[];
+  replyToUser?: string;
+}
+
+/** PostComment（前端 types.ts） */
+export interface PostCommentVo {
+  id: string;
+  userId: string;
+  user: string;
+  avatar: string;
+  content: string;
+  date: string;
+  replies?: PostReplyVo[];
 }
 
 /** Post（前端 types.ts） */
@@ -269,27 +281,55 @@ export class PostService {
     return { title, content, topic, place, images: images as string[] };
   }
 
-  /** 评论列表 → 楼中楼树（replies 挂在根评论下，回复人昵称取 reply_to_user） */
+  /** 评论列表 → 两级拍平（根评论 + 回复列表）
+  * 回复沿 parentId 链向上回溯到根，保证三级以上评论不丢失 */
   private buildCommentTree(rows: CommentRow[]): PostCommentVo[] {
+    if (!rows.length) {
+      return [];
+    }
+    // 全量索引
+    const map = new Map<number, CommentRow>();
+    for (const r of rows) {
+      map.set(r.id, r);
+    }
+    // 按发布时间升序排列
+    const sorted = [...rows].sort(
+      (a, b) =>
+        (a.publishedAt?.getTime() ?? 0) - (b.publishedAt?.getTime() ?? 0),
+    );
     const roots: PostCommentVo[] = [];
-    const children = new Map<number, { user: string; content: string; date: string }[]>();
-    for (const row of rows) {
+    const children = new Map<number, PostReplyVo[]>();
+
+    for (const row of sorted) {
       if (row.parentId == null) {
         roots.push(this.toCommentVo(row));
       } else {
-        const list = children.get(Number(row.parentId)) ?? [];
-        list.push({
-          user: row.replyUserName ?? '',
-          content: row.content,
-          date: this.fmtDate(row.publishedAt),
-        });
-        children.set(Number(row.parentId), list);
+        const rootId = this.backtrackRoot(row.id, map, 10);
+        const list = children.get(rootId) ?? [];
+        list.push(this.toReplyVo(row));
+        children.set(rootId, list);
       }
     }
     return roots.map((root) => {
       const replies = children.get(Number(root.id));
-      return replies && replies.length ? { ...root, replies } : root;
+      return replies?.length ? { ...root, replies } : root;
     });
+  }
+
+  /** 沿 parentId 向上回溯到根评论（depth 上限防循环） */
+  private backtrackRoot(
+    id: number,
+    map: Map<number, CommentRow>,
+    depth: number,
+  ): number {
+    if (depth <= 0) {
+      return id;
+    }
+    const row = map.get(id);
+    if (!row || row.parentId == null) {
+      return id;
+    }
+    return this.backtrackRoot(row.parentId, map, depth - 1);
   }
 
   private toPostVo(row: PostRow, liked: boolean): PostVo {
@@ -318,10 +358,23 @@ export class PostService {
   private toCommentVo(row: CommentRow): PostCommentVo {
     return {
       id: String(row.id),
+      userId: String(row.userId),
       user: row.authorName ?? '',
       avatar: row.authorAvatar ?? '',
       content: row.content,
       date: this.fmtDate(row.publishedAt),
+    };
+  }
+
+  private toReplyVo(row: CommentRow): PostReplyVo {
+    return {
+      id: String(row.id),
+      userId: String(row.userId),
+      user: row.authorName ?? '',
+      avatar: row.authorAvatar ?? '',
+      content: row.content,
+      date: this.fmtDate(row.publishedAt),
+      replyToUser: row.replyUserName ?? undefined,
     };
   }
 
