@@ -354,6 +354,9 @@ addRec('HOME_POST', 'POST', [1, 2, 3, 4, 5, 6])
 const seedTables = [
   'wudong_common_user', 'wudong_common_address', 'wudong_common_merchant', 'wudong_common_favorite',
   'wudong_common_cart_item', 'wudong_common_order', 'wudong_common_order_item', 'wudong_common_payment',
+  // 订单事件由订单模块在下单/支付/取消/退款时写入。不随种子重建清空的话，
+  // 重跑 seed 会留下引用已不存在订单的孤儿事件（order_event 表本身无种子数据）。
+  'wudong_common_order_event',
   'wudong_common_review', 'wudong_common_message', 'wudong_common_banner', 'wudong_common_announcement',
   'wudong_common_recommend', 'wudong_common_search_keyword',
   'wudong_m1_category', 'wudong_m1_product', 'wudong_m1_sku', 'wudong_m1_order_ext',
