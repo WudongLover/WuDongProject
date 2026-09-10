@@ -7,7 +7,10 @@ import { useUserStore } from '@/stores/user'
 import RouteCard from '@/components/RouteCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
+import CultureBand from '@/components/CultureBand.vue'
 import { img } from '@/mock/images'
+
+const culture = api.getCultureSection('XING')
 
 const userStore = useUserStore()
 const scenics = ref<Scenic[]>([])
@@ -100,6 +103,9 @@ const filteredRoutes = () =>
       </div>
     </div>
 
+    <!-- 先讲山水与节庆的来路，票种价格往后放 -->
+    <CultureBand v-if="culture" :section="culture" />
+
     <div class="container">
       <!-- 景区门票 -->
       <section class="sec">
@@ -154,7 +160,7 @@ const filteredRoutes = () =>
         </div>
 
         <EmptyState v-if="!loading && !filteredRoutes().length" text="没有符合条件的路线" />
-        <div v-else class="route-grid">
+        <div v-else class="route-grid card-grid">
           <RouteCard v-for="(r, i) in filteredRoutes()" :key="r.id" :item="r" class="rise" :style="{ animationDelay: `${Math.min(i, 6) * 60}ms` }" />
         </div>
       </section>

@@ -124,7 +124,7 @@ async function publish() {
         </div>
 
         <EmptyState v-if="!loading && !posts.length" text="这个话题下还没有游记" />
-        <div v-else class="waterfall">
+        <div v-else class="waterfall card-grid">
           <PostCard v-for="(p, i) in posts" :key="p.id" :item="p" class="rise" :style="{ animationDelay: `${Math.min(i, 8) * 50}ms` }" />
         </div>
       </main>

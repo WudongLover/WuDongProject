@@ -6,9 +6,12 @@ defineProps<{ item: Restaurant }>()
 </script>
 
 <template>
-  <router-link :to="`/restaurants/${item.id}`" class="rest-card">
-    <div class="cover">
+  <router-link :to="`/restaurants/${item.id}`" class="rest-card card-hover">
+    <div class="cover card-media">
       <img :src="item.cover" :alt="item.name" loading="lazy" />
+      <div class="card-veil">
+        <span class="veil-cta">订餐位 <i>→</i></span>
+      </div>
     </div>
     <div class="body">
       <div class="row">
@@ -35,18 +38,14 @@ defineProps<{ item: Restaurant }>()
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
-}
-
-.rest-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-2);
+  /* 横向卡体量大，放大倍率压低一点，避免顶到相邻内容 */
+  --card-scale: 1.014;
+  --card-lift: -4px;
 }
 
 .cover {
   width: 42%;
   flex: none;
-  overflow: hidden;
   background: var(--indigo-mist);
 }
 
@@ -54,11 +53,6 @@ defineProps<{ item: Restaurant }>()
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s var(--ease);
-}
-
-.rest-card:hover .cover img {
-  transform: scale(1.05);
 }
 
 .body {
