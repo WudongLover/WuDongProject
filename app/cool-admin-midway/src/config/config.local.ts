@@ -16,8 +16,15 @@ export default {
         username: process.env.MYSQL_USERNAME || 'root',
         password: process.env.MYSQL_PASSWORD || '',
         database: process.env.MYSQL_DATABASE || 'cool',
-        // 自动建表 注意：线上部署的时候不要使用，有可能导致数据丢失
-        synchronize: true,
+        // 自动建表：必须保持 false，否则会改动 C 端共用的业务库。
+        // 本库与 C 端是同一个（.env 的 MYSQL_DATABASE=wudong），而下面的 entities 是
+        // glob 扫描 '**/modules/*/entity'，会把本服务声明的 wudong_common_order /
+        // wudong_common_payment / wudong_common_order_event 一并纳入同步；
+        // synchronize 会把这些共享表对齐到本服务的实体，直接 DROP 掉实体里没声明的列。
+        // 已发生过一次：checkout_id、completed_at、callback_payload、retry_count、
+        // next_retry_at 被删，导致 C 端下单接口全部 500。
+        // 表结构变更请走 migration（与 CLAUDE.md 的约定一致）。
+        synchronize: false,
         // 打印日志
         logging: false,
         // 字符集
