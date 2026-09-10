@@ -8,8 +8,8 @@ const TOKEN_REQUIRED_PATHS = [
   '/api/user/profile',
   '/api/user/password',
 ];
-/** m3/m4 的写操作需要登录，公开查询放行 */
-const TOKEN_REQUIRED_WRITE_PREFIXES = ['/api/app/m3', '/api/app/m4'];
+/** m3/m4/m5 的写操作需要登录，公开查询放行 */
+const TOKEN_REQUIRED_WRITE_PREFIXES = ['/api/app/m3', '/api/app/m4', '/api/posts'];
 
 /**
  * C 端鉴权中间件：校验 Authorization: Bearer <access token>，通过后写入 ctx.userId
