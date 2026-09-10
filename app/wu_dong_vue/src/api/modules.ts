@@ -19,6 +19,15 @@ export const getHomeData = S.getHomeData
 export const getLiveInfo = S.getLiveInfo
 export const searchAll = S.searchAll
 
+/* 文化导览：前端固定内容，不计划迁后端；页面仍统一从 @/api 取，守住"页面不直接访问 mock" */
+export {
+  cultureSections,
+  cultureEntries,
+  getCultureSection,
+  findCultureStory,
+  relatedCultureStories,
+} from '@/mock/culture'
+
 /* 认证 */
 export {
   sendSmsCode,

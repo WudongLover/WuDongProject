@@ -6,10 +6,13 @@ defineProps<{ item: Homestay }>()
 </script>
 
 <template>
-  <router-link :to="`/stay/${item.id}`" class="stay-card">
-    <div class="cover">
+  <router-link :to="`/stay/${item.id}`" class="stay-card card-hover">
+    <div class="cover card-media">
       <img :src="item.cover" :alt="item.name" loading="lazy" />
       <span class="score">{{ Number(item.rating).toFixed(1) }}<small>分</small></span>
+      <div class="card-veil">
+        <span class="veil-cta">看房型 <i>→</i></span>
+      </div>
     </div>
     <div class="body">
       <h3>{{ item.name }}</h3>
@@ -33,18 +36,11 @@ defineProps<{ item: Homestay }>()
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
-}
-
-.stay-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-2);
 }
 
 .cover {
   position: relative;
   aspect-ratio: 16/9;
-  overflow: hidden;
   background: var(--indigo-mist);
 }
 
@@ -52,17 +48,13 @@ defineProps<{ item: Homestay }>()
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s var(--ease);
-}
-
-.stay-card:hover .cover img {
-  transform: scale(1.05);
 }
 
 .score {
   position: absolute;
   left: 12px;
   bottom: 12px;
+  z-index: 4;
   background: rgba(22, 48, 77, 0.88);
   color: var(--amber);
   font-family: var(--font-display);
