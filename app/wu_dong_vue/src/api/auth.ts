@@ -49,6 +49,10 @@ export function hasAccessToken() {
   return !!accessToken
 }
 
+export function getAccessToken() {
+  return accessToken
+}
+
 async function request<T>(
   path: string,
   options: HttpOptions = {},
