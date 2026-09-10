@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Put } from '@midwayjs/core';
+import { Body, Controller, Get, Inject, Param, Put } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
 import { FavoriteService } from '../service/favorite_service';
 import { ApiError } from '../error/api_error';
@@ -45,5 +45,22 @@ export class FavoriteController {
       message: 'ok',
       data: await this.favoriteService.list(userId),
     };
+  }
+
+  /** 检查某项目是否已收藏 */
+  @Get('/:targetType/:targetId')
+  async check(@Param('targetType') targetType: string, @Param('targetId') targetId: string) {
+    const userId = Number((this.ctx as any).userId);
+    if (!userId) throw new ApiError(1001, '未登录', 401);
+    if (!VALID_TARGET_TYPES.includes(targetType)) {
+      throw new ApiError(1004, 'targetType 无效', 400);
+    }
+    const tid = Number(targetId);
+    if (!Number.isFinite(tid) || tid <= 0) {
+      throw new ApiError(1004, 'targetId 无效', 400);
+    }
+
+    const rows = await this.favoriteService.checkOne(userId, targetType, tid);
+    return { code: 0, message: 'ok', data: { favorited: rows } };
   }
 }

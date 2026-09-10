@@ -1,6 +1,6 @@
 import { Provide } from '@midwayjs/core';
 import { InjectDataSource } from '@midwayjs/typeorm';
-import { DataSource, IsNull } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { FavoriteEntity } from '../entity/favorite_entity';
 
 export interface FavoriteRow {
@@ -41,6 +41,15 @@ export class FavoriteMapper {
       }
       throw err;
     }
+  }
+
+  /** 检查单个目标是否已收藏 */
+  async check(userId: number, targetType: string, targetId: number): Promise<boolean> {
+    const row = await this.dataSource.getRepository(FavoriteEntity).findOne({
+      where: { userId, targetType, targetId },
+      select: ['id'],
+    });
+    return !!row;
   }
 
   /** 当前用户所有收藏 */

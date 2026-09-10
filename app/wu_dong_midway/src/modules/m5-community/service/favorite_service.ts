@@ -53,6 +53,10 @@ export class FavoriteService {
     return this.favoriteMapper.toggle(userId, body.targetType, body.targetId);
   }
 
+  async checkOne(userId: number, targetType: string, targetId: number): Promise<boolean> {
+    return this.favoriteMapper.check(userId, targetType, targetId);
+  }
+
   /** 当前用户全部收藏列表（聚合各模块名/封面） */
   async list(userId: number): Promise<FavoriteVo[]> {
     const rows = await this.favoriteMapper.listByUser(userId);
