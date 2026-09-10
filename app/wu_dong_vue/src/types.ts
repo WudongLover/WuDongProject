@@ -168,13 +168,24 @@ export interface PostAuthor {
   bio?: string
 }
 
-export interface PostComment {
+export interface PostReply {
   id: string
+  userId: string
   user: string
   avatar: string
   content: string
   date: string
-  replies?: { user: string; content: string; date: string }[]
+  replyToUser?: string
+}
+
+export interface PostComment {
+  id: string
+  userId: string
+  user: string
+  avatar: string
+  content: string
+  date: string
+  replies?: PostReply[]
 }
 
 export interface Post {
