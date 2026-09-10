@@ -9,6 +9,7 @@ import type {
   Order,
   OrderStatus,
   OrderType,
+  LiveInfo,
   Post,
   Product,
   UserProfile,
@@ -97,6 +98,123 @@ export async function getHomeData() {
   })
 }
 
+/* ---------- 首页实时信息 ---------- */
+
+/** 乌东村海拔（固定特征值） */
+const ALTITUDE = 1300
+/** 苗年节（农历十一月首日前后，取公历固定日期以便倒计时） */
+const FESTIVAL_DATE = new Date('2026-11-11T00:00:00')
+
+/** 贵州黔东南雷山县（雷公山腹地）坐标 */
+const WUDONG_LAT = 26.38
+const WUDONG_LON = 108.08
+
+/** Open-Meteo weather_code → 中文天气 */
+const WEATHER_CODE_TEXT: Record<number, string> = {
+  0: '晴',
+  1: '大部晴朗',
+  2: '多云',
+  3: '阴',
+  45: '雾',
+  48: '雾凇',
+  51: '毛毛雨',
+  53: '小毛毛雨',
+  55: '浓毛毛雨',
+  61: '小雨',
+  63: '中雨',
+  65: '大雨',
+  71: '小雪',
+  73: '中雪',
+  75: '大雪',
+  80: '阵雨',
+  81: '强阵雨',
+  82: '暴雨',
+  95: '雷阵雨',
+  96: '雷阵雨伴冰雹',
+  99: '强雷阵雨',
+}
+
+/** 天气备选池（外部接口不可用时的本地兜底，按天轮换） */
+const WEATHER_POOL = [
+  { text: '多云', temp: 22 },
+  { text: '晴', temp: 25 },
+  { text: '小雨', temp: 18 },
+  { text: '阴', temp: 20 },
+  { text: '晴间多云', temp: 23 },
+]
+
+/** 按日期决定当日天气（本地兜底） */
+function todayWeather(): LiveWeather {
+  const now = new Date()
+  const dayIndex = Math.floor(now.getTime() / 86400000)
+  const base = WEATHER_POOL[dayIndex % WEATHER_POOL.length]
+  const hour = now.getHours()
+  // 一天内温度曲线：早晚低、午后高
+  const delta = Math.round(Math.sin(((hour - 6) / 24) * Math.PI * 2) * 3)
+  const temp = base.temp + delta
+  return {
+    text: base.text,
+    temp,
+    high: base.temp + 4,
+    low: base.temp - 3,
+  }
+}
+
+/**
+ * 从 Open-Meteo 拉取真实实时天气（免费、无需 Key、支持浏览器跨域）。
+ * 失败时回退到本地兜底 todayWeather()。
+ */
+async function fetchWeather(): Promise<LiveWeather> {
+  const url =
+    `https://api.open-meteo.com/v1/forecast?latitude=${WUDONG_LAT}&longitude=${WUDONG_LON}` +
+    `&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min` +
+    `&timezone=Asia/Shanghai&forecast_days=1`
+  try {
+    const res = await fetch(url)
+    if (!res.ok) throw new Error(`weather api status ${res.status}`)
+    const data = await res.json()
+    const cur = data.current
+    return {
+      text: WEATHER_CODE_TEXT[cur.weather_code] ?? '未知',
+      temp: Math.round(cur.temperature_2m),
+      high: Math.round(data.daily.temperature_2m_max[0]),
+      low: Math.round(data.daily.temperature_2m_min[0]),
+    }
+  } catch {
+    return todayWeather()
+  }
+}
+
+/** 按当前小时模拟实时访客数（白天高峰） */
+function todayVisitors(): number {
+  const now = new Date()
+  const hour = now.getHours()
+  // 06:00 起入场，09:00-16:00 高峰，约 12:00 达到峰值
+  const wave = Math.max(0, Math.sin(((hour - 6) / 18) * Math.PI))
+  const base = Math.round(Array.from({ length: now.getDate() }).reduce((s, _, i) => s + (i % 7), 0)) % 120
+  return 120 + Math.round(wave * 760) + base
+}
+
+/** 苗年节倒计时（实时计算） */
+function festivalCountdown() {
+  const now = new Date()
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const end = new Date(FESTIVAL_DATE.getFullYear(), FESTIVAL_DATE.getMonth(), FESTIVAL_DATE.getDate())
+  const daysLeft = Math.max(0, Math.ceil((end.getTime() - start.getTime()) / 86400000))
+  const date = `${FESTIVAL_DATE.getMonth() + 1}月${FESTIVAL_DATE.getDate()}日`
+  return { name: '苗年节', date, daysLeft }
+}
+
+export async function getLiveInfo(): Promise<Envelope<LiveInfo>> {
+  await delay(140)
+  return ok<LiveInfo>({
+    altitude: ALTITUDE,
+    weather: await fetchWeather(),
+    visitorsToday: todayVisitors(),
+    festival: festivalCountdown(),
+  })
+}
+
 export async function searchAll(keyword: string) {
   await delay(300)
   const kw = keyword.trim()
@@ -152,47 +270,6 @@ export function currentUser(): UserProfile | null {
 
 export function logout() {
   db.user = null
-}
-
-/* ---------- 商品（衣 + 特产） ---------- */
-
-export interface GoodsFilter {
-  category?: string
-  module?: 'GOODS' | 'SPECIALTY'
-  keyword?: string
-  sort?: 'default' | 'sales' | 'price-asc' | 'price-desc' | 'rating'
-  maxPrice?: number
-}
-
-export async function getGoodsList(filter: GoodsFilter = {}) {
-  await delay(280)
-  let list = filter.module === 'SPECIALTY' ? [...specialties] : [...goods, ...specialties]
-  if (filter.module === 'GOODS') list = [...goods]
-  if (filter.category && filter.category !== '全部') list = list.filter((g) => g.category === filter.category)
-  if (filter.keyword) list = list.filter((g) => (g.title + g.subtitle).includes(filter.keyword!))
-  if (filter.maxPrice) list = list.filter((g) => g.price <= filter.maxPrice!)
-  switch (filter.sort) {
-    case 'sales':
-      list.sort((a, b) => b.sales - a.sales)
-      break
-    case 'price-asc':
-      list.sort((a, b) => a.price - b.price)
-      break
-    case 'price-desc':
-      list.sort((a, b) => b.price - a.price)
-      break
-    case 'rating':
-      list.sort((a, b) => b.rating - a.rating)
-      break
-  }
-  return ok({ items: list, total: list.length })
-}
-
-export async function getProductDetail(id: string) {
-  await delay(240)
-  const found = [...goods, ...specialties].find((g) => g.id === id)
-  if (!found) throw new ApiError(1003, '资源不存在')
-  return ok(found)
 }
 
 /* ---------- 食 ---------- */

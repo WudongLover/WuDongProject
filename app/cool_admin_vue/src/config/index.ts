@@ -16,7 +16,145 @@ export const config = {
 			// 是否分组显示
 			isGroup: false,
 			// 自定义菜单列表
-			list: []
+			// 乌东文旅管理端：直接由前端维护左侧菜单，替代后端菜单表里导入的框架示例菜单。
+			// 页面 viewPath 指向 src/modules/wudong 下的看板页面；
+			// 如需恢复“后端菜单 + RBAC”模式，将本数组置空即可。
+			list: [
+				{
+					name: '乌东文旅总览',
+					router: '/',
+					viewPath: 'modules/wudong/views/scene/overview.vue',
+					type: 1,
+					icon: 'icon-monitor',
+					orderNum: 0,
+					keepAlive: false,
+					isShow: false
+				},
+				{
+					name: '衣·非遗',
+					type: 0,
+					icon: 'icon-goods',
+					orderNum: 1,
+					isShow: true,
+					children: [
+						{
+							name: '非遗数据看板',
+							router: '/wudong/heritage',
+							viewPath: 'modules/wudong/views/scene/heritage.vue',
+							type: 1,
+							icon: 'icon-monitor',
+							orderNum: 1,
+							keepAlive: true,
+							isShow: true
+						}
+					]
+				},
+				{
+					name: '食·风味',
+					type: 0,
+					icon: 'icon-hot',
+					orderNum: 2,
+					isShow: true,
+					children: [
+						{
+							name: '风味数据看板',
+							router: '/wudong/meal',
+							viewPath: 'modules/wudong/views/scene/meal.vue',
+							type: 1,
+							icon: 'icon-monitor',
+							orderNum: 1,
+							keepAlive: true,
+							isShow: true
+						}
+					]
+				},
+				{
+					name: '住·山居',
+					type: 0,
+					icon: 'icon-home',
+					orderNum: 3,
+					isShow: true,
+					children: [
+						{
+							name: '山居数据看板',
+							router: '/wudong/lodging',
+							viewPath: 'modules/wudong/views/scene/lodging.vue',
+							type: 1,
+							icon: 'icon-monitor',
+							orderNum: 1,
+							keepAlive: true,
+							isShow: true
+						}
+					]
+				},
+				{
+					name: '行·山水',
+					type: 0,
+					icon: 'icon-map',
+					orderNum: 4,
+					isShow: true,
+					children: [
+						{
+							name: '山水数据看板',
+							router: '/wudong/travel',
+							viewPath: 'modules/wudong/views/scene/travel.vue',
+							type: 1,
+							icon: 'icon-monitor',
+							orderNum: 1,
+							keepAlive: true,
+							isShow: true
+						}
+					]
+				},
+				{
+					name: '社区',
+					type: 0,
+					icon: 'icon-pic',
+					orderNum: 5,
+					isShow: true,
+					children: [
+						{
+							name: '社区数据看板',
+							router: '/wudong/community',
+							viewPath: 'modules/wudong/views/scene/community.vue',
+							type: 1,
+							icon: 'icon-monitor',
+							orderNum: 1,
+							keepAlive: true,
+							isShow: true
+						}
+					]
+				},
+				{
+					name: '用户管理',
+					type: 0,
+					icon: 'icon-user',
+					orderNum: 6,
+					isShow: true,
+					children: [
+						{
+							name: '用户数据看板',
+							router: '/wudong/user',
+							viewPath: 'modules/wudong/views/scene/user.vue',
+							type: 1,
+							icon: 'icon-monitor',
+							orderNum: 1,
+							keepAlive: true,
+							isShow: true
+						},
+						{
+							name: '用户列表',
+							router: '/user/list',
+							viewPath: 'modules/user/views/list.vue',
+							type: 1,
+							icon: 'icon-list',
+							orderNum: 2,
+							keepAlive: true,
+							isShow: true
+						}
+					]
+				}
+			]
 		},
 
 		// 路由

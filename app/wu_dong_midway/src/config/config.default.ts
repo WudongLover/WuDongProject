@@ -1,14 +1,32 @@
 import 'dotenv/config';
 import { MidwayConfig } from '@midwayjs/core';
-import { RestaurantEntity } from '../modules/m2-meal/entity/restaurant_entity';
+import { PostEntity } from '../modules/m5-community/entity/post_entity';
+import { CommentEntity } from '../modules/m5-community/entity/comment_entity';
+import { PostLikeEntity } from '../modules/m5-community/entity/post_like_entity';
+import { UserEntity } from '../modules/m5-community/entity/user_entity';
 import { ProductEntity } from '../modules/m1-goods/entity/product_entity';
+import { SkuEntity } from '../modules/m1-goods/entity/sku_entity';
+import { CategoryEntity } from '../modules/m1-goods/entity/category_entity';
+import { ReviewEntity } from '../modules/m1-goods/entity/review_entity';
+import { CartItemEntity } from '../modules/m1-goods/entity/cart_item_entity';
+import { HomestayEntity } from '../modules/m3-lodging/entity/homestay_entity';
+import { RoomTypeEntity } from '../modules/m3-lodging/entity/room_type_entity';
+import { RoomCalendarEntity } from '../modules/m3-lodging/entity/room_calendar_entity';
+import { TicketEntity } from '../modules/m4-ticket/entity/ticket_entity';
+import { ScenicEntity } from '../modules/m4-ticket/entity/scenic_entity';
+import { RouteEntity } from '../modules/m4-ticket/entity/route_entity';
+import { RouteDayEntity } from '../modules/m4-ticket/entity/route_day_entity';
+import { RefreshTokenEntity } from '../modules/user/entity/refresh_token_entity';
+// user 模块（C 端鉴权）实体：与 m5 的临时只读实体同表不同用途，二者都要注册，
+// 否则 AuthService 注入的 UserEntity 没有 metadata，登录接口直接 500
+import { UserEntity as AuthUserEntity } from '../modules/user/entity/user_entity';
 
 /**
  * 通用配置（本地开发与生产一致）
  * 连接 MySQL wudong 业务库
  *
  * 实体显式注册约定：src/modules 下各模块 entity 目录内的 *_entity.ts → 表 wudong_{common|m1..m5}_*
- * 骨架阶段暂无实体实现；各模块填充 entity 后，在此追加 import + 加入 entities 数组
+ * 各模块填充 entity 后，在此追加 import + 加入 entities 数组
  */
 export default {
   // 各环境保持唯一即可（正式接入时更换）
@@ -32,7 +50,21 @@ export default {
         synchronize: false,
         logging: true,
         // 实体：显式注册（见文件顶部 import）
-        entities: [RestaurantEntity, ProductEntity],
+        entities: [
+          PostEntity,
+          CommentEntity,
+          PostLikeEntity,
+          UserEntity,
+          ProductEntity,
+          SkuEntity,
+          CategoryEntity,
+          ReviewEntity,
+          CartItemEntity,
+          HomestayEntity, RoomTypeEntity, RoomCalendarEntity,
+          TicketEntity, ScenicEntity, RouteEntity, RouteDayEntity,
+          RefreshTokenEntity,
+          AuthUserEntity,
+        ],
       },
     },
   },

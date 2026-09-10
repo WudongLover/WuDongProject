@@ -98,7 +98,7 @@ import SearchPlugin from './components/search/plugin.vue';
 import AdvSearchBase from './components/adv-search/base.vue';
 import AdvSearchCustom from './components/adv-search/custom.vue';
 
-import OtherTsx from './components/other/tsx.js';
+import OtherTsx from './components/other/tsx/index.tsx';
 import OtherTips from './components/other/tips.vue';
 import OtherContextMenu from './components/other/context-menu.vue';
 

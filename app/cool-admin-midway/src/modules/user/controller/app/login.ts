@@ -10,7 +10,9 @@ import { UserLoginService } from '../../service/login';
 import { BaseSysLoginService } from '../../../base/service/sys/login';
 
 /**
- * 登录
+ * 登录（历史/框架实现）
+ * 注意：C 端认证主入口已迁移到同目录 ./auth.ts（wudong 库 + refresh 落库哈希），
+ * 本文件仅保留小程序/公众号/APP 微信登录等存量接口，后续按终端迁移后移除。
  */
 @CoolUrlTag()
 @CoolController()

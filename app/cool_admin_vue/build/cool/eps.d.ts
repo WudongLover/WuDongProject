@@ -502,6 +502,212 @@ declare namespace Eps {
 		[key: string]: any;
 	}
 
+	interface M3HomestayEntity {
+		/**
+		 * ID
+		 */
+		id?: BigInt;
+
+		/**
+		 * 商家ID
+		 */
+		merchantId?: BigInt;
+
+		/**
+		 * 民宿名称
+		 */
+		name?: string;
+
+		/**
+		 * 封面图
+		 */
+		cover?: string;
+
+		/**
+		 * 图片列表
+		 */
+		images?: any;
+
+		/**
+		 * 评分
+		 */
+		rating?: number;
+
+		/**
+		 * 评分明细 {"hygiene":4.9,"location":4.8,"service":5.0}
+		 */
+		score?: any;
+
+		/**
+		 * 标签
+		 */
+		tags?: any;
+
+		/**
+		 * 设施列表
+		 */
+		facilities?: any;
+
+		/**
+		 * 地址
+		 */
+		address?: string;
+
+		/**
+		 * 民宿简介
+		 */
+		intro?: string;
+
+		/**
+		 * 入住须知
+		 */
+		notice?: string;
+
+		/**
+		 * 状态
+		 */
+		status?: string;
+
+		/**
+		 * 删除时间
+		 */
+		deletedAt?: Date;
+
+		/**
+		 * undefined
+		 */
+		createTime?: Date;
+
+		/**
+		 * undefined
+		 */
+		updateTime?: Date;
+
+		/**
+		 * 任意键值
+		 */
+		[key: string]: any;
+	}
+
+	interface M3RoomCalendarEntity {
+		/**
+		 * ID
+		 */
+		id?: BigInt;
+
+		/**
+		 * 房型ID
+		 */
+		roomTypeId?: BigInt;
+
+		/**
+		 * 日期
+		 */
+		date?: Date;
+
+		/**
+		 * 当日剩余可售间数
+		 */
+		stock?: number;
+
+		/**
+		 * 当日加价（周末节假日）
+		 */
+		priceDelta?: number;
+
+		/**
+		 * 当日是否停售
+		 */
+		closed?: number;
+
+		/**
+		 * undefined
+		 */
+		createTime?: Date;
+
+		/**
+		 * undefined
+		 */
+		updateTime?: Date;
+
+		/**
+		 * 任意键值
+		 */
+		[key: string]: any;
+	}
+
+	interface M3RoomTypeEntity {
+		/**
+		 * ID
+		 */
+		id?: BigInt;
+
+		/**
+		 * 民宿ID
+		 */
+		homestayId?: BigInt;
+
+		/**
+		 * 房型名称
+		 */
+		name?: string;
+
+		/**
+		 * 床型（1.8m大床）
+		 */
+		bed?: string;
+
+		/**
+		 * 面积㎡
+		 */
+		area?: number;
+
+		/**
+		 * 最大入住人数
+		 */
+		maxGuests?: number;
+
+		/**
+		 * 基础价
+		 */
+		price?: number;
+
+		/**
+		 * 总间数
+		 */
+		stock?: number;
+
+		/**
+		 * 封面图
+		 */
+		cover?: string;
+
+		/**
+		 * 设施列表
+		 */
+		facilities?: any;
+
+		/**
+		 * 删除时间
+		 */
+		deletedAt?: Date;
+
+		/**
+		 * undefined
+		 */
+		createTime?: Date;
+
+		/**
+		 * undefined
+		 */
+		updateTime?: Date;
+
+		/**
+		 * 任意键值
+		 */
+		[key: string]: any;
+	}
+
 	interface PluginInfoEntity {
 		/**
 		 * ID
@@ -1033,6 +1239,21 @@ declare namespace Eps {
 		list: DictTypeEntity[];
 	}
 
+	interface M3LodgingHomestayPageResponse {
+		pagination: PagePagination;
+		list: M3HomestayEntity[];
+	}
+
+	interface M3LodgingRoomCalendarPageResponse {
+		pagination: PagePagination;
+		list: M3RoomCalendarEntity[];
+	}
+
+	interface M3LodgingRoomTypePageResponse {
+		pagination: PagePagination;
+		list: M3RoomTypeEntity[];
+	}
+
 	interface PluginInfoPageResponse {
 		pagination: PagePagination;
 		list: PluginInfoEntity[];
@@ -1554,6 +1775,71 @@ declare namespace Eps {
 		request: Request;
 	}
 
+	interface DashboardStats {
+		/**
+		 * 社区看板
+		 */
+		community(data?: any): Promise<any>;
+
+		/**
+		 * 平台总览
+		 */
+		overview(data?: any): Promise<any>;
+
+		/**
+		 * 衣·非遗看板
+		 */
+		heritage(data?: any): Promise<any>;
+
+		/**
+		 * 住·山居看板
+		 */
+		lodging(data?: any): Promise<any>;
+
+		/**
+		 * 行·山水看板
+		 */
+		travel(data?: any): Promise<any>;
+
+		/**
+		 * 食·风味看板
+		 */
+		meal(data?: any): Promise<any>;
+
+		/**
+		 * 用户看板
+		 */
+		user(data?: any): Promise<any>;
+
+		/**
+		 * 权限标识
+		 */
+		permission: {
+			community: string;
+			overview: string;
+			heritage: string;
+			lodging: string;
+			travel: string;
+			meal: string;
+			user: string;
+		};
+
+		/**
+		 * 权限状态
+		 */
+		_permission: {
+			community: boolean;
+			overview: boolean;
+			heritage: boolean;
+			lodging: boolean;
+			travel: boolean;
+			meal: boolean;
+			user: boolean;
+		};
+
+		request: Request;
+	}
+
 	interface DemoGoods {
 		/**
 		 * 删除
@@ -1738,6 +2024,180 @@ declare namespace Eps {
 		 * 分页查询
 		 */
 		page(data?: any): Promise<DictTypePageResponse>;
+
+		/**
+		 * 新增
+		 */
+		add(data?: any): Promise<any>;
+
+		/**
+		 * 权限标识
+		 */
+		permission: {
+			delete: string;
+			update: string;
+			info: string;
+			list: string;
+			page: string;
+			add: string;
+		};
+
+		/**
+		 * 权限状态
+		 */
+		_permission: {
+			delete: boolean;
+			update: boolean;
+			info: boolean;
+			list: boolean;
+			page: boolean;
+			add: boolean;
+		};
+
+		request: Request;
+	}
+
+	interface M3LodgingHomestay {
+		/**
+		 * 删除
+		 */
+		delete(data?: any): Promise<any>;
+
+		/**
+		 * 修改
+		 */
+		update(data?: any): Promise<any>;
+
+		/**
+		 * 单个信息
+		 */
+		info(data?: any): Promise<M3HomestayEntity>;
+
+		/**
+		 * 列表查询
+		 */
+		list(data?: any): Promise<M3HomestayEntity[]>;
+
+		/**
+		 * 分页查询
+		 */
+		page(data?: any): Promise<M3LodgingHomestayPageResponse>;
+
+		/**
+		 * 新增
+		 */
+		add(data?: any): Promise<any>;
+
+		/**
+		 * 权限标识
+		 */
+		permission: {
+			delete: string;
+			update: string;
+			info: string;
+			list: string;
+			page: string;
+			add: string;
+		};
+
+		/**
+		 * 权限状态
+		 */
+		_permission: {
+			delete: boolean;
+			update: boolean;
+			info: boolean;
+			list: boolean;
+			page: boolean;
+			add: boolean;
+		};
+
+		request: Request;
+	}
+
+	interface M3LodgingRoomCalendar {
+		/**
+		 * 删除
+		 */
+		delete(data?: any): Promise<any>;
+
+		/**
+		 * 修改
+		 */
+		update(data?: any): Promise<any>;
+
+		/**
+		 * 单个信息
+		 */
+		info(data?: any): Promise<M3RoomCalendarEntity>;
+
+		/**
+		 * 列表查询
+		 */
+		list(data?: any): Promise<M3RoomCalendarEntity[]>;
+
+		/**
+		 * 分页查询
+		 */
+		page(data?: any): Promise<M3LodgingRoomCalendarPageResponse>;
+
+		/**
+		 * 新增
+		 */
+		add(data?: any): Promise<any>;
+
+		/**
+		 * 权限标识
+		 */
+		permission: {
+			delete: string;
+			update: string;
+			info: string;
+			list: string;
+			page: string;
+			add: string;
+		};
+
+		/**
+		 * 权限状态
+		 */
+		_permission: {
+			delete: boolean;
+			update: boolean;
+			info: boolean;
+			list: boolean;
+			page: boolean;
+			add: boolean;
+		};
+
+		request: Request;
+	}
+
+	interface M3LodgingRoomType {
+		/**
+		 * 删除
+		 */
+		delete(data?: any): Promise<any>;
+
+		/**
+		 * 修改
+		 */
+		update(data?: any): Promise<any>;
+
+		/**
+		 * 单个信息
+		 */
+		info(data?: any): Promise<M3RoomTypeEntity>;
+
+		/**
+		 * 列表查询
+		 */
+		list(data?: any): Promise<M3RoomTypeEntity[]>;
+
+		/**
+		 * 分页查询
+		 */
+		page(data?: any): Promise<M3LodgingRoomTypePageResponse>;
 
 		/**
 		 * 新增
@@ -2204,8 +2664,14 @@ declare namespace Eps {
 				user: BaseSysUser;
 			};
 		};
+		dashboard: { stats: DashboardStats };
 		demo: { goods: DemoGoods; tenant: DemoTenant };
 		dict: { info: DictInfo; type: DictType };
+		m3Lodging: {
+			homestay: M3LodgingHomestay;
+			roomCalendar: M3LodgingRoomCalendar;
+			roomType: M3LodgingRoomType;
+		};
 		plugin: { info: PluginInfo };
 		recycle: { data: RecycleData };
 		space: { info: SpaceInfo; type: SpaceType };

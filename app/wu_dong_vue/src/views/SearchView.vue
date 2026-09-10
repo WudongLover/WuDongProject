@@ -29,7 +29,12 @@ async function search() {
   const keyword = kw.value.trim()
   if (!keyword) return
   loading.value = true
-  results.value = (await api.searchAll(keyword)).data
+  // 商品走真实后端，其余板块仍为 mock（两者 id 体系不同，不能混用 searchAll.goods）
+  const [all, goodsRes] = await Promise.all([
+    api.searchAll(keyword),
+    api.getGoodsList({ keyword, page_size: 100 }),
+  ])
+  results.value = { ...all.data, goods: goodsRes.data.items }
   loading.value = false
   if (route.query.kw !== keyword) router.replace({ query: { kw: keyword } })
 }
