@@ -13,6 +13,8 @@ export interface FavoriteRow {
 export interface ToggleResult {
   /** 操作后是否处于收藏状态 */
   favorited: boolean;
+  /** 状态是否实际发生变化 */
+  changed: boolean;
 }
 
 @Provide()
@@ -30,14 +32,14 @@ export class FavoriteMapper {
     const existing = await repo.findOne({ where: { userId, targetType, targetId } });
     if (existing) {
       await repo.delete(existing.id);
-      return { favorited: false };
+      return { favorited: false, changed: true };
     }
     try {
       await repo.insert({ userId, targetType, targetId });
-      return { favorited: true };
+      return { favorited: true, changed: true };
     } catch (err: any) {
       if (err?.errno === 1062) {
-        return { favorited: true };
+        return { favorited: true, changed: false };
       }
       throw err;
     }

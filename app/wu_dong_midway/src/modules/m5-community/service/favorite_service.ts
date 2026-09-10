@@ -9,7 +9,6 @@ import { TicketService } from '../../m4-ticket/service/ticket_service';
 import { ApiError } from '../error/api_error';
 import { InjectDataSource } from '@midwayjs/typeorm';
 import { DataSource } from 'typeorm';
-import { PostEntity } from '../entity/post_entity';
 
 export interface FavoriteVo {
   id: string;
@@ -50,7 +49,16 @@ export class FavoriteService {
   dataSource: DataSource;
 
   async toggle(userId: number, body: ToggleBody): Promise<{ favorited: boolean }> {
-    return this.favoriteMapper.toggle(userId, body.targetType, body.targetId);
+    const result = await this.favoriteMapper.toggle(userId, body.targetType, body.targetId);
+    // POST 类型同步维护 collects 计数
+    if (body.targetType === 'POST' && result.changed) {
+      if (result.favorited) {
+        await this.dataSource.query('UPDATE wudong_m5_post SET collects = collects + 1 WHERE id = ?', [body.targetId]);
+      } else {
+        await this.dataSource.query('UPDATE wudong_m5_post SET collects = GREATEST(collects - 1, 0) WHERE id = ?', [body.targetId]);
+      }
+    }
+    return { favorited: result.favorited };
   }
 
   async checkOne(userId: number, targetType: string, targetId: number): Promise<boolean> {
