@@ -63,19 +63,30 @@ export class PostService {
   postMapper: PostMapper;
 
   /**
-   * 当前用户 id：
-   * 请求头 X-User-Id 优先，缺省回退 env DEMO_USER_ID（默认 1）
-   * ❗待登录鉴权模块（src/modules/user）实现后，改为从 token/会话解析并移除兜底
+   * 当前用户 id，优先级：
+   * 1. ctx.userId（AuthMiddleware 校验 Bearer token 后写入，真实身份）
+   * 2. X-User-Id 请求头（仅非生产环境，联调兜底）
+   * 3. DEMO_USER_ID 环境变量（仅非生产环境）
+   * 生产环境无合法身份时直接 401，杜绝身份伪造
    */
   currentUserId(ctx: Context): number {
-    const raw = ctx.headers['x-user-id'];
-    const header = Array.isArray(raw) ? raw[0] : raw;
-    const headerId = Number(header);
-    if (Number.isFinite(headerId) && headerId > 0) {
-      return headerId;
+    const authedId = Number((ctx as any).userId);
+    if (Number.isFinite(authedId) && authedId > 0) {
+      return authedId;
     }
-    const fallback = Number(process.env.DEMO_USER_ID || 1);
-    return Number.isFinite(fallback) && fallback > 0 ? fallback : 1;
+    if (process.env.NODE_ENV !== 'production') {
+      const raw = ctx.headers['x-user-id'];
+      const header = Array.isArray(raw) ? raw[0] : raw;
+      const headerId = Number(header);
+      if (Number.isFinite(headerId) && headerId > 0) {
+        return headerId;
+      }
+      const fallback = Number(process.env.DEMO_USER_ID || 1);
+      if (Number.isFinite(fallback) && fallback > 0) {
+        return fallback;
+      }
+    }
+    throw new ApiError(1001, '未登录', 401);
   }
 
   /** 列表：status=PASSED 且未删除；comments 恒 []（契约），liked 按当前用户批量填充 */
