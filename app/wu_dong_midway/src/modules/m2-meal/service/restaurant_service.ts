@@ -9,7 +9,7 @@ import { RestaurantMapper } from '../mapper/restaurant_mapper';
 @Provide()
 export class RestaurantService {
   @Inject()
-  mapper: RestaurantMapper;
+  mapper!: RestaurantMapper;
 
   /**
    * 分页查询（支持 keyword / status 过滤）

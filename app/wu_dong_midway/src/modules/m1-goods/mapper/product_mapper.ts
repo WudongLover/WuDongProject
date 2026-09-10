@@ -9,7 +9,7 @@ import { ProductEntity } from '../entity/product_entity';
 @Provide()
 export class ProductMapper {
   @InjectEntityModel(ProductEntity)
-  repo: Repository<ProductEntity>;
+  repo!: Repository<ProductEntity>;
 
   /**
    * 分页查询（findAndCount 自动排除已逻辑删除记录）

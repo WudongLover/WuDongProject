@@ -9,7 +9,7 @@ import { RestaurantEntity } from '../entity/restaurant_entity';
 @Provide()
 export class RestaurantMapper {
   @InjectEntityModel(RestaurantEntity)
-  repo: Repository<RestaurantEntity>;
+  repo!: Repository<RestaurantEntity>;
 
   /**
    * 分页查询（findAndCount 自动排除已逻辑删除记录）

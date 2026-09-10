@@ -1,7 +1,7 @@
 import {
   Body,
   Controller,
-  Delete,
+  Del,
   Get,
   Inject,
   Param,
@@ -17,7 +17,7 @@ import { RestaurantService } from '../service/restaurant_service';
 @Controller('/api/v1/m2/restaurant')
 export class RestaurantController {
   @Inject()
-  service: RestaurantService;
+  service!: RestaurantService;
 
   @Get('/page')
   async page(@Query() query: any) {
@@ -34,7 +34,7 @@ export class RestaurantController {
     return this.service.add(body);
   }
 
-  @Delete('/:id')
+  @Del('/:id')
   async delete(@Param('id') id: string) {
     return this.service.delete(Number(id));
   }

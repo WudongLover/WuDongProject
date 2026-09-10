@@ -9,7 +9,7 @@ import { ProductMapper } from '../mapper/product_mapper';
 @Provide()
 export class ProductService {
   @Inject()
-  mapper: ProductMapper;
+  mapper!: ProductMapper;
 
   /**
    * 分页查询（支持 module / keyword / status / categoryId 过滤）
