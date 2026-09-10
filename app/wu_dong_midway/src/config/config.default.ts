@@ -8,6 +8,14 @@ import { ProductEntity } from '../modules/m1-goods/entity/product_entity';
 import { SkuEntity } from '../modules/m1-goods/entity/sku_entity';
 import { CategoryEntity } from '../modules/m1-goods/entity/category_entity';
 import { ReviewEntity } from '../modules/m1-goods/entity/review_entity';
+import { HomestayEntity } from '../modules/m3-lodging/entity/homestay_entity';
+import { RoomTypeEntity } from '../modules/m3-lodging/entity/room_type_entity';
+import { RoomCalendarEntity } from '../modules/m3-lodging/entity/room_calendar_entity';
+import { TicketEntity } from '../modules/m4-ticket/entity/ticket_entity';
+import { ScenicEntity } from '../modules/m4-ticket/entity/scenic_entity';
+import { RouteEntity } from '../modules/m4-ticket/entity/route_entity';
+import { RouteDayEntity } from '../modules/m4-ticket/entity/route_day_entity';
+import { RefreshTokenEntity } from '../modules/user/entity/refresh_token_entity';
 
 /**
  * 通用配置（本地开发与生产一致）
@@ -47,6 +55,9 @@ export default {
           SkuEntity,
           CategoryEntity,
           ReviewEntity,
+          HomestayEntity, RoomTypeEntity, RoomCalendarEntity,
+          TicketEntity, ScenicEntity, RouteEntity, RouteDayEntity,
+          RefreshTokenEntity,
         ],
       },
     },

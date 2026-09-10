@@ -5,7 +5,7 @@
 import type { UserProfile } from '@/types'
 import { ApiError } from '@/mock/server'
 
-const BASE = '/app/user/auth'
+const BASE = '/user'
 
 export interface Envelope<T> {
   code: number

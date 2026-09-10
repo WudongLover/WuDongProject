@@ -1,24 +1,37 @@
-import { BaseEntity, transformerTime } from '../../base/entity/base';
-import { Column, DeleteDateColumn, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 /**
  * m3住宿模块-民宿信息
+ *
+ * 不继承 base/entity 的 BaseEntity：父类已用 @Index() 装饰 createTime/updateTime，
+ * 子类再次声明同名属性会让 TypeORM 生成两组同名索引，同步时报 ER_DUP_KEYNAME。
+ * 列名与 scripts/sql/wudong_schema.sql 的 wudong_m3_homestay 保持一致。
  */
 @Entity('wudong_m3_homestay')
-export class M3HomestayEntity extends BaseEntity {
-  @PrimaryGeneratedColumn('increment', { comment: 'ID' })
+export class M3HomestayEntity {
+  @PrimaryGeneratedColumn('increment', {
+    type: 'bigint',
+    unsigned: true,
+    comment: 'ID',
+  })
   id: number;
 
-  @Index()
-  @Column({ name: 'created_at', comment: '创建时间', type: 'varchar', transformer: transformerTime })
-  createTime: Date;
-
-  @Index()
-  @Column({ name: 'updated_at', comment: '更新时间', type: 'varchar', transformer: transformerTime })
-  updateTime: Date;
-
-  @Index()
-  @Column({ name: 'merchant_id', comment: '商家ID', default: 0 })
+  @Index('idx_merchant')
+  @Column({
+    name: 'merchant_id',
+    type: 'bigint',
+    unsigned: true,
+    default: 0,
+    comment: '商家ID',
+  })
   merchantId: number;
 
   @Column({ comment: '民宿名称', length: 128 })
@@ -84,6 +97,17 @@ export class M3HomestayEntity extends BaseEntity {
   })
   status: string;
 
-  @DeleteDateColumn({ name: 'deleted_at', comment: '删除时间', nullable: true })
+  @CreateDateColumn({ name: 'created_at', type: 'datetime' })
+  createTime: Date;
+
+  @UpdateDateColumn({ name: 'updated_at', type: 'datetime' })
+  updateTime: Date;
+
+  @DeleteDateColumn({
+    name: 'deleted_at',
+    type: 'datetime',
+    comment: '删除时间',
+    nullable: true,
+  })
   deletedAt: Date;
 }

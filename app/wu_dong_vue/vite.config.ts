@@ -13,9 +13,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // cool-admin-midway 后端（端口 8001）
+      // wu_dong_midway 后端（端口 6666）
       '/api': {
-        target: 'http://localhost:8001',
+        target: 'http://localhost:6666',
         changeOrigin: true,
       },
     },
