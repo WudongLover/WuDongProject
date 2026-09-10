@@ -98,8 +98,12 @@ export * from './m4-order'
 
 /* 社区（真实后端 http://127.0.0.1:8001，vite 代理 /api） */
 
-export function getPosts(): Promise<Envelope<Post[]>> {
-  return apiFetch<Envelope<Post[]>>('/posts')
+export function getPosts(topic?: string, sort?: 'hot' | 'new'): Promise<Envelope<Post[]>> {
+  const params = new URLSearchParams()
+  if (topic) params.set('topic', topic)
+  if (sort) params.set('sort', sort)
+  const qs = params.toString()
+  return apiFetch<Envelope<Post[]>>(`/posts${qs ? `?${qs}` : ''}`)
 }
 export function getPostDetail(id: string): Promise<Envelope<Post>> {
   return apiFetch<Envelope<Post>>(`/posts/${id}`)
@@ -112,12 +116,17 @@ export function togglePostLike(id: string): Promise<Envelope<{ liked: boolean; l
 export function getComments(postId: string): Promise<Envelope<PostComment[]>> {
   return apiFetch<Envelope<PostComment[]>>(`/posts/${postId}/comments`)
 }
-/** 新增评论 */
-export function addComment(postId: string, content: string): Promise<Envelope<PostComment[]>> {
+/** 新增评论（支持回复 parentCommentId） */
+export function addComment(postId: string, content: string, parentCommentId?: string): Promise<Envelope<PostComment[]>> {
   return apiFetch<Envelope<PostComment[]>>(`/posts/${postId}/comments`, {
     method: 'POST',
-    body: JSON.stringify({ content }),
+    body: JSON.stringify({ content, parentId: parentCommentId ? Number(parentCommentId) : undefined }),
   })
+}
+
+/** 发布游记 */
+export function publishPost(data: { title: string; content: string; topic?: string; place?: string }): Promise<Envelope<Post>> {
+  return apiFetch<Envelope<Post>>('/posts', { method: 'POST', body: JSON.stringify(data) })
 }
 
 /** 逻辑删除帖子 */
