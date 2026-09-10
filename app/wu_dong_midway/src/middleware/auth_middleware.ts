@@ -7,6 +7,7 @@ const TOKEN_REQUIRED_PATHS = [
   '/api/user/me',
   '/api/user/profile',
   '/api/user/password',
+  '/api/favorites',
 ];
 /** m3/m4/m5 的写操作需要登录，公开查询放行 */
 const TOKEN_REQUIRED_WRITE_PREFIXES = ['/api/app/m3', '/api/app/m4', '/api/posts'];
