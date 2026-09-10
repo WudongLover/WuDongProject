@@ -2,11 +2,16 @@
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getRestaurants, getSpecialties } from '@/api/food'
+import * as api from '@/api'
 import type { Product, Restaurant } from '@/types'
 import RestaurantCard from '@/components/RestaurantCard.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
+import CultureBand from '@/components/CultureBand.vue'
 import { img } from '@/mock/images'
+
+/** 文化导览：长桌宴、火塘、酸汤的来路跨「宴 / 产」两个 tab，故放在 tab 之上做全局导览 */
+const culture = api.getCultureSection('SHI')
 
 const route = useRoute()
 const tab = ref<'restaurant' | 'specialty'>((route.query.tab as 'specialty') === 'specialty' ? 'specialty' : 'restaurant')
@@ -40,6 +45,9 @@ const spCat = ref('全部')
       </div>
     </div>
 
+    <!-- 先读特色，再选「宴」或「产」 -->
+    <CultureBand v-if="culture" :section="culture" />
+
     <div class="container">
       <div class="big-tabs">
         <button :class="{ on: tab === 'restaurant' }" @click="tab = 'restaurant'">
@@ -53,7 +61,7 @@ const spCat = ref('全部')
       <!-- 餐厅 -->
       <section v-if="tab === 'restaurant'">
         <EmptyState v-if="!loading && !restaurants.length" text="暂无餐厅" />
-        <div v-else class="rest-list">
+        <div v-else class="rest-list card-grid">
           <RestaurantCard v-for="(r, i) in restaurants" :key="r.id" :item="r" class="rise" :style="{ animationDelay: `${Math.min(i, 6) * 60}ms` }" />
         </div>
         <p class="tip">
@@ -74,7 +82,7 @@ const spCat = ref('全部')
           </button>
         </div>
         <EmptyState v-if="!loading && !specialties.filter((s) => spCat === '全部' || s.category === spCat).length" text="该分类暂无特产" />
-        <div v-else class="sp-grid">
+        <div v-else class="sp-grid card-grid">
           <ProductCard
             v-for="(s, i) in specialties.filter((x) => spCat === '全部' || x.category === spCat)"
             :key="s.id"

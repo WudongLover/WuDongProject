@@ -6,10 +6,13 @@ defineProps<{ item: TravelRoute }>()
 </script>
 
 <template>
-  <router-link :to="`/routes/${item.id}`" class="route-card">
-    <div class="cover">
+  <router-link :to="`/routes/${item.id}`" class="route-card card-hover">
+    <div class="cover card-media">
       <img :src="item.cover" :alt="item.title" loading="lazy" />
       <span class="days">{{ item.days === 1 ? '一日' : item.days === 2 ? '两日' : `${item.days} 日` }}行程</span>
+      <div class="card-veil">
+        <span class="veil-cta">看行程 <i>→</i></span>
+      </div>
     </div>
     <div class="body">
       <span class="theme">{{ item.theme }}</span>
@@ -33,18 +36,11 @@ defineProps<{ item: TravelRoute }>()
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
-}
-
-.route-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-2);
 }
 
 .cover {
   position: relative;
   aspect-ratio: 16/8.5;
-  overflow: hidden;
   background: var(--indigo-mist);
 }
 
@@ -52,17 +48,13 @@ defineProps<{ item: TravelRoute }>()
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s var(--ease);
-}
-
-.route-card:hover .cover img {
-  transform: scale(1.05);
 }
 
 .days {
   position: absolute;
   left: 10px;
   bottom: 10px;
+  z-index: 4;
   background: rgba(181, 68, 46, 0.92);
   color: #fff;
   font-size: 12px;

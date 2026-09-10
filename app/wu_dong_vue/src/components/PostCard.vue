@@ -6,10 +6,21 @@ defineProps<{ item: Post }>()
 </script>
 
 <template>
-  <router-link :to="`/posts/${item.id}`" class="post-card">
-    <div class="cover">
+  <router-link :to="`/posts/${item.id}`" class="post-card card-hover">
+    <div class="cover card-media">
       <img :src="item.images[0]" :alt="item.title" loading="lazy" />
+      <img
+        v-if="item.images[1]"
+        class="img-alt"
+        :src="item.images[1]"
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+      />
       <span v-if="item.images.length > 1" class="count"><AppIcon name="camera" :size="12" /> {{ item.images.length }}</span>
+      <div class="card-veil">
+        <span class="veil-cta">看全文 <i>→</i></span>
+      </div>
     </div>
     <div class="body">
       <h3>{{ item.title }}</h3>
@@ -35,33 +46,36 @@ defineProps<{ item: Post }>()
   border-radius: var(--radius-lg);
   overflow: hidden;
   margin-bottom: 16px;
-  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
-}
-
-.post-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-2);
 }
 
 .cover {
   position: relative;
-  overflow: hidden;
   background: var(--indigo-mist);
 }
 
 .cover img {
   width: 100%;
-  transition: transform 0.6s var(--ease);
 }
 
-.post-card:hover .cover img {
-  transform: scale(1.04);
+/* 多图笔记：悬停时第一张淡出、第二张淡入 */
+.img-alt {
+  position: absolute;
+  inset: 0;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+}
+
+.post-card:hover .img-alt,
+.post-card:focus-visible .img-alt {
+  opacity: 1;
 }
 
 .count {
   position: absolute;
   top: 10px;
   right: 10px;
+  z-index: 4;
   background: rgba(22, 48, 77, 0.82);
   color: var(--silver-light);
   font-size: 11px;

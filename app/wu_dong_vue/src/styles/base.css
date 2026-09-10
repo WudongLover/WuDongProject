@@ -238,12 +238,14 @@ ol {
   }
 }
 
+/* fill 用 backwards：动画结束后交还给正常样式，
+   否则动画最后一帧的 transform 会盖住卡片悬停的位移与放大 */
 .rise {
-  animation: rise 0.7s var(--ease) both;
+  animation: rise 0.7s var(--ease) backwards;
 }
 
 .fade {
-  animation: fade 0.9s var(--ease) both;
+  animation: fade 0.9s var(--ease) backwards;
 }
 
 /* ---------- 滚动条 ---------- */
@@ -317,4 +319,203 @@ ol {
   box-shadow: var(--shadow-2);
   animation: rise 0.35s var(--ease) both;
   border-left: 3px solid var(--amber);
+}
+
+/* ============================================================
+   卡片悬停动效：单卡放大 + 图片推近 + 苗银扫光 + 遮罩揭示
+   用法：卡片根节点加 .card-hover，图片容器加 .card-media，
+        图片容器内放 .card-veil；同组容器加 .card-grid 可让其余卡片后退
+   ============================================================ */
+.card-hover {
+  position: relative;
+  transition:
+    transform 0.5s var(--ease),
+    box-shadow 0.5s var(--ease),
+    border-color 0.5s var(--ease),
+    opacity 0.45s var(--ease);
+}
+
+/* 顶部苗绣配色描边，自左向右拉开 */
+.card-hover::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--indigo), var(--amber) 58%, var(--red));
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.6s var(--ease);
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* 双类名提升优先级：盖过各卡片作用域样式里的 border 简写 */
+.card-hover.card-hover:hover,
+.card-hover.card-hover:focus-visible {
+  transform: translateY(var(--card-lift)) scale(var(--card-scale));
+  box-shadow: var(--shadow-3);
+  border-color: rgba(35, 69, 107, 0.34);
+  z-index: 3;
+}
+
+.card-hover:hover::before,
+.card-hover:focus-visible::before {
+  transform: scaleX(1);
+}
+
+.card-hover:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+/* ---------- 图片：缓慢推近，银光斜扫一次 ---------- */
+.card-media {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-media img {
+  transition:
+    transform 0.85s var(--ease),
+    filter 0.6s var(--ease),
+    opacity 0.65s var(--ease);
+}
+
+.card-media::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(226, 236, 243, 0.42), transparent);
+  transform: translateX(-170%) skewX(-12deg);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.card-hover:hover .card-media img,
+.card-hover:focus-visible .card-media img {
+  transform: scale(1.08);
+  filter: saturate(1.08) contrast(1.03);
+}
+
+.card-hover:hover .card-media::after,
+.card-hover:focus-visible .card-media::after {
+  transform: translateX(330%) skewX(-12deg);
+  /* 补间只写在悬停态：鼠标移出时不倒着再扫一次 */
+  transition: transform 0.9s var(--ease);
+}
+
+/* ---------- 遮罩揭示：底部夜靛渐隐 + 查看详情胶囊 ---------- */
+.card-veil {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: 12px 14px;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 35, 56, 0) 42%,
+    rgba(15, 35, 56, 0.48) 74%,
+    rgba(15, 35, 56, 0.78)
+  );
+  color: var(--silver-light);
+  opacity: 0;
+  transition: opacity 0.45s var(--ease);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.veil-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 13px;
+  border: 1px solid rgba(215, 224, 230, 0.5);
+  border-radius: 999px;
+  background: rgba(15, 35, 56, 0.44);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    transform 0.5s var(--ease),
+    opacity 0.45s var(--ease),
+    border-color 0.3s,
+    color 0.3s;
+}
+
+.veil-cta i {
+  font-style: normal;
+  transition: transform 0.4s var(--ease);
+}
+
+.card-hover:hover .card-veil,
+.card-hover:focus-visible .card-veil {
+  opacity: 1;
+}
+
+.card-hover:hover .veil-cta,
+.card-hover:focus-visible .veil-cta {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.card-hover:hover .veil-cta {
+  border-color: var(--amber);
+  color: #fff;
+}
+
+.card-hover:hover .veil-cta i {
+  transform: translateX(4px);
+}
+
+/* ---------- 同组卡片后退，让被悬停的一张真正「跳出来」 ---------- */
+@media (hover: hover) {
+  .card-grid:has(.card-hover:hover) .card-hover:not(:hover) {
+    opacity: 0.88;
+    transform: scale(0.992);
+  }
+}
+
+/* 触屏没有真正的悬停，避免点击后效果粘住 */
+@media (hover: none) {
+  .card-veil {
+    display: none;
+  }
+
+  .card-hover:hover,
+  .card-hover:focus-visible {
+    transform: none;
+  }
+
+  .card-hover:hover::before,
+  .card-hover:focus-visible::before {
+    transform: scaleX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-hover:hover,
+  .card-hover:focus-visible,
+  .card-grid:has(.card-hover:hover) .card-hover:not(:hover) {
+    transform: none;
+  }
+
+  .card-media::after {
+    display: none;
+  }
+
+  .card-hover:hover .card-media img,
+  .card-hover:focus-visible .card-media img {
+    transform: none;
+    filter: none;
+  }
+
+  .veil-cta {
+    transform: none;
+  }
 }

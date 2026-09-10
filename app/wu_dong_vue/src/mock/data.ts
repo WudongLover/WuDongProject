@@ -16,34 +16,36 @@ import { img, scene } from './images'
 
 /* ================= 首页运营 ================= */
 
+// 首页 Banner 只做导览，不指向商品：按钮文案与 link 都是「先了解」
 export const banners: Banner[] = [
   {
     id: 'b1',
     title: '银饰锻造之声',
     subtitle: '百年炉火不熄，乌东银匠村',
     image: scene('close-up of Miao silver headdress jewelry craftsmanship, dark moody lighting'),
-    link: '/goods',
+    link: '/culture/yi-silver-hammer',
   },
   {
     id: 'b2',
     title: '梯田云海之间',
     subtitle: '住进吊脚楼，推开窗就是苗岭晨雾',
     image: scene('green rice terraces and morning mist over mountain village aerial view'),
-    link: '/stay',
+    link: '/culture/zhu-cloud-sea',
   },
   {
     id: 'b3',
     title: '长桌宴上百家菜',
     subtitle: '酸汤鱼、糯米酒与芦笙歌',
     image: scene('Miao long table banquet with many dishes, warm lantern light, festival'),
-    link: '/food',
+    link: '/culture/shi-long-table',
   },
 ]
 
+// 公告位播报文旅资讯，不放促销
 export const announcements: string[] = [
-  '「苗年节」11 月中旬启幕，路线套餐早鸟立减 100 元',
-  '新用户注册即领 30 元文旅礼包',
-  '乌东非遗工坊体验课每周三、周六开班',
+  '「苗年节」11 月中旬启幕，芦笙大赛与篝火夜歌连闹三日',
+  '乌东非遗工坊体验课每周三、周六开班，可现场学敲银片',
+  '雨后次日清晨云海概率最高，观景台五点开放',
 ]
 
 /* ================= 衣 · 非遗商品 ================= */
@@ -1219,4 +1221,5 @@ export const defaultUser: UserProfile = {
   favorites: ['g1', 'h1', 'f1', 'rt1', 'p1', 'p3'],
 }
 
+/** 首页「逛一逛」词条，点击落到对应文化内容（culture.ts 的 cultureEntries 按 label 匹配） */
 export const hotKeywords = ['银饰', '长桌宴', '云海民宿', '苗年节', '蓝染体验', '酸汤鱼']
