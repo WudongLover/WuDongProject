@@ -1,15 +1,3 @@
-import {
-  Body,
-  Controller,
-  Del,
-  Get,
-  Inject,
-  Param,
-  Post,
-  Query,
-} from '@midwayjs/core';
-import { ProductService } from '../service/product_service';
-
 /**
  * 【m1-goods 模块】商品（wudong_m1_product，衣/特产统一表）
  * controller 层：接口与路由
