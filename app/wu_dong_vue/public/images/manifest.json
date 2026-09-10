@@ -1,0 +1,968 @@
+[
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=young%20chinese%20woman%20avatar%20illustration%20minimal&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=close-up%20of%20Miao%20silver%20headdress%20jewelry%20craftsmanship%2C%20dark%20moody%20lighting%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": "001_close-up-of-miao-silver-headdress-jewelry-_b7835ee5.jpg",
+    "status": "ok",
+    "bytes": 184192,
+    "md5": "e37264de4d1bc98db94b10b252cd2f64"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=elderly%20Chinese%20Miao%20silversmith%20portrait%2C%20weathered%20kind%20face&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=silver%20bracelet%20detail%20butterfly%20pattern%20macro%20photography&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Miao%20long%20table%20banquet%20with%20many%20dishes%2C%20warm%20lantern%20light%2C%20festival%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": "003_miao-long-table-banquet-with-many-dishes-w_4be11336.jpg",
+    "status": "ok",
+    "bytes": 313170,
+    "md5": "53457635ac24c7fd481cd93a0df37149"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=green%20rice%20terraces%20and%20morning%20mist%20over%20mountain%20village%20aerial%20view%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": "002_green-rice-terraces-and-morning-mist-over-_73264c88.jpg",
+    "status": "ok",
+    "bytes": 238757,
+    "md5": "1824de62f708b530200bbf7e8477d0bd"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=handcrafted%20Miao%20silver%20filigree%20bracelet%20on%20dark%20indigo%20linen&image_size=square_hd",
+    "tag": "src:mock/data.ts",
+    "file": "004_handcrafted-miao-silver-filigree-bracelet-_bc373861.jpg",
+    "status": "ok",
+    "bytes": 163499,
+    "md5": "0f0de4fee1240c44477997952c30de50"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20man%20avatar%20illustration%20minimal&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20woman%20avatar%20illustration%20minimal%20glasses&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": "014_chinese-woman-avatar-illustration-minimal-_5d29a078.jpg",
+    "status": "ok",
+    "bytes": 73594,
+    "md5": "274b0e413bc9eb552954180006a52a74"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Miao%20silversmith%20hands%20crafting%20silver%20jewelry%20with%20small%20hammer&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=indigo%20blue%20batik%20square%20scarf%20folded%2C%20crackle%20texture%20pattern&image_size=square_hd",
+    "tag": "src:mock/data.ts",
+    "file": "010_indigo-blue-batik-square-scarf-folded-crac_7c8bb2d7.jpg",
+    "status": "ok",
+    "bytes": 233397,
+    "md5": "8e07d944432f210180d753c3957a8ceb"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=indigo%20dye%20vat%20with%20fabric%20being%20dipped%2C%20workshop%20scene&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=batik%20wax%20drawing%20with%20copper%20knife%20on%20white%20cloth&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=middle%20aged%20chinese%20Miao%20woman%20portrait%20smiling%2C%20indigo%20apron&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=elderly%20chinese%20Miao%20woman%20in%20traditional%20silver%20headdress%20portrait&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Miao%20festival%20costume%20with%20silver%20ornaments%20full%20display&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20man%20avatar%20illustration%20minimal%20beard&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicate%20silver%20butterfly%20earrings%20on%20linen%20cloth&image_size=square_hd",
+    "tag": "src:mock/data.ts",
+    "file": "021_delicate-silver-butterfly-earrings-on-line_4ac55c25.jpg",
+    "status": "ok",
+    "bytes": 175919,
+    "md5": "1bbbf65c52d9ba6dbf9374f543b8e5bd"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Miao%20embroidery%20close-up%20silk%20thread%20work%20vibrant%20colors&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20girl%20avatar%20illustration%20minimal&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20woman%20avatar%20illustration%20minimal%20short%20hair&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=parent%20and%20child%20making%20silver%20ring%20at%20crafting%20workshop&image_size=square_hd",
+    "tag": "src:mock/data.ts",
+    "file": "026_parent-and-child-making-silver-ring-at-cra_36caf7fc.jpg",
+    "status": "ok",
+    "bytes": 166344,
+    "md5": "6749e8d38fa84f2ed3d7a0c31bb717da"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20man%20avatar%20illustration%20minimal%20glasses&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": "027_chinese-man-avatar-illustration-minimal-gl_478338fc.jpg",
+    "status": "ok",
+    "bytes": 120776,
+    "md5": "b761288f54ab7123e0cd7972425ee719"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=set%20of%20six%20geometric%20embroidered%20coasters%20colorful&image_size=square_hd",
+    "tag": "src:mock/data.ts",
+    "file": "024_set-of-six-geometric-embroidered-coasters-_7ba163b9.jpg",
+    "status": "ok",
+    "bytes": 286821,
+    "md5": "b203487a804864a60a8d730158f80af6"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=colorful%20Miao%20embroidery%20dragon%20wall%20hanging%20textile%20art&image_size=square_hd",
+    "tag": "src:mock/data.ts",
+    "file": "015_colorful-miao-embroidery-dragon-wall-hangi_48870d33.jpg",
+    "status": "ok",
+    "bytes": 326519,
+    "md5": "920e4bafc4c6585894fae95ec7fe3412"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=indigo%20batik%20table%20runner%20with%20bronze%20drum%20pattern%20on%20wooden%20table&image_size=square_hd",
+    "tag": "src:mock/data.ts",
+    "file": "023_indigo-batik-table-runner-with-bronze-drum_24a1e634.jpg",
+    "status": "ok",
+    "bytes": 218666,
+    "md5": "6d6e5064332b3fe1cb189592057ab5b2"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Guizhou%20sour%20soup%20fish%20hotpot%20red%20broth%20steam&image_size=landscape_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=glutinous%20rice%20wine%20bowls%20on%20wooden%20table&image_size=landscape_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20fashion%20dress%20with%20Miao%20embroidery%20elements%20on%20mannequin&image_size=square_hd",
+    "tag": "src:mock/data.ts",
+    "file": "019_modern-fashion-dress-with-miao-embroidery-_1958710e.jpg",
+    "status": "ok",
+    "bytes": 129948,
+    "md5": "05322bfec54993b02313ca869ff659ab"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=smoked%20cured%20pork%20slices%20plate&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=five%20color%20glutinous%20rice&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=sour%20soup%20fish%20hotpot&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Miao%20long%20table%20banquet%2C%20red%20lanterns%2C%20wooden%20stilt%20house%20interior%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": "028_miao-long-table-banquet-red-lanterns-woode_51d465df.jpg",
+    "status": "ok",
+    "bytes": 297715,
+    "md5": "08ba879c70defc42055e05f6ac2ae019"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cold%20dish%20houttuynia%20root%20salad&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=bayberry%20drink%20glass%20red&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20woman%20avatar%20illustration%20minimal%20ponytail&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20man%20avatar%20illustration%20minimal%20hat&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=rice%20field%20fish%20dish&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=stir%20fried%20vegetables%20plate&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chicken%20soup%20clay%20pot&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20woman%20avatar%20illustration%20minimal&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": "042_chinese-woman-avatar-illustration-minimal_f738a687.jpg",
+    "status": "ok",
+    "bytes": 60433,
+    "md5": "46a210dcd3b38c53eb4ab9a8e0cd5aa5"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=grilled%20pork%20belly%20over%20fire&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=grilled%20sticky%20rice%20cake&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=tofu%20in%20green%20tea%20broth&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=tea%20flavored%20chicken%20dish%20elegant&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=rice%20wine%20ceramic%20pot&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=nine%20grid%20dessert%20dim%20sum&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=green%20tea%20pearls%20in%20ceramic%20jar%20with%20tea%20cup&image_size=square_hd",
+    "tag": "src:mock/data.ts",
+    "file": "051_green-tea-pearls-in-ceramic-jar-with-tea-c_b5337b54.jpg",
+    "status": "ok",
+    "bytes": 119614,
+    "md5": "4f336943b0df470cbd5d6a577c46e4cd"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=tea%20plantation%20on%20misty%20mountain%20terraces&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=rice%20wine%20in%20ceramic%20jars%20with%20red%20paper%20seal&image_size=square_hd",
+    "tag": "src:mock/data.ts",
+    "file": "054_rice-wine-in-ceramic-jars-with-red-paper-s_2e71d2b6.jpg",
+    "status": "ok",
+    "bytes": 126464,
+    "md5": "2c3d3afbe90f700dbf02b7b4a9de1bc2"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=elegant%20tea%20house%20restaurant%20interior%2C%20wooden%20lattice%20windows%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": "047_elegant-tea-house-restaurant-interior-wood_e9d19ef6.jpg",
+    "status": "ok",
+    "bytes": 327114,
+    "md5": "a90f97a75d5e1843c985c7372a3cb697"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=farmhouse%20restaurant%20terrace%20overlooking%20rice%20paddies%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": "038_farmhouse-restaurant-terrace-overlooking-r_01afd89a.jpg",
+    "status": "ok",
+    "bytes": 345607,
+    "md5": "78d4355457a461d57286ec682f7b8fa8"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=smoked%20cured%20pork%20hanging%20with%20hemp%20rope%20rustic&image_size=square_hd",
+    "tag": "src:mock/data.ts",
+    "file": "053_smoked-cured-pork-hanging-with-hemp-rope-r_9dcfe7d0.jpg",
+    "status": "ok",
+    "bytes": 134889,
+    "md5": "fff07fc1fae71b7eece2f8b4f9a83dc2"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=red%20sour%20soup%20paste%20in%20vacuum%20package%20with%20tomatoes&image_size=square_hd",
+    "tag": "src:mock/data.ts",
+    "file": "055_red-sour-soup-paste-in-vacuum-package-with_458ffbc5.jpg",
+    "status": "ok",
+    "bytes": 216309,
+    "md5": "dfb34fffdb736524509424619700ada3"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=round%20sticky%20rice%20cakes%20stacked%20with%20wooden%20mold&image_size=square_hd",
+    "tag": "src:mock/data.ts",
+    "file": "056_round-sticky-rice-cakes-stacked-with-woode_63e322f2.jpg",
+    "status": "ok",
+    "bytes": 164296,
+    "md5": "0e5a811b70da13381f9f21c1718981e3"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=honey%20jar%20with%20honeycomb%20and%20wooden%20dipper&image_size=square_hd",
+    "tag": "src:mock/data.ts",
+    "file": "057_honey-jar-with-honeycomb-and-wooden-dipper_e315498d.jpg",
+    "status": "ok",
+    "bytes": 119440,
+    "md5": "eb127627cdfb7c99c23dd8279e9065a7"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cozy%20wooden%20guesthouse%20room%20with%20indigo%20textiles%20warm%20lamp&image_size=landscape_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=guesthouse%20balcony%20overlooking%20mountain%20valley%20morning&image_size=landscape_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cozy%20wooden%20bedroom%20indigo%20fabric%20headboard&image_size=landscape_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cozy%20indoor%20fire%20pit%20dining%20room%2C%20rustic%20wooden%20benches%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": "043_cozy-indoor-fire-pit-dining-room-rustic-wo_dc72ca13.jpg",
+    "status": "ok",
+    "bytes": 276177,
+    "md5": "641e90b3ade03db5a1e9bff82500554e"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=family%20room%20wooden%20house%20two%20beds%20warm&image_size=landscape_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=twin%20bedroom%20wooden%20interior%20valley%20view&image_size=landscape_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=family%20suite%20bedroom%20wooden%20cozy&image_size=landscape_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=elegant%20chinese%20style%20bedroom%20silver%20details&image_size=landscape_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20man%20avatar%20illustration%20minimal%20camera&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": "063_chinese-man-avatar-illustration-minimal-ca_fb03d20e.jpg",
+    "status": "ok",
+    "bytes": 80134,
+    "md5": "a36e3a57d27923064f1bd47ba8e0d9de"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=simple%20clean%20twin%20bedroom%20bright&image_size=landscape_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=wooden%20stilt%20house%20guesthouse%20on%20hillside%20with%20sea%20of%20clouds%20view%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": "058_wooden-stilt-house-guesthouse-on-hillside-_34dbacb7.jpg",
+    "status": "ok",
+    "bytes": 257779,
+    "md5": "e8e8ccb62e4b8b4d376b534abf05bd50"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20man%20avatar%20illustration%20minimal%20scarf&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": "072_chinese-man-avatar-illustration-minimal-sc_9387371a.jpg",
+    "status": "ok",
+    "bytes": 63734,
+    "md5": "bd696b0a62078e1900fef74fecaaf842"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=panoramic%20window%20bedroom%20forest%20view%20minimalist&image_size=landscape_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=rural%20courtyard%20homestay%20next%20to%20green%20rice%20field%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": "067_rural-courtyard-homestay-next-to-green-ric_4140dcb7.jpg",
+    "status": "ok",
+    "bytes": 305148,
+    "md5": "3cff6e1b693d7f70ba38d76a4d498b03"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern%20minimalist%20wooden%20architecture%20cantilever%20terrace%20forest%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": "070_modern-minimalist-wooden-architecture-cant_a862fa3e.jpg",
+    "status": "ok",
+    "bytes": 370536,
+    "md5": "854c2e9113484dcb7b0b7aef4d69a57e"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Miao%20village%20panorama%20wooden%20houses%20terraces%20valley%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": "073_miao-village-panorama-wooden-houses-terrac_73fc9c31.jpg",
+    "status": "ok",
+    "bytes": 334572,
+    "md5": "1a0bd28594d592757adbb7248e26b323"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=mountain%20forest%20park%20misty%20peaks%20boardwalk%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": "074_mountain-forest-park-misty-peaks-boardwalk_3b70feb8.jpg",
+    "status": "ok",
+    "bytes": 304859,
+    "md5": "24df9cc18d5fc209d8617e8edc091049"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=traditional%20courtyard%20inn%20with%20silver%20craft%20decorations%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": "064_traditional-courtyard-inn-with-silver-craf_034de4e7.jpg",
+    "status": "ok",
+    "bytes": 341493,
+    "md5": "eca4814d2497070453ba5cf3be3672a2"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=day%20tour%20village%20walking%20path%20silversmith%20workshop%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": "075_day-tour-village-walking-path-silversmith-_899aa3fb.jpg",
+    "status": "ok",
+    "bytes": 268697,
+    "md5": "a793117fe4ce2fc432c703cdad1936ef"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=children%20photography%20workshop%20village%20kids%20playing%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=festival%20celebration%20lusheng%20dance%20colorful%20costumes%20night%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=two%20day%20hiking%20trail%20mountain%20village%20sunrise%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=landscape_16_9",
+    "tag": "src:mock/data.ts",
+    "file": "076_two-day-hiking-trail-mountain-village-sunr_85cab07c.jpg",
+    "status": "ok",
+    "bytes": 246192,
+    "md5": "344f9bf3df7d9c7a7156cb25be4a147a"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=sea%20of%20clouds%20over%20mountain%20village%20at%20dawn%20golden%20light%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=guesthouse%20balcony%20morning%20view%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cup%20of%20hot%20tea%20on%20wooden%20railing%20mountain%20view&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=long%20table%20banquet%20toast%20celebration%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=rice%20wine%20toast%20with%20horn%20cup&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=sour%20soup%20fish%20boiling%20pot&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=silver%20wire%20crafting%20tools%20on%20workbench&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=silversmith%20teaching%20young%20man%20crafting%20silver%2C%20warm%20workshop&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=glutinous%20rice%20with%20colorful%20toppings&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=rice%20terraces%20golden%20sunset%20light%20layers%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=father%20and%20son%20crafting%20silver%20ring%20workshop&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=child%20hands%20holding%20silver%20ring%20proud&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=village%20street%20wooden%20houses%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=batik%20fabric%20drying%20on%20bamboo%20pole%20wind&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=indigo%20dye%20vat%20hands%20dipping%20fabric&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=crackle%20pattern%20indigo%20cloth%20macro&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=indoor%20fire%20pit%20night%20storytelling%20warm%20glow%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=mountain%20ridge%20grassland%20clouds%20hikers%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=hiking%20trail%20through%20ancient%20forest%20mist%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=waterfall%20in%20green%20mountains&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=chinese%20traveler%20avatar%20illustration%20minimal%20backpack&image_size=square",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=grandmother%20cooking%20in%20traditional%20kitchen&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=village%20night%20starry%20sky%20wooden%20house%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=dried%20bamboo%20shoots%20in%20basket%20gift&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=village%20lane%20wooden%20houses%20sunlight%20shadow%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=portrait_4_3",
+    "tag": "src:mock/data.ts",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=silversmith%20elder%20teaching%20apprentice%20in%20workshop%2C%20cinematic%20light%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=portrait_16_9",
+    "tag": "src:views/HomeView.vue",
+    "file": "106_silversmith-elder-teaching-apprentice-in-w_04ae4162.jpg",
+    "status": "ok",
+    "bytes": 195289,
+    "md5": "340fdd6dfe5d5178c3857961dbf22ac0"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Miao%20long%20table%20banquet%20dishes%20overhead%20view%2C%20vibrant%20food%20photography%2C%20wide%20banner&image_size=landscape_16_9",
+    "tag": "src:views/FoodView.vue",
+    "file": "104_miao-long-table-banquet-dishes-overhead-vi_a29046b8.jpg",
+    "status": "ok",
+    "bytes": 414458,
+    "md5": "a3ba6cb7857d7f1f76d1876fb41d3013"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Miao%20embroidery%20and%20silver%20jewelry%20flat%20lay%20on%20indigo%20cloth%2C%20wide%20banner&image_size=landscape_16_9",
+    "tag": "src:views/GoodsListView.vue",
+    "file": "105_miao-embroidery-and-silver-jewelry-flat-la_10565293.jpg",
+    "status": "ok",
+    "bytes": 268352,
+    "md5": "40300b57446283186513137e04318a96"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Miao%20village%20wooden%20stilt%20houses%20in%20morning%20mist%2C%20indigo%20tone%2C%20Wudong%20Miao%20village%20in%20Guizhou%20China%2C%20wooden%20stilt%20houses%2C%20indigo%20dyed%20textiles%2C%20documentary%20travel%20photography%2C%20natural%20light&image_size=portrait_16_9",
+    "tag": "src:views/LoginView.vue",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=lusheng%20instrument%20Miao%20festival%20performance%20colorful%20costumes%20valley%2C%20wide%20banner&image_size=landscape_16_9",
+    "tag": "src:views/TripView.vue",
+    "file": "108_lusheng-instrument-miao-festival-performan_4998ae57.jpg",
+    "status": "ok",
+    "bytes": 278691,
+    "md5": "077f3163f0386b98957190bba8f56cf4"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=honey+jar+with+honeycomb+and+wooden+dipper&image_size=square_hd",
+    "tag": "api:/api/v1/m1/products",
+    "file": "api_1001_honey-jar-with-honeycomb-and-wooden-dipper_605851b8.jpg",
+    "status": "ok",
+    "bytes": 119440,
+    "md5": "eb127627cdfb7c99c23dd8279e9065a7"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=round+sticky+rice+cakes+stacked+with+wooden+mold&image_size=square_hd",
+    "tag": "api:/api/v1/m1/products",
+    "file": "api_1002_round-sticky-rice-cakes-stacked-with-woode_8e7b6884.jpg",
+    "status": "ok",
+    "bytes": 164296,
+    "md5": "0e5a811b70da13381f9f21c1718981e3"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=red+sour+soup+paste+in+vacuum+package+with+tomatoes&image_size=square_hd",
+    "tag": "api:/api/v1/m1/products",
+    "file": "api_1003_red-sour-soup-paste-in-vacuum-package-with_f297110c.jpg",
+    "status": "ok",
+    "bytes": 216309,
+    "md5": "dfb34fffdb736524509424619700ada3"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=rice+wine+in+ceramic+jars+with+red+paper+seal&image_size=square_hd",
+    "tag": "api:/api/v1/m1/products",
+    "file": "api_1004_rice-wine-in-ceramic-jars-with-red-paper-s_dd073e98.jpg",
+    "status": "ok",
+    "bytes": 126464,
+    "md5": "2c3d3afbe90f700dbf02b7b4a9de1bc2"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=smoked+cured+pork+hanging+with+hemp+rope+rustic&image_size=square_hd",
+    "tag": "api:/api/v1/m1/products",
+    "file": "api_1005_smoked-cured-pork-hanging-with-hemp-rope-r_6ccbc0bf.jpg",
+    "status": "ok",
+    "bytes": 134889,
+    "md5": "fff07fc1fae71b7eece2f8b4f9a83dc2"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=green+tea+pearls+in+ceramic+jar+with+tea+cup&image_size=square_hd",
+    "tag": "api:/api/v1/m1/products",
+    "file": "api_1006_green-tea-pearls-in-ceramic-jar-with-tea-c_15722f01.jpg",
+    "status": "ok",
+    "bytes": 119614,
+    "md5": "4f336943b0df470cbd5d6a577c46e4cd"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=green+tea+pearls+in+ceramic+jar+with+tea+cup&image_size=square",
+    "tag": "api:/api/v1/m1/products",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=parent+and+child+making+silver+ring+at+crafting+workshop&image_size=square_hd",
+    "tag": "api:/api/v1/m1/products",
+    "file": "api_1008_parent-and-child-making-silver-ring-at-cra_1ec2dd6e.jpg",
+    "status": "ok",
+    "bytes": 166344,
+    "md5": "6749e8d38fa84f2ed3d7a0c31bb717da"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=set+of+six+geometric+embroidered+coasters+colorful&image_size=square_hd",
+    "tag": "api:/api/v1/m1/products",
+    "file": "api_1009_set-of-six-geometric-embroidered-coasters-_6285db8e.jpg",
+    "status": "ok",
+    "bytes": 286821,
+    "md5": "b203487a804864a60a8d730158f80af6"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=indigo+batik+table+runner+with+bronze+drum+pattern+on+wooden+table&image_size=square_hd",
+    "tag": "api:/api/v1/m1/products",
+    "file": "api_1010_indigo-batik-table-runner-with-bronze-drum_f050e823.jpg",
+    "status": "ok",
+    "bytes": 218666,
+    "md5": "6d6e5064332b3fe1cb189592057ab5b2"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=delicate+silver+butterfly+earrings+on+linen+cloth&image_size=square_hd",
+    "tag": "api:/api/v1/m1/products",
+    "file": "api_1011_delicate-silver-butterfly-earrings-on-line_31cd2908.jpg",
+    "status": "ok",
+    "bytes": 175919,
+    "md5": "1bbbf65c52d9ba6dbf9374f543b8e5bd"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern+fashion+dress+with+Miao+embroidery+elements+on+mannequin&image_size=square_hd",
+    "tag": "api:/api/v1/m1/products",
+    "file": "api_1012_modern-fashion-dress-with-miao-embroidery-_ae5332c5.jpg",
+    "status": "ok",
+    "bytes": 129948,
+    "md5": "05322bfec54993b02313ca869ff659ab"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern+fashion+dress+with+Miao+embroidery+elements+on+mannequin&image_size=square",
+    "tag": "api:/api/v1/m1/products",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=colorful+Miao+embroidery+dragon+wall+hanging+textile+art&image_size=square_hd",
+    "tag": "api:/api/v1/m1/products",
+    "file": "api_1014_colorful-miao-embroidery-dragon-wall-hangi_e69990a0.jpg",
+    "status": "ok",
+    "bytes": 326519,
+    "md5": "920e4bafc4c6585894fae95ec7fe3412"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=colorful+Miao+embroidery+dragon+wall+hanging+textile+art&image_size=square",
+    "tag": "api:/api/v1/m1/products",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=indigo+blue+batik+square+scarf+folded+crackle+texture+pattern&image_size=square_hd",
+    "tag": "api:/api/v1/m1/products",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=indigo+blue+batik+square+scarf+folded+crackle+texture+pattern&image_size=square",
+    "tag": "api:/api/v1/m1/products",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=handcrafted+Miao+silver+filigree+bracelet+on+dark+indigo+linen&image_size=square_hd",
+    "tag": "api:/api/v1/m1/products",
+    "file": "api_1018_handcrafted-miao-silver-filigree-bracelet-_75fded11.jpg",
+    "status": "ok",
+    "bytes": 163499,
+    "md5": "0f0de4fee1240c44477997952c30de50"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=handcrafted+Miao+silver+filigree+bracelet+on+dark+indigo+linen&image_size=square",
+    "tag": "api:/api/v1/m1/products",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=modern+minimalist+wooden+architecture+cantilever+terrace+forest&image_size=landscape_16_9",
+    "tag": "api:/api/app/m3/homestay",
+    "file": "m3-stay4-cover.jpg",
+    "status": "ok"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=panoramic+window+bedroom+forest+view+minimalist&image_size=landscape_4_3",
+    "tag": "api:/api/app/m3/homestay",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=rural+courtyard+homestay+next+to+green+rice+field&image_size=landscape_16_9",
+    "tag": "api:/api/app/m3/homestay",
+    "file": "m3-stay3-cover.jpg",
+    "status": "ok"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=family+suite+bedroom+wooden+cozy&image_size=landscape_4_3",
+    "tag": "api:/api/app/m3/homestay",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=simple+clean+twin+bedroom+bright&image_size=landscape_4_3",
+    "tag": "api:/api/app/m3/homestay",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=traditional+courtyard+inn+with+silver+craft+decorations&image_size=landscape_16_9",
+    "tag": "api:/api/app/m3/homestay",
+    "file": "m3-stay2-cover.jpg",
+    "status": "ok"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=elegant+chinese+style+bedroom+silver+details&image_size=landscape_4_3",
+    "tag": "api:/api/app/m3/homestay",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=twin+bedroom+wooden+interior+valley+view&image_size=landscape_4_3",
+    "tag": "api:/api/app/m3/homestay",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=wooden+stilt+house+guesthouse+on+hillside+with+sea+of+clouds+view&image_size=landscape_16_9",
+    "tag": "api:/api/app/m3/homestay",
+    "file": "m3-stay1-cover.jpg",
+    "status": "ok"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cozy+wooden+bedroom+indigo+fabric+headboard&image_size=landscape_4_3",
+    "tag": "api:/api/app/m3/homestay",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=family+room+wooden+house+two+beds+warm&image_size=landscape_4_3",
+    "tag": "api:/api/app/m3/homestay",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=mountain+forest+park+misty+peaks+boardwalk&image_size=landscape_16_9",
+    "tag": "api:/api/app/m4/scenic/list",
+    "file": "m4-scenic2-cover.jpg",
+    "status": "ok"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Miao+village+panorama+wooden+houses+terraces+valley&image_size=landscape_16_9",
+    "tag": "api:/api/app/m4/scenic/list",
+    "file": "m4-scenic1-cover.jpg",
+    "status": "ok"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=festival+celebration+lusheng+dance+colorful+costumes+night&image_size=landscape_16_9",
+    "tag": "api:/api/app/m4/route/list",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=children+photography+workshop+village+kids+playing&image_size=landscape_16_9",
+    "tag": "api:/api/app/m4/route/list",
+    "file": null,
+    "status": "placeholder"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=two+day+hiking+trail+mountain+village+sunrise&image_size=landscape_16_9",
+    "tag": "api:/api/app/m4/route/list",
+    "file": "m4-route2-cover.jpg",
+    "status": "ok"
+  },
+  {
+    "url": "https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=day+tour+village+walking+path+silversmith+workshop&image_size=landscape_16_9",
+    "tag": "api:/api/app/m4/route/list",
+    "file": "m4-route1-cover.jpg",
+    "status": "ok"
+  }
+]

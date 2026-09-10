@@ -1,5 +1,5 @@
-/**
- * 【m4-ticket 模块】门票（wudong_m4_ticket）
- * controller 层骨架占位：接口与路由
- * TODO: 由模块负责人填充实现
- */
+import { Body, Controller, Del, Get, Inject, Param, Post, Query } from '@midwayjs/core'; import { TicketService } from '../service/ticket_service';
+@Controller('/api/app/m4') export class TicketController { @Inject() service:TicketService; private ok(data:any){return {code:0,message:'ok',data};}
+ @Get('/scenic/list') async scenic(){return this.ok(await this.service.scenicList());} @Get('/ticket/page') async ticketPage(@Query()q:any){return this.ok(await this.service.page(q));} @Get('/ticket/list') async ticketList(@Query()q:any){return this.ok(await this.service.page(q));} @Get('/ticket/info') async ticketInfo(@Query('id')id:string){return this.ok(await this.service.info(id));} @Post('/ticket/add') async ticketAdd(@Body()b:any){return this.ok(await this.service.add(b));} @Post('/ticket/delete') async ticketDel(@Body('id')id:string){return this.ok(await this.service.remove(id));}
+ @Get('/route/page') async routePage(@Query()q:any){return this.ok(await this.service.routePage(q));} @Get('/route/list') async routeList(@Query()q:any){return this.ok(await this.service.routePage(q));} @Get('/route/info') async routeInfo(@Query('id')id:string){return this.ok(await this.service.routeInfo(id));} @Post('/route/add') async routeAdd(@Body()b:any){return this.ok(await this.service.addRoute(b));} @Post('/route/delete') async routeDel(@Body('id')id:string){return this.ok(await this.service.removeRoute(id));}
+}

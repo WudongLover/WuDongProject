@@ -506,12 +506,12 @@ declare namespace Eps {
 		/**
 		 * ID
 		 */
-		id?: number;
+		id?: BigInt;
 
 		/**
 		 * 商家ID
 		 */
-		merchantId?: number;
+		merchantId?: BigInt;
 
 		/**
 		 * 民宿名称
@@ -574,14 +574,133 @@ declare namespace Eps {
 		deletedAt?: Date;
 
 		/**
-		 * 创建时间
+		 * undefined
 		 */
-		createTime?: string;
+		createTime?: Date;
 
 		/**
-		 * 更新时间
+		 * undefined
 		 */
-		updateTime?: string;
+		updateTime?: Date;
+
+		/**
+		 * 任意键值
+		 */
+		[key: string]: any;
+	}
+
+	interface M3RoomCalendarEntity {
+		/**
+		 * ID
+		 */
+		id?: BigInt;
+
+		/**
+		 * 房型ID
+		 */
+		roomTypeId?: BigInt;
+
+		/**
+		 * 日期
+		 */
+		date?: Date;
+
+		/**
+		 * 当日剩余可售间数
+		 */
+		stock?: number;
+
+		/**
+		 * 当日加价（周末节假日）
+		 */
+		priceDelta?: number;
+
+		/**
+		 * 当日是否停售
+		 */
+		closed?: number;
+
+		/**
+		 * undefined
+		 */
+		createTime?: Date;
+
+		/**
+		 * undefined
+		 */
+		updateTime?: Date;
+
+		/**
+		 * 任意键值
+		 */
+		[key: string]: any;
+	}
+
+	interface M3RoomTypeEntity {
+		/**
+		 * ID
+		 */
+		id?: BigInt;
+
+		/**
+		 * 民宿ID
+		 */
+		homestayId?: BigInt;
+
+		/**
+		 * 房型名称
+		 */
+		name?: string;
+
+		/**
+		 * 床型（1.8m大床）
+		 */
+		bed?: string;
+
+		/**
+		 * 面积㎡
+		 */
+		area?: number;
+
+		/**
+		 * 最大入住人数
+		 */
+		maxGuests?: number;
+
+		/**
+		 * 基础价
+		 */
+		price?: number;
+
+		/**
+		 * 总间数
+		 */
+		stock?: number;
+
+		/**
+		 * 封面图
+		 */
+		cover?: string;
+
+		/**
+		 * 设施列表
+		 */
+		facilities?: any;
+
+		/**
+		 * 删除时间
+		 */
+		deletedAt?: Date;
+
+		/**
+		 * undefined
+		 */
+		createTime?: Date;
+
+		/**
+		 * undefined
+		 */
+		updateTime?: Date;
 
 		/**
 		 * 任意键值
@@ -1123,6 +1242,16 @@ declare namespace Eps {
 	interface M3LodgingHomestayPageResponse {
 		pagination: PagePagination;
 		list: M3HomestayEntity[];
+	}
+
+	interface M3LodgingRoomCalendarPageResponse {
+		pagination: PagePagination;
+		list: M3RoomCalendarEntity[];
+	}
+
+	interface M3LodgingRoomTypePageResponse {
+		pagination: PagePagination;
+		list: M3RoomTypeEntity[];
 	}
 
 	interface PluginInfoPageResponse {
@@ -1986,6 +2115,122 @@ declare namespace Eps {
 		request: Request;
 	}
 
+	interface M3LodgingRoomCalendar {
+		/**
+		 * 删除
+		 */
+		delete(data?: any): Promise<any>;
+
+		/**
+		 * 修改
+		 */
+		update(data?: any): Promise<any>;
+
+		/**
+		 * 单个信息
+		 */
+		info(data?: any): Promise<M3RoomCalendarEntity>;
+
+		/**
+		 * 列表查询
+		 */
+		list(data?: any): Promise<M3RoomCalendarEntity[]>;
+
+		/**
+		 * 分页查询
+		 */
+		page(data?: any): Promise<M3LodgingRoomCalendarPageResponse>;
+
+		/**
+		 * 新增
+		 */
+		add(data?: any): Promise<any>;
+
+		/**
+		 * 权限标识
+		 */
+		permission: {
+			delete: string;
+			update: string;
+			info: string;
+			list: string;
+			page: string;
+			add: string;
+		};
+
+		/**
+		 * 权限状态
+		 */
+		_permission: {
+			delete: boolean;
+			update: boolean;
+			info: boolean;
+			list: boolean;
+			page: boolean;
+			add: boolean;
+		};
+
+		request: Request;
+	}
+
+	interface M3LodgingRoomType {
+		/**
+		 * 删除
+		 */
+		delete(data?: any): Promise<any>;
+
+		/**
+		 * 修改
+		 */
+		update(data?: any): Promise<any>;
+
+		/**
+		 * 单个信息
+		 */
+		info(data?: any): Promise<M3RoomTypeEntity>;
+
+		/**
+		 * 列表查询
+		 */
+		list(data?: any): Promise<M3RoomTypeEntity[]>;
+
+		/**
+		 * 分页查询
+		 */
+		page(data?: any): Promise<M3LodgingRoomTypePageResponse>;
+
+		/**
+		 * 新增
+		 */
+		add(data?: any): Promise<any>;
+
+		/**
+		 * 权限标识
+		 */
+		permission: {
+			delete: string;
+			update: string;
+			info: string;
+			list: string;
+			page: string;
+			add: string;
+		};
+
+		/**
+		 * 权限状态
+		 */
+		_permission: {
+			delete: boolean;
+			update: boolean;
+			info: boolean;
+			list: boolean;
+			page: boolean;
+			add: boolean;
+		};
+
+		request: Request;
+	}
+
 	interface PluginInfo {
 		/**
 		 * 安装插件
@@ -2422,7 +2667,11 @@ declare namespace Eps {
 		dashboard: { stats: DashboardStats };
 		demo: { goods: DemoGoods; tenant: DemoTenant };
 		dict: { info: DictInfo; type: DictType };
-		m3Lodging: { homestay: M3LodgingHomestay };
+		m3Lodging: {
+			homestay: M3LodgingHomestay;
+			roomCalendar: M3LodgingRoomCalendar;
+			roomType: M3LodgingRoomType;
+		};
 		plugin: { info: PluginInfo };
 		recycle: { data: RecycleData };
 		space: { info: SpaceInfo; type: SpaceType };
