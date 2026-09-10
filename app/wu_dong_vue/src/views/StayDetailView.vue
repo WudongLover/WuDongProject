@@ -131,8 +131,8 @@ async function bookRoom() {
         <div>
           <h1>{{ stay.name }}</h1>
           <div class="sub-row">
-            <span class="score">★ {{ stay.rating.toFixed(1) }}</span>
-            <span class="score-d">卫生 {{ stay.score.hygiene }} · 位置 {{ stay.score.location }} · 服务 {{ stay.score.service }}</span>
+            <span class="score">★ {{ Number(stay.rating).toFixed(1) }}</span>
+            <span v-if="stay.score" class="score-d">卫生 {{ stay.score.hygiene }} · 位置 {{ stay.score.location }} · 服务 {{ stay.score.service }}</span>
           </div>
         </div>
         <button class="fav" :class="{ on: favorited }" @click="toggleFav">

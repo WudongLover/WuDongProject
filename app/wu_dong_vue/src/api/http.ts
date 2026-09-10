@@ -47,7 +47,7 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
  */
 function getMockUserId(): string {
   try {
-    const u = localStorage.getItem('wudong_user')
+    const u = sessionStorage.getItem('wudong_user')
     if (u) {
       const parsed = JSON.parse(u)
       if (parsed?.id) return String(parsed.id)

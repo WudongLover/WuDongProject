@@ -9,7 +9,7 @@ defineProps<{ item: Homestay }>()
   <router-link :to="`/stay/${item.id}`" class="stay-card">
     <div class="cover">
       <img :src="item.cover" :alt="item.name" loading="lazy" />
-      <span class="score">{{ item.rating.toFixed(1) }}<small>分</small></span>
+      <span class="score">{{ Number(item.rating).toFixed(1) }}<small>分</small></span>
     </div>
     <div class="body">
       <h3>{{ item.name }}</h3>
@@ -19,7 +19,7 @@ defineProps<{ item: Homestay }>()
       <p class="intro">{{ item.intro }}</p>
       <div class="meta">
         <span class="loc"><AppIcon name="location" :size="13" /> {{ item.address }}</span>
-        <span class="pp"><i>¥</i>{{ Math.min(...item.rooms.map((r) => r.price)) }}<em>起</em></span>
+        <span class="pp" v-if="item.rooms.length"><i>¥</i>{{ Math.min(...item.rooms.map((r) => r.price)) }}<em>起</em></span>
       </div>
     </div>
   </router-link>
