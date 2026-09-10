@@ -1,0 +1,2 @@
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+@Entity('wudong_m4_route_day') export class RouteDayEntity { @PrimaryGeneratedColumn({type:'bigint',unsigned:true}) id:string; @Column({name:'route_id',type:'bigint'}) routeId:string; @Column({type:'int'}) day:number; @Column({length:128}) title:string; @Column({type:'text',nullable:true}) description:string|null; @Column({length:128,default:''}) meals:string; @Column({length:128,default:''}) stay:string; }

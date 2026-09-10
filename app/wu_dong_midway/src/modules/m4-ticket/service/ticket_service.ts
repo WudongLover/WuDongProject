@@ -1,5 +1,6 @@
-/**
- * 【m4-ticket 模块】门票（wudong_m4_ticket）
- * service 层骨架占位：业务逻辑（跨模块只经对方 Service）
- * TODO: 由模块负责人填充实现
- */
+import { Inject, Provide } from '@midwayjs/core'; import { TicketMapper } from '../mapper/ticket_mapper';
+@Provide() export class TicketService { @Inject() mapper:TicketMapper;
+  page(q:any){return this.mapper.tickets(q);} info(id:string){return this.mapper.ticket.findOneBy({id});} add(b:any){if(!b?.name||!Number(b.scenicId)||Number(b.price)<0||Number(b.stock??0)<0)throw new Error('门票参数不正确');return this.mapper.ticket.save(this.mapper.ticket.create({...b,scenicId:String(b.scenicId),price:Number(b.price),stock:Number(b.stock??0)}));} async remove(id:string){if(!(await this.info(id)))return false;await this.mapper.ticket.softDelete({id});return true;}
+  routePage(q:any){return this.mapper.routes(q);} async routeInfo(id:string){const r=await this.mapper.route.findOneBy({id});if(!r)return null;const days=await this.mapper.day.find({where:{routeId:id},order:{day:'ASC'}});return {...r,price:Number(r.price),rating:Number(r.rating),includes:r.includes||[],notice:r.notice||[],schedule:days.map(d=>({day:d.day,title:d.title,desc:d.description||'',meals:d.meals,stay:d.stay}))};} addRoute(b:any){if(!b?.title||!b?.cover||Number(b.price)<0)throw new Error('路线参数不正确');return this.mapper.route.save(this.mapper.route.create({...b,price:Number(b.price),days:Number(b.days??1)}));} async removeRoute(id:string){if(!(await this.routeInfo(id)))return false;await this.mapper.route.softDelete({id});return true;}
+  scenicList(){return this.mapper.scenic.find({where:{status:'ENABLED'},order:{id:'DESC'}}).then(async s=>Promise.all(s.map(async x=>({...x,rating:Number(x.rating),tickets:(await this.mapper.ticket.find({where:{scenicId:x.id}})).map(t=>({...t,price:Number(t.price)}))}))));}
+}
