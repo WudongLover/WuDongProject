@@ -45,6 +45,15 @@ export async function getRestaurantDetail(id: string) {
 
 // ==================== 特产 ====================
 
+/** categoryId → 分类名称映射（对齐 wudong_m1_category 表） */
+const CATEGORY_MAP: Record<number, string> = {
+  5: '茶叶',
+  6: '腊肉',
+  7: '米酒',
+  8: '酸食',
+  9: '其他',
+}
+
 /** 后端实体 → 前端 Product 类型 */
 function toProduct(entity: any): Product {
   return {
@@ -52,7 +61,7 @@ function toProduct(entity: any): Product {
     module: 'SPECIALTY',
     title: entity.title || '',
     subtitle: entity.subtitle || '',
-    category: entity.category || '',
+    category: CATEGORY_MAP[entity.categoryId] || '',
     price: Number(entity.price) || 0,
     marketPrice: entity.marketPrice != null ? Number(entity.marketPrice) : undefined,
     sales: Number(entity.sales) || 0,
