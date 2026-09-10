@@ -49,6 +49,11 @@ export function hasAccessToken() {
   return !!accessToken
 }
 
+/** 供通用 http 客户端注入 Authorization 头 */
+export function getAccessToken() {
+  return accessToken
+}
+
 async function request<T>(
   path: string,
   options: HttpOptions = {},

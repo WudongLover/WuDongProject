@@ -1,5 +1,6 @@
 /** 轻量 HTTP 客户端：后端统一信封 { code, message, data }。 */
 import { ApiError } from './contracts'
+import { getAccessToken } from './auth'
 import { localizeImage } from '@/mock/image-map'
 
 const BASE = '/api'
@@ -23,10 +24,12 @@ function localizeDeep(value: unknown): unknown {
  * code !== 0 时抛 ApiError（与前端已有的错误处理兼容）。
  */
 export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
+  const token = getAccessToken()
   const res = await fetch(`${BASE}${path}`, {
     headers: {
       'content-type': 'application/json',
       'x-user-id': getMockUserId(),
+      ...(token ? { authorization: `Bearer ${token}` } : {}),
       ...init?.headers,
     },
     ...init,

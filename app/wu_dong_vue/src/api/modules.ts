@@ -75,9 +75,8 @@ export function getCategories(module?: ProductModule): Promise<Envelope<Category
   return apiFetch<Envelope<Category[]>>(`/v1/m1/categories${module ? `?module=${module}` : ''}`)
 }
 
-/* 食 */
-export const getRestaurants = S.getRestaurants
-export const getRestaurantDetail = S.getRestaurantDetail
+/* 食（真实后端 m2：列表/详情含菜品与时段） */
+export { getRestaurants, getRestaurantDetail } from './food'
 
 /* 住 */
 export async function getHomestays() {
@@ -95,6 +94,8 @@ export async function getRoomCalendar(roomTypeId: string | number) {
 /* 行：门票、景区和路线均使用真实后端接口 */
 export * from './m4'
 export * from './m4-order'
+/* 通用订单 + 餐位/民宿预订（真实后端 order / m2 / m3） */
+export * from './order'
 
 /* 社区（真实后端 http://127.0.0.1:8001，vite 代理 /api） */
 
