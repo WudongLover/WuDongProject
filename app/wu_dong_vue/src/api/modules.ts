@@ -27,6 +27,7 @@ export {
   fetchMe,
   logout,
   updateProfile,
+  setPassword,
   refreshAccess as bootstrap,
 } from './auth'
 export const currentUser = S.currentUser
