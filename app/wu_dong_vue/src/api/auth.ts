@@ -1,11 +1,11 @@
 /**
- * 真实后端认证接口（对接 cool-admin-midway /app/user/auth/*）
+ * 真实后端认证接口（对接 wu_dong_midway C 端服务 /api/user/*，见 vite.config.ts 的 /api 代理）
  * access token 只保存在本模块内存中；refresh token 走 HttpOnly Cookie。
  */
 import type { UserProfile } from '@/types'
 import { ApiError } from '@/mock/server'
 
-const BASE = '/user'
+const BASE = '/api/user'
 
 export interface Envelope<T> {
   code: number
