@@ -54,7 +54,10 @@ async function load() {
     skuId.value = res.data.skus[0]?.id || ''
     qty.value = 1
     curImg.value = 0
-    favorited.value = api.isFavorite(id)
+    if (userStore.isLoggedIn) {
+      const r = await api.checkFavorite(product.value!.module, id)
+      favorited.value = r.data.favorited
+    }
     tab.value = res.data.craft ? 'craft' : 'detail'
   } catch {
     notFound.value = true
@@ -65,7 +68,7 @@ onMounted(load)
 watch(() => route.params.id, load)
 
 async function toggleFav() {
-  favorited.value = await favStore.toggle(product.value!.id)
+  favorited.value = await favStore.toggle(product.value!.module, product.value!.id)
   userStore.toast(favorited.value ? '已加入收藏' : '已取消收藏')
 }
 

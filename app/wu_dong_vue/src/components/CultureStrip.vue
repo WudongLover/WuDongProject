@@ -27,10 +27,15 @@ const more = getCultureSection(props.story.module)?.stories.filter((s) => s.id !
       </div>
     </router-link>
 
-    <!-- 同模块其他段落，各自一张卡 -->
+    <!-- 同模块其他段落，各自一张卡；悬浮时从顶部展开配图 -->
     <ul v-if="more.length" class="cs-list card-grid">
       <li v-for="s in more" :key="s.id">
         <router-link :to="`/culture/${s.id}`" class="cs-item card-hover">
+          <div class="cs-item-cover">
+            <div class="cs-item-cover-inner">
+              <img :src="s.cover" :alt="s.title" loading="lazy" />
+            </div>
+          </div>
           <em class="cs-eyebrow">{{ s.eyebrow }}</em>
           <b>{{ s.title }}</b>
           <span>{{ s.summary }}</span>
@@ -140,6 +145,7 @@ h3 {
 .cs-item {
   position: relative;
   flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -150,6 +156,41 @@ h3 {
   overflow: hidden;
   --card-scale: 1.018;
   --card-lift: -3px;
+}
+
+/* ---------- 悬浮配图：从顶部平滑展开，上图下文 ---------- */
+.cs-item-cover {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.55s var(--ease);
+  /* 突破卡片 padding，让配图贴满顶边与左右 */
+  margin: -16px -40px 12px -20px;
+}
+
+.cs-item-cover-inner {
+  overflow: hidden;
+  min-height: 0;
+  background: var(--indigo-mist);
+}
+
+.cs-item-cover-inner img {
+  width: 100%;
+  aspect-ratio: 16 / 8;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.04);
+  transition:
+    opacity 0.4s var(--ease),
+    transform 0.6s var(--ease);
+}
+
+.cs-item:hover .cs-item-cover {
+  grid-template-rows: 1fr;
+}
+
+.cs-item:hover .cs-item-cover-inner img {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .cs-item b {
@@ -181,6 +222,7 @@ h3 {
   color: var(--text-3);
   opacity: 0;
   transition: opacity 0.25s, transform 0.25s;
+  z-index: 2;
 }
 
 .cs-item:hover b {
@@ -228,6 +270,25 @@ h3 {
 
   .cs-item {
     padding: 14px 36px 14px 16px;
+  }
+
+  .cs-item-cover {
+    margin: -14px -36px 10px -16px;
+  }
+}
+
+/* 触屏没有真正的悬停，禁止配图展开，避免点击后效果粘住 */
+@media (hover: none) {
+  .cs-item-cover {
+    display: none;
+  }
+}
+
+/* 尊重减少动效偏好：展开与图片缩放动画全部关闭 */
+@media (prefers-reduced-motion: reduce) {
+  .cs-item-cover,
+  .cs-item-cover-inner img {
+    transition: none;
   }
 }
 </style>

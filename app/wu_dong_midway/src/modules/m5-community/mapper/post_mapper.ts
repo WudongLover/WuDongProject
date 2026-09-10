@@ -34,6 +34,7 @@ export interface PostRow {
 export interface CommentRow {
   id: number;
   postId: number;
+  userId: number;
   parentId: number | null;
   content: string;
   publishedAt: Date | null;
@@ -128,6 +129,7 @@ export class PostMapper {
       .leftJoin(UserEntity, 'ru', 'ru.id = c.reply_to_user_id')
       .select('c.id', 'id')
       .addSelect('c.post_id', 'postId')
+      .addSelect('c.user_id', 'userId')
       .addSelect('c.parent_id', 'parentId')
       .addSelect('c.content', 'content')
       .addSelect('c.published_at', 'publishedAt')
@@ -188,8 +190,11 @@ export class PostMapper {
       let liked: boolean;
       try {
         if (like) {
-          await em.delete(PostLikeEntity, { postId, userId });
-          await em.query('UPDATE wudong_m5_post SET likes = GREATEST(likes - 1, 0) WHERE id = ?', [postId]);
+          const d = await em.delete(PostLikeEntity, { postId, userId });
+          // 以 affected 为准，避免并发不取消时重复 -1
+          if ((d.affected ?? 0) > 0) {
+            await em.query('UPDATE wudong_m5_post SET likes = GREATEST(likes - 1, 0) WHERE id = ?', [postId]);
+          }
           liked = false;
         } else {
           await em.insert(PostLikeEntity, { postId, userId });
@@ -266,12 +271,30 @@ export class PostMapper {
       .then((r) => (r.affected ?? 0) > 0);
   }
 
-  /** 逻辑删除评论（设置 deleted_at） */
-  softDeleteComment(id: number, postId: number): Promise<boolean> {
-    return this.dataSource
+  /** 逻辑删除单条评论（并删除全部后代，避免孤儿） */
+  async softDeleteComment(id: number, postId: number): Promise<boolean> {
+    const allIds = await this.collectDescendantIds(id);
+    allIds.push(id);
+    const r = await this.dataSource
       .getRepository(CommentEntity)
-      .update({ id, postId, deletedAt: IsNull() }, { deletedAt: new Date() })
-      .then((r) => (r.affected ?? 0) > 0);
+      .update(
+        { id: In(allIds), postId, deletedAt: IsNull() },
+        { deletedAt: new Date() },
+      );
+    return (r.affected ?? 0) > 0;
+  }
+
+  /** 递归采集全部子评论 id（有限深度，评论区最多数十条） */
+  private async collectDescendantIds(parentId: number): Promise<number[]> {
+    const children = await this.dataSource.getRepository(CommentEntity).find({
+      where: { parentId, deletedAt: IsNull() },
+      select: ['id'],
+    });
+    const ids = [...children.map((c) => c.id)];
+    for (const id of ids) {
+      ids.push(...(await this.collectDescendantIds(id)));
+    }
+    return ids;
   }
 
   /** 插入结果主键提取（insertId 可能为 string/number，统一转 Number） */

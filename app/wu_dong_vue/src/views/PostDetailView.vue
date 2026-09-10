@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import * as api from '@/api'
-import type { Post } from '@/types'
+import type { Post, PostComment } from '@/types'
 import { useUserStore } from '@/stores/user'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
 
 const route = useRoute()
+const router = useRouter()
 const userStore = useUserStore()
 
 const post = ref<Post | null>(null)
@@ -15,8 +16,19 @@ const notFound = ref(false)
 const liked = ref(false)
 const likes = ref(0)
 const collected = ref(false)
+const collects = ref(0)
 const commentText = ref('')
 const sending = ref(false)
+
+/** 正在回复某条评论/回复 */
+const replyTo = ref<{ id: string; user: string } | null>(null)
+const replyText = ref('')
+const replying = ref(false)
+
+const currentUserId = computed(() => userStore.user?.id)
+const isPostAuthor = computed(() =>
+  post.value && currentUserId.value && String(post.value.author.id) === currentUserId.value,
+)
 
 onMounted(async () => {
   try {
@@ -24,20 +36,37 @@ onMounted(async () => {
     post.value = res.data
     liked.value = !!res.data.liked
     likes.value = res.data.likes
+    collects.value = res.data.collects
+    if (userStore.isLoggedIn) {
+      const r = await api.checkFavorite('POST', route.params.id as string)
+      collected.value = r.data.favorited
+    }
   } catch {
     notFound.value = true
   }
 })
 
 async function doLike() {
+  if (!userStore.requireLogin()) return
   const res = await api.togglePostLike(post.value!.id)
   liked.value = res.data.liked
   likes.value = res.data.likes
 }
 
-function doCollect() {
-  collected.value = !collected.value
-  userStore.toast(collected.value ? '已收藏游记' : '已取消收藏')
+async function doCollect() {
+  if (!userStore.requireLogin()) return
+  if (!post.value) return
+  try {
+    const res = await api.toggleFavorite('POST', post.value.id)
+    const prev = collected.value
+    collected.value = res.data.favorited
+    if (prev !== collected.value) {
+      collects.value += collected.value ? 1 : -1
+    }
+    userStore.toast(collected.value ? '已收藏游记' : '已取消收藏')
+  } catch (e: any) {
+    userStore.toast(e?.message || '操作失败')
+  }
 }
 
 function share() {
@@ -53,9 +82,68 @@ async function sendComment() {
     post.value!.comments = res.data as typeof post.value.comments
     commentText.value = ''
     userStore.toast('评论成功')
+  } catch (e: any) {
+    userStore.toast(e?.message || '评论发送失败')
   } finally {
     sending.value = false
   }
+}
+
+function setReplyTo(commentOrReply: { id: string; user: string }) {
+  replyTo.value = commentOrReply
+  replyText.value = ''
+}
+
+function cancelReply() {
+  replyTo.value = null
+  replyText.value = ''
+}
+
+async function sendReply() {
+  if (!replyText.value.trim() || !replyTo.value) return
+  if (!userStore.requireLogin()) return
+  replying.value = true
+  try {
+    const res = await api.addComment(post.value!.id, replyText.value, replyTo.value.id)
+    post.value!.comments = res.data as typeof post.value.comments
+    userStore.toast('回复成功')
+    replyTo.value = null
+    replyText.value = ''
+  } catch (e: any) {
+    userStore.toast(e?.message || '回复发送失败')
+  } finally {
+    replying.value = false
+  }
+}
+
+async function removeComment(commentId: string) {
+  if (!confirm('确定删除这条评论？')) return
+  try {
+    await api.deleteComment(post.value!.id, commentId)
+    const res = await api.getPostDetail(route.params.id as string)
+    post.value!.comments = res.data.comments
+    userStore.toast('已删除')
+  } catch {
+    userStore.toast('删除失败')
+  }
+}
+
+async function deletePost() {
+  if (!confirm('确定删除这篇游记？')) return
+  try {
+    await api.deletePost(post.value!.id)
+    userStore.toast('已删除')
+    router.push('/community')
+  } catch {
+    userStore.toast('删除失败')
+  }
+}
+
+/** 回复输入框是否渲染在当前根评论块内 */
+function isReplyingToRoot(c: PostComment): boolean {
+  if (!replyTo.value) return false
+  if (replyTo.value.id === c.id) return true
+  return c.replies?.some((r) => r.id === replyTo.value.id) ?? false
 }
 </script>
 
@@ -81,6 +169,9 @@ async function sendComment() {
             <div>
               <b>{{ post.author.name }}</b>
               <span>{{ post.author.bio }}</span>
+            </div>
+            <div class="head-actions">
+              <button v-if="isPostAuthor" class="btn-del" @click="deletePost">删除帖子</button>
             </div>
             <time>{{ post.date }}</time>
           </div>
@@ -110,7 +201,7 @@ async function sendComment() {
             </button>
             <button :class="{ on: collected }" @click="doCollect">
               <AppIcon name="star" :size="18" />
-              {{ post.collects + (collected ? 1 : 0) }}
+              {{ collects }}
             </button>
             <button @click="share">
               <AppIcon name="arrow" :size="18" />
@@ -140,10 +231,34 @@ async function sendComment() {
                 <div class="c-head">
                   <b>{{ c.user }}</b>
                   <time>{{ c.date }}</time>
+                  <div class="c-actions">
+                    <button v-if="c.userId === currentUserId || isPostAuthor" class="c-del" @click="removeComment(c.id)" title="删除">×</button>
+                    <button v-if="userStore.isLoggedIn" class="c-reply-btn" @click="setReplyTo(c)">回复</button>
+                  </div>
                 </div>
                 <p>{{ c.content }}</p>
-                <div v-for="(r, i) in c.replies" :key="i" class="c-reply">
-                  <b>{{ r.user }}</b>：{{ r.content }}
+                <div v-for="(r, i) in c.replies" :key="r.id || i" class="c-reply">
+                  <div class="c-head">
+                    <b>{{ r.user }}</b>
+                    <span v-if="r.replyToUser" class="reply-at">回复 <b>@{{ r.replyToUser }}</b></span>
+                    <time>{{ r.date }}</time>
+                    <div class="c-actions">
+                      <button v-if="r.userId === currentUserId || isPostAuthor" class="c-del" @click="removeComment(r.id)" title="删除">×</button>
+                      <button v-if="userStore.isLoggedIn" class="c-reply-btn" @click="setReplyTo(r)">回复</button>
+                    </div>
+                  </div>
+                  <span class="reply-body">{{ r.content }}</span>
+                </div>
+                <!-- 回复输入框 -->
+                <div v-if="isReplyingToRoot(c)" class="c-reply-input">
+                  <input
+                    v-model="replyText"
+                    maxlength="500"
+                    :placeholder="'回复 @' + replyTo!.user"
+                    @keyup.enter="sendReply"
+                  />
+                  <button class="btn btn-sm" @click="cancelReply">取消</button>
+                  <button class="btn btn-primary btn-sm" :disabled="replying" @click="sendReply">发送</button>
                 </div>
               </div>
             </div>
@@ -223,6 +338,24 @@ async function sendComment() {
   margin-left: auto;
   font-size: 12.5px;
   color: var(--text-3);
+}
+
+.head-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+}
+
+.btn-del {
+  font-size: 12px;
+  color: var(--accent);
+  padding: 4px 10px;
+  border: 1px solid rgba(181, 68, 46, 0.3);
+  border-radius: var(--radius);
+}
+
+.btn-del:hover {
+  background: rgba(181, 68, 46, 0.08);
 }
 
 .imgs {
@@ -365,6 +498,7 @@ async function sendComment() {
   display: flex;
   align-items: baseline;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .c-head b {
@@ -374,6 +508,41 @@ async function sendComment() {
 .c-head time {
   font-size: 11.5px;
   color: var(--text-3);
+}
+
+.c-actions {
+  display: inline-flex;
+  gap: 6px;
+}
+
+.c-del {
+  font-size: 14px;
+  color: var(--text-3);
+  line-height: 1;
+}
+
+.c-del:hover {
+  color: var(--accent);
+}
+
+.c-reply-btn {
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+
+.c-reply-btn:hover {
+  color: var(--primary);
+}
+
+.reply-at {
+  font-size: 11.5px;
+  color: var(--text-3);
+}
+
+.reply-at b {
+  font-size: inherit;
+  color: var(--primary);
+  font-weight: 600;
 }
 
 .c-body p {
@@ -391,8 +560,39 @@ async function sendComment() {
   color: var(--text-2);
 }
 
-.c-reply b {
+.c-reply .c-head {
+  margin-bottom: 3px;
+}
+
+.c-reply .c-head b {
+  font-size: 12px;
   color: var(--primary);
+}
+
+.reply-body {
+  font-size: 12.5px;
+}
+
+.c-reply-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.c-reply-input input {
+  flex: 1;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12.5px;
+  background: #fff;
+  transition: all 0.2s;
+}
+
+.c-reply-input input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(35, 69, 107, 0.12);
 }
 
 .side {
