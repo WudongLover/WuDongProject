@@ -157,3 +157,11 @@ export async function updateProfile(patch: Partial<Pick<UserProfile, 'name' | 'b
   const res = await request<UserProfile>('/profile', { method: 'POST', body: patch }, true)
   return res
 }
+
+/**
+ * 设置/修改登录密码（需登录）
+ * 未设置过密码时只传 newPassword；已设置密码时必须带 oldPassword。
+ */
+export async function setPassword(payload: { newPassword: string; oldPassword?: string }) {
+  return request<UserProfile>('/password', { method: 'POST', body: payload }, true)
+}

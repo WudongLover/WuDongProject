@@ -143,7 +143,7 @@ const submitText = computed(() =>
 
         <button class="btn btn-primary btn-lg submit" :disabled="loading" @click="submit">{{ submitText }}</button>
 
-        <p class="hint">演示环境：验证码发送至后端控制台，任意手机号均可登录</p>
+        <p class="hint">演示环境：验证码随机生成并打印在后端控制台（app/wu_dong_midway 终端），5 分钟内有效</p>
       </div>
     </div>
   </div>
