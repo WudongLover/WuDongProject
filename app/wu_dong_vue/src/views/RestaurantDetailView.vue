@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import * as api from '@/api'
 import { unwrapError } from '@/api'
+import { getRestaurantDetail } from '@/api/food'
 import type { Restaurant } from '@/types'
 import { useUserStore } from '@/stores/user'
 import QtyStepper from '@/components/QtyStepper.vue'
@@ -39,7 +40,7 @@ function todayStr(offset = 0) {
 onMounted(async () => {
   bookDate.value = todayStr(1)
   try {
-    const res = await api.getRestaurantDetail(route.params.id as string)
+    const res = await getRestaurantDetail(route.params.id as string)
     rest.value = res.data
     slotId.value = res.data.slots[0]?.id || ''
   } catch {
