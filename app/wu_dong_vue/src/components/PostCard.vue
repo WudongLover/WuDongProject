@@ -19,7 +19,7 @@ defineProps<{ item: Post }>()
           <img :src="item.author.avatar" :alt="item.author.name" />
           {{ item.author.name }}
         </span>
-        <span class="likes"><AppIcon name="heart" :size="13" /> {{ item.likes }}</span>
+        <span class="likes" :class="{ on: item.liked }"><AppIcon name="heart" :size="13" /> {{ item.likes }}</span>
       </div>
     </div>
   </router-link>
@@ -140,5 +140,15 @@ h3 {
 
 .likes :deep(svg) {
   color: rgba(181, 68, 46, 0.7);
+}
+
+.likes.on {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.likes.on :deep(svg) {
+  color: var(--accent);
+  fill: var(--accent);
 }
 </style>

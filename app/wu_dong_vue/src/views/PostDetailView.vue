@@ -30,6 +30,7 @@ onMounted(async () => {
 })
 
 async function doLike() {
+  if (!userStore.requireLogin()) return
   const res = await api.togglePostLike(post.value!.id)
   liked.value = res.data.liked
   likes.value = res.data.likes
