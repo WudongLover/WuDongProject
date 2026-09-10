@@ -94,8 +94,8 @@ async function readOne(m: Message) {
   await loadMessages()
 }
 
-async function unfav(id: string) {
-  await api.toggleFavorite(id)
+async function unfav(f: { targetType: string; targetId: string; id: string }) {
+  await api.toggleFavorite(f.targetType, f.targetId || f.id)
   userStore.toast('已取消收藏')
   await loadFavorites()
 }
@@ -234,7 +234,7 @@ async function unfav(id: string) {
                   <span class="ft">{{ f.type }}</span>
                   <span v-if="f.price" class="price">{{ f.price }}</span>
                 </router-link>
-                <button class="unfav" aria-label="取消收藏" @click="unfav(f.id)">
+                <button class="unfav" aria-label="取消收藏" @click="unfav(f)">
                   <AppIcon name="heart" :size="14" />
                 </button>
               </div>
