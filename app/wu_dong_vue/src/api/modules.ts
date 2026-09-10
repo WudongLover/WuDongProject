@@ -140,9 +140,20 @@ export function deleteComment(postId: string, commentId: string): Promise<Envelo
 }
 
 /* 收藏 */
-export const getFavorites = S.getFavorites
-export const toggleFavorite = S.toggleFavorite
-export const isFavorite = S.isFavorite
+export function toggleFavorite(targetType: string, targetId: string | number): Promise<Envelope<{ favorited: boolean }>> {
+  return apiFetch<Envelope<{ favorited: boolean }>>('/favorites', {
+    method: 'PUT',
+    body: JSON.stringify({ targetType, targetId: Number(targetId) }),
+  })
+}
+
+export function getFavorites(): Promise<Envelope<{ id: string; targetType: string; name: string; cover: string; type: string; price?: number; targetId: string }[]>> {
+  return apiFetch('/favorites')
+}
+
+export function checkFavorite(targetType: string, targetId: string | number): Promise<Envelope<{ favorited: boolean }>> {
+  return apiFetch<Envelope<{ favorited: boolean }>>(`/favorites/${targetType}/${targetId}`)
+}
 
 /* 购物车 */
 export const getCart = S.getCart
