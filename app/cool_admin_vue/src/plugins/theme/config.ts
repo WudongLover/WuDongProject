@@ -1,4 +1,4 @@
-import { type ModuleConfig } from '/@/cool';
+﻿import { type ModuleConfig } from '/@/cool';
 import 'element-plus/theme-chalk/dark/css-vars.css';
 import './static/css/index.scss';
 import { t } from '/#/i18n';
@@ -16,14 +16,14 @@ export default (): ModuleConfig => {
 			name: 'default',
 
 			// 自定义主题色
-			// color: "#4165d7",
+			// color: "#23456b",
 
 			// 主题列表
 			list: [
 				{
 					label: t('默认'),
 					name: 'default',
-					color: '#4165d7'
+					color: '#23456b'
 				},
 				{
 					label: t('翠绿'),

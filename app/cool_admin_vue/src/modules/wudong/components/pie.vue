@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<div class="wd-pie" :style="{ height }">
 		<v-chart :option="option" autoresize />
 	</div>
@@ -31,7 +31,7 @@ const props = withDefaults(
 
 const isDark = useDark();
 const textColor = computed(() => (isDark.value ? '#d8dce5' : '#667085'));
-const palette = ['#4165d7', '#e6a23c', '#67c23a', '#f56c6c', '#9b59b6', '#2fb8ac', '#8e7cc3'];
+const palette = ['#23456b', '#c08a2d', '#67c23a', '#b5442e', '#7a8b99', '#2fb8ac', '#9fb0bd'];
 
 const option = computed(() => ({
 	color: palette,

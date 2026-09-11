@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<div class="wd-stat">
 		<div class="wd-stat__head">
 			<span class="label">{{ label }}</span>
@@ -50,7 +50,7 @@ const props = withDefaults(
 	{
 		unit: '',
 		icon: '',
-		color: '#4165d7',
+		color: '#23456b',
 		trend: '',
 		trendType: 'up',
 		desc: '',

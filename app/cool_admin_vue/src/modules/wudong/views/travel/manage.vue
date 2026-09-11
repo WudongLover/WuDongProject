@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<cl-crud ref="Crud">
 		<cl-row>
 			<cl-refresh-btn />
@@ -46,21 +46,21 @@
 				<!-- 数据概览 -->
 				<div class="detail-stats">
 					<div class="detail-stats__item">
-						<div class="detail-stats__icon detail-stats__icon--yellow">⭐</div>
+						<div class="detail-stats__icon detail-stats__icon--yellow"><el-icon><Star /></el-icon></div>
 						<div class="detail-stats__info">
 							<span class="detail-stats__value">{{ detailItem.rating }}</span>
 							<span class="detail-stats__label">用户评分</span>
 						</div>
 					</div>
 					<div class="detail-stats__item">
-						<div class="detail-stats__icon detail-stats__icon--green">🕐</div>
+						<div class="detail-stats__icon detail-stats__icon--green"><el-icon><Clock /></el-icon></div>
 						<div class="detail-stats__info">
 							<span class="detail-stats__value detail-stats__value--sm">{{ detailItem.openTime || '全天开放' }}</span>
 							<span class="detail-stats__label">开放时间</span>
 						</div>
 					</div>
 					<div class="detail-stats__item">
-						<div class="detail-stats__icon detail-stats__icon--blue">📍</div>
+						<div class="detail-stats__icon detail-stats__icon--blue"><el-icon><Location /></el-icon></div>
 						<div class="detail-stats__info">
 							<span class="detail-stats__value detail-stats__value--sm">{{ detailItem.address }}</span>
 							<span class="detail-stats__label">详细地址</span>
@@ -79,7 +79,7 @@
 				<div class="detail-content">
 					<div v-if="detailItem.intro" class="detail-card">
 						<div class="detail-card__header">
-							<span class="detail-card__icon">🏞️</span>
+							<span class="detail-card__icon"><el-icon><Picture /></el-icon></span>
 							<span class="detail-card__title">景点介绍</span>
 						</div>
 						<div class="detail-card__body">
@@ -108,7 +108,7 @@ defineOptions({
 
 import { reactive, ref } from 'vue';
 import { ElMessage } from 'element-plus';
-import { Location, Edit } from '@element-plus/icons-vue';
+import { Location, Edit, Star, Clock, Picture, View, Delete } from '@element-plus/icons-vue';
 import { useCrud, useSearch, useTable, useUpsert } from '@cool-vue/crud';
 
 // ==================== 类型定义 ====================
@@ -255,25 +255,25 @@ const Table = useTable({
 		{
 			label: '操作',
 			type: 'op',
-			width: 180,
+			width: 148,
 			buttons: [
 				{
-					label: '详情',
+					label: '',
 					type: 'primary',
-					text: true,
+					props: { icon: View, size: 'small', title: '查看详情', 'aria-label': '查看详情' },
 					onClick: ({ scope }: { scope: { row: ScenicItem } }) => viewDetail(scope.row.id)
 				},
 				{
-					label: '编辑',
+					label: '',
 					type: 'primary',
-					text: true,
+					props: { icon: Edit, size: 'small', title: '编辑景点', 'aria-label': '编辑景点' },
 					onClick: ({ scope }: { scope: { row: ScenicItem } }) =>
 						Crud.value?.rowEdit(scope.row)
 				},
 				{
-					label: '删除',
+					label: '',
 					type: 'danger',
-					text: true,
+					props: { icon: Delete, size: 'small', title: '删除景点', 'aria-label': '删除景点' },
 					confirm: '确认删除该景点？删除后不可恢复。'
 				}
 			]
@@ -399,10 +399,10 @@ const Crud = useCrud({ service: mockService }, app => {
 		align-items: center;
 		justify-content: center;
 		font-size: 20px;
-		&--orange { background: #fff3e0; }
-		&--yellow { background: #fffde7; }
-		&--blue { background: #e3f2fd; }
-		&--green { background: #e8f5e9; }
+		&--orange { background: #fff3e0; color: #e65100; }
+		&--yellow { background: #fffde7; color: #f9a825; }
+		&--blue { background: #e3f2fd; color: #23456b; }
+		&--green { background: #e8f5e9; color: #2e7d32; }
 	}
 
 	&__info { display: flex; flex-direction: column; }
@@ -448,4 +448,8 @@ const Crud = useCrud({ service: mockService }, app => {
 	gap: 12px;
 	padding: 16px 32px;
 }
+
+:deep(.cl-table .cl-table__op) { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; margin-bottom: 0; }
+:deep(.cl-table .cl-table__op .el-button) { margin-bottom: 0; }
+:deep(.cl-table .cl-table__op .el-button + .el-button) { margin-left: 0; }
 </style>

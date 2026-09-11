@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<el-scrollbar>
 		<div class="wd-dashboard">
 			<wd-page-head
@@ -26,7 +26,7 @@
 						:value="46"
 						unit="桌"
 						icon="icon-tag"
-						color="#4165d7"
+						color="#23456b"
 						trend="+9.5%"
 						desc="全天可订 120 桌"
 					/>

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<div class="wd-trend" :style="{ height }">
 		<v-chart :option="option" autoresize />
 	</div>
@@ -28,7 +28,7 @@ const props = withDefaults(
 
 const isDark = useDark();
 
-const palette = ['#4165d7', '#e6a23c', '#67c23a', '#f56c6c', '#9b59b6', '#2fb8ac'];
+const palette = ['#23456b', '#c08a2d', '#67c23a', '#b5442e', '#7a8b99', '#2fb8ac'];
 
 const colors = computed(() => {
 	const hex = getComputedStyle(document.documentElement)

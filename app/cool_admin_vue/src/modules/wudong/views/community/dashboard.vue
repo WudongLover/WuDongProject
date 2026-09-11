@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<el-scrollbar>
 		<div class="wd-dashboard">
 			<wd-page-head title="社区数据看板" desc="乌东游客游记、照片、短视频内容社区运营监控">
@@ -12,7 +12,7 @@
 						:value="2486"
 						unit="篇"
 						icon="icon-pic"
-						color="#4165d7"
+						color="#23456b"
 						trend="+18.2%"
 						desc="本月新增 412 篇"
 					/>

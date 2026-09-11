@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<el-scrollbar>
 		<div class="wd-dashboard">
 			<wd-page-head title="行·山水数据看板" desc="景区门票、苗寨游路线套餐与电子票核销监控">
@@ -12,7 +12,7 @@
 						:value="4"
 						unit="个"
 						icon="icon-map"
-						color="#4165d7"
+						color="#23456b"
 						trend="+1"
 						desc="乌东 / 雷公山等"
 					/>

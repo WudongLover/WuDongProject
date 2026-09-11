@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<el-scrollbar>
 		<div class="wd-dashboard">
 			<wd-page-head
@@ -15,7 +15,7 @@
 						:value="86"
 						unit="款"
 						icon="icon-goods"
-						color="#4165d7"
+						color="#23456b"
 						trend="+6"
 						desc="本月新上架 4 款"
 					/>
