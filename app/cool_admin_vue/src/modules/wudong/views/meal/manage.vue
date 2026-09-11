@@ -124,9 +124,10 @@ defineOptions({
 });
 
 import { reactive, ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import { Location, Edit, Star, User, Clock, PriceTag, Food, View, Delete } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { Location, Edit, Star, User, Clock, PriceTag, Food, View, Delete, Top, Bottom } from '@element-plus/icons-vue';
 import { useCrud, useSearch, useTable, useUpsert } from '@cool-vue/crud';
+import { ossImage } from '../../utils/oss-image';
 
 // ==================== 类型定义 ====================
 type RestaurantStatus = 'ENABLED' | 'DISABLED';
@@ -157,16 +158,23 @@ function generateMockRestaurants(): RestaurantItem[] {
 	const hoursList = ['10:00 - 22:00', '11:00 - 21:30', '08:00 - 20:00', '11:30 - 22:30', '09:00 - 21:00'];
 	const tagsPool = [['酸汤鱼', '苗家菜', '长桌宴'], ['农家菜', '土鸡', '山野菜'], ['米粉', '小吃', '早餐'], ['烧烤', '米酒', '夜宵'], ['私房菜', '观景位', '预约制']];
 	const statuses: RestaurantStatus[] = ['ENABLED', 'ENABLED', 'ENABLED', 'ENABLED', 'DISABLED'];
+	const imageFiles = [
+		'003_miao-long-table-banquet-with-many-dishes-w_4be11336.jpg',
+		'038_farmhouse-restaurant-terrace-overlooking-r_01afd89a.jpg',
+		'043_cozy-indoor-fire-pit-dining-room-rustic-wo_dc72ca13.jpg',
+		'115_spicy-red-fish-hotpot-bowl_9e423264.jpg'
+	];
 
 	const list: RestaurantItem[] = [];
 	for (let i = 1; i <= 24; i++) {
 		const d = new Date(Date.now() - i * 3600 * 1000 * 18);
+		const cover = ossImage(imageFiles[i % imageFiles.length]);
 		list.push({
 			id: 3000 + i,
 			merchantId: 0,
 			name: names[i % names.length] + `（${String(i).padStart(2, '0')}号店）`,
-			cover: '',
-			images: [],
+			cover,
+			images: [cover],
 			rating: Math.round((4.0 + Math.random()) * 10) / 10,
 			pricePerCapita: Math.floor(Math.random() * 150) + 30,
 			address: addresses[i % addresses.length],
@@ -236,6 +244,7 @@ const statusOptions = [
 	{ label: '营业中', value: 'ENABLED', type: 'success' },
 	{ label: '已停业', value: 'DISABLED', type: 'info' }
 ];
+const statusFilterOptions = [{ label: '全部状态', value: '' }, ...statusOptions];
 
 // ==================== 详情弹窗 ====================
 const detailVisible = ref(false);
@@ -257,6 +266,16 @@ function editItem() {
 		detailVisible.value = false;
 		Crud.value?.rowEdit(detailItem.value);
 	}
+}
+
+async function toggleRestaurantStatus(id: number, status: RestaurantStatus) {
+	const action = status === 'ENABLED' ? '恢复营业' : '设为停业';
+	try {
+		await ElMessageBox.confirm(`确认将该餐厅${action}？`, '状态确认', { type: 'warning' });
+		await mockService.update({ id, status });
+		ElMessage.success(`餐厅已${action}`);
+		Crud.value?.refresh();
+	} catch { /* cancel */ }
 }
 
 // ==================== cl-table ====================
@@ -305,7 +324,7 @@ const Table = useTable({
 			label: '操作',
 			type: 'op',
 			width: 148,
-			buttons: [
+			buttons: ({ scope }: { scope: { row: RestaurantItem } }) => [
 				{
 					label: '',
 					type: 'primary',
@@ -329,6 +348,15 @@ const Table = useTable({
 					onClick: ({ scope }: { scope: { row: RestaurantItem } }) =>
 						Crud.value?.rowEdit(scope.row)
 				},
+				scope.row.status === 'ENABLED'
+					? {
+						label: '', type: 'warning', props: { icon: Bottom, size: 'small', title: '设为停业', 'aria-label': '设为停业' },
+						onClick: ({ scope }: { scope: { row: RestaurantItem } }) => toggleRestaurantStatus(scope.row.id, 'DISABLED')
+					}
+					: {
+						label: '', type: 'success', props: { icon: Top, size: 'small', title: '恢复营业', 'aria-label': '恢复营业' },
+						onClick: ({ scope }: { scope: { row: RestaurantItem } }) => toggleRestaurantStatus(scope.row.id, 'ENABLED')
+					},
 				{
 					label: '',
 					type: 'danger',
@@ -347,22 +375,27 @@ const Table = useTable({
 
 // ==================== cl-upsert ====================
 const Upsert = useUpsert({
+	dialog: { width: '780px', height: '74vh', class: 'wudong-upsert-dialog' },
+	props: { labelPosition: 'top' },
+	op: { saveButtonText: '保存餐厅', closeButtonText: '取消' },
 	items: [
-		{ prop: 'name', label: '餐厅名称', component: { name: 'el-input' }, required: true },
-		{ prop: 'cover', label: '封面图', component: { name: 'cl-upload' } },
-		{ prop: 'pricePerCapita', label: '人均消费(元)', value: 0, component: { name: 'el-input-number', props: { min: 0, precision: 2 } } },
-		{ prop: 'rating', label: '评分', value: 5.0, component: { name: 'el-input-number', props: { min: 0, max: 5, precision: 1 } } },
-		{ prop: 'address', label: '地址', component: { name: 'el-input' }, required: true },
-		{ prop: 'hours', label: '营业时间', component: { name: 'el-input', props: { placeholder: '如 10:00 - 22:00' } } },
-		{ prop: 'capacity', label: '容纳人数', value: 0, component: { name: 'el-input-number', props: { min: 0 } } },
-		{ prop: 'tags', label: '标签', component: { name: 'el-input', props: { placeholder: '多个标签用逗号分隔' } } },
+		{ prop: 'name', label: '餐厅名称', span: 24, component: { name: 'el-input', props: { placeholder: '输入餐厅名称' } }, required: true },
+		{ prop: 'cover', label: '封面图', span: 24, component: { name: 'cl-upload' } },
+		{ prop: 'images', label: '餐厅图集', span: 24, component: { name: 'cl-upload', props: { multiple: true, limit: 6, draggable: true } } },
+		{ prop: 'pricePerCapita', label: '人均消费（元）', span: 12, value: 0, component: { name: 'el-input-number', props: { min: 0, precision: 2 } } },
+		{ prop: 'rating', label: '用户评分', span: 12, value: 5.0, component: { name: 'el-input-number', props: { min: 0, max: 5, precision: 1 } } },
+		{ prop: 'address', label: '详细地址', span: 24, component: { name: 'el-input', props: { placeholder: '输入餐厅地址' } }, required: true },
+		{ prop: 'hours', label: '营业时间', span: 12, component: { name: 'el-input', props: { placeholder: '如 10:00 - 22:00' } } },
+		{ prop: 'capacity', label: '容纳人数', span: 12, value: 0, component: { name: 'el-input-number', props: { min: 0 } } },
+		{ prop: 'tags', label: '特色标签', span: 24, component: { name: 'el-input', props: { placeholder: '多个标签用逗号分隔' } } },
 		{
 			prop: 'status',
 			label: '状态',
+			span: 24,
 			value: 'ENABLED',
 			component: { name: 'el-radio-group', options: statusOptions }
 		},
-		{ prop: 'intro', label: '餐厅介绍', component: { name: 'el-input', props: { type: 'textarea', rows: 4 } } }
+		{ prop: 'intro', label: '餐厅介绍', span: 24, component: { name: 'el-input', props: { type: 'textarea', rows: 5, maxlength: 600, showWordLimit: true, placeholder: '介绍餐厅特色、菜品与服务' } } }
 	]
 });
 
@@ -377,7 +410,7 @@ const Search = useSearch({
 		{
 			prop: 'status',
 			label: '状态',
-			component: { name: 'el-select', options: statusOptions, props: { clearable: true, placeholder: '全部状态' } }
+			component: { name: 'el-select', options: statusFilterOptions, props: { clearable: true, placeholder: '全部状态' } }
 		}
 	]
 });
@@ -393,6 +426,17 @@ const Crud = useCrud({ service: mockService }, app => {
 	.el-dialog { overflow: hidden; border-radius: 10px; }
 	.el-dialog__body { padding: 0; background: #f8f8f4; }
 	.el-dialog__footer { padding: 0; border-top: 1px solid #e2e5dc; background: #fff; }
+}
+
+:deep(.wudong-upsert-dialog) {
+	.el-dialog { overflow: hidden; border-radius: 10px; }
+	.el-dialog__header { padding: 20px 26px; margin-right: 0; border-bottom: 1px solid #e1e6df; background: #f8faf7; }
+	.el-dialog__title { color: #25473b; font-size: 18px; font-weight: 700; }
+	.el-dialog__body { padding: 24px 26px 6px; }
+	.el-dialog__footer { padding: 14px 26px; border-top: 1px solid #e1e6df; }
+	.el-form-item__label { color: #506158; font-weight: 650; }
+	.el-input__wrapper, .el-textarea__inner { box-shadow: 0 0 0 1px #dce4da inset; }
+	.el-input__wrapper.is-focus, .el-textarea__inner:focus { box-shadow: 0 0 0 1px #287a5a inset; }
 }
 
 .detail-banner {
