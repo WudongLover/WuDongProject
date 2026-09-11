@@ -16,7 +16,7 @@ export class SessionService {
   messageMapper: ChatMessageMapper;
 
   /** 创建新会话 */
-  async createSession(userId: number | null, deviceId: string, firstMessage: string): Promise<number> {
+  async createSession(userId: string | null, deviceId: string, firstMessage: string): Promise<number> {
     const title = firstMessage.slice(0, 30) || '新对话';
     const session = await this.sessionMapper.create({ userId, deviceId, title });
     return session.id;
@@ -45,17 +45,17 @@ export class SessionService {
     return messages.map((m) => ({ role: m.role, content: m.content }));
   }
 
-  /** 验证会话是否属于当前用户/设备 */
-  async verifyOwnership(sessionId: number, userId: number | null, deviceId: string): Promise<boolean> {
+  /** 验证会话是否属于当前用户/设备（BIGINT 列取回是 string，统一按字符串比） */
+  async verifyOwnership(sessionId: number, userId: string | null, deviceId: string): Promise<boolean> {
     const session = await this.sessionMapper.findById(sessionId);
     if (!session) return false;
-    if (userId && session.userId === userId) return true;
-    if (!userId && session.deviceId === deviceId) return true;
+    if (userId && session.userId !== null) return String(session.userId) === String(userId);
+    if (!userId) return session.deviceId === deviceId;
     return false;
   }
 
   /** 获取用户/设备的会话列表 */
-  async listSessions(userId: number | null, deviceId: string) {
+  async listSessions(userId: string | null, deviceId: string) {
     return this.sessionMapper.listByUser(userId, deviceId);
   }
 }

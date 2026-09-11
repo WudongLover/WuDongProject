@@ -14,7 +14,7 @@ import {
 } from '@langchain/core/messages';
 import { RagService } from './rag_service';
 import { SessionService } from './session_service';
-import { WeatherService } from './weather_service';
+import { AgentToolService, ToolContext } from './agent_tool_service';
 import { SYSTEM_PROMPT } from '../prompts/system';
 
 /** 对话结果 */
@@ -24,30 +24,11 @@ export interface ChatResult {
   sources: string[];
 }
 
-/** 单次对话内最多的工具调用轮数，避免模型反复调用 */
-const MAX_TOOL_ROUNDS = 3;
-
-/** 暴露给 LLM 的工具定义（OpenAI function calling 格式） */
-const AGENT_TOOLS = [
-  {
-    type: 'function' as const,
-    function: {
-      name: 'get_wudong_weather',
-      description:
-        '查询乌东村（贵州省雷山县丹江镇）的当前天气和未来几天预报。当用户问到天气、气温、下雨、穿衣、出行天气等问题时调用。',
-      parameters: {
-        type: 'object',
-        properties: {
-          days: {
-            type: 'integer',
-            description: '需要预报的天数，1-7，默认 3。只问当前天气或今天天气时传 1。',
-          },
-        },
-        required: [],
-      },
-    },
-  },
-];
+/**
+ * 单次对话内最多的工具调用轮数，避免模型反复调用。
+ * 留一轮余量：模型连搜几次后仍需要一轮来产出文字答复（轮数用尽会走强制答复兜底）。
+ */
+const MAX_TOOL_ROUNDS = 4;
 
 @Provide()
 export class AgentService {
@@ -58,7 +39,7 @@ export class AgentService {
   sessionService: SessionService;
 
   @Inject()
-  weatherService: WeatherService;
+  agentToolService: AgentToolService;
 
   @Logger()
   logger: ILogger;
@@ -74,7 +55,7 @@ export class AgentService {
   private async prepare(
     content: string,
     sessionId: number | null,
-    userId: number | null,
+    userId: string | null,
     deviceId: string
   ): Promise<{ sid: number; sources: string[]; messages: (SystemMessage | HumanMessage | AIMessage)[] }> {
     // 1. 创建或验证会话
@@ -108,9 +89,13 @@ export class AgentService {
     // 5. 获取历史消息
     const history = await this.sessionService.getHistory(sid, 10);
 
-    // 6. 构建 LLM 消息列表
+    // 6. 构建 LLM 消息列表（把当天日期告诉模型，避免它凭训练数据猜"今年"，影响联网搜索的年份）
     const messages: (SystemMessage | HumanMessage | AIMessage)[] = [
-      new SystemMessage(SYSTEM_PROMPT + (contextParts.length > 0 ? '\n\n' + contextParts.join('\n') : '')),
+      new SystemMessage(
+        SYSTEM_PROMPT +
+          `\n\n（今天是 ${this.today()}，判断"今年""最近""现在"等相对时间时以此为准）` +
+          (contextParts.length > 0 ? '\n\n' + contextParts.join('\n') : '')
+      ),
     ];
 
     // 加入历史（排除刚保存的当前用户消息，因为会在下面重新加入）
@@ -156,14 +141,28 @@ export class AgentService {
     );
   }
 
+  /** 当天日期（北京时间，形如 2026-09-12 星期六） */
+  private today(): string {
+    const parts = new Intl.DateTimeFormat('zh-CN', {
+      timeZone: 'Asia/Shanghai',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      weekday: 'long',
+    }).formatToParts(new Date());
+    const pick = (type: string) => parts.find((p) => p.type === type)?.value ?? '';
+    return `${pick('year')}-${pick('month')}-${pick('day')} ${pick('weekday')}`;
+  }
+
   /**
    * 带工具调用的生成循环：逐段产出回复文本。
    * 模型要求调用工具时，先执行工具并把结果回灌，再继续生成。
    */
   private async *streamReply(
-    messages: (SystemMessage | HumanMessage | AIMessage)[]
+    messages: (SystemMessage | HumanMessage | AIMessage)[],
+    toolCtx: ToolContext
   ): AsyncGenerator<string> {
-    const llm = this.buildLLM().bindTools(AGENT_TOOLS);
+    const llm = this.buildLLM().bindTools(this.agentToolService.definitions);
     const conversation: (SystemMessage | HumanMessage | AIMessage | ToolMessage)[] = [...messages];
 
     for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
@@ -183,41 +182,33 @@ export class AgentService {
       conversation.push(new AIMessage({ content: acc?.content ?? '', tool_calls: toolCalls }));
       for (const call of toolCalls) {
         this.logger.info('[m6-agent] tool call: %s(%j)', call.name, call.args);
-        const result = await this.runTool(call);
+        const result = await this.agentToolService.run(call.name, call.args, toolCtx);
         conversation.push(
           new ToolMessage({ content: result, tool_call_id: call.id ?? '', name: call.name })
         );
       }
     }
 
-    this.logger.warn('[m6-agent] 达到工具调用轮数上限 %d，停止继续调用', MAX_TOOL_ROUNDS);
-  }
-
-  /** 执行单个工具调用；工具异常时把错误信息交回模型，不中断对话 */
-  private async runTool(call: { name: string; args: Record<string, any> }): Promise<string> {
-    if (call.name === 'get_wudong_weather') {
-      const days = Number(call.args?.days) || 3;
-      try {
-        return await this.weatherService.getWudongWeather(days);
-      } catch (err: any) {
-        this.logger.error('[m6-agent] get_wudong_weather failed: %s', err?.message || err);
-        return `天气查询失败：${err?.message || err}`;
-      }
+    // 轮数用尽时模型还在调工具，直接结束会导致空回复，这里强制再生成一次纯文字答复
+    this.logger.warn('[m6-agent] 达到工具调用轮数上限 %d，改为强制输出答复', MAX_TOOL_ROUNDS);
+    const finalStream = await this.buildLLM().stream(conversation);
+    for await (const chunk of finalStream) {
+      const text = typeof chunk.content === 'string' ? chunk.content : '';
+      if (text) yield text;
     }
-    return `未知工具：${call.name}`;
   }
 
   /**
    * 发送消息并获取回复（非流式：内部同样走工具调用循环，攒齐后一次返回）
    * @param content 用户输入
    * @param sessionId 会话 id（不传则新建）
-   * @param userId 登录用户 id
+   * @param userId 登录用户 id（BIGINT 以 string 传递），未登录为 null
    * @param deviceId 设备 id
    */
   async chat(
     content: string,
     sessionId: number | null,
-    userId: number | null,
+    userId: string | null,
     deviceId: string
   ): Promise<ChatResult> {
     if (!this.isAvailable()) {
@@ -228,7 +219,7 @@ export class AgentService {
 
     this.logLLMCall('non-stream');
     let reply = '';
-    for await (const text of this.streamReply(messages)) {
+    for await (const text of this.streamReply(messages, { userId, deviceId })) {
       reply += text;
     }
 
@@ -242,13 +233,13 @@ export class AgentService {
    * 流式对话：逐段产出回复，SSE 事件序列 meta → delta* → end
    * @param content 用户输入
    * @param sessionId 会话 id（不传则新建）
-   * @param userId 登录用户 id
+   * @param userId 登录用户 id（BIGINT 以 string 传递），未登录为 null
    * @param deviceId 设备 id
    */
   async *chatStream(
     content: string,
     sessionId: number | null,
-    userId: number | null,
+    userId: string | null,
     deviceId: string
   ): AsyncGenerator<{ event: string; data: any }> {
     if (!this.isAvailable()) {
@@ -262,7 +253,7 @@ export class AgentService {
 
     this.logLLMCall('stream');
     let full = '';
-    for await (const text of this.streamReply(messages)) {
+    for await (const text of this.streamReply(messages, { userId, deviceId })) {
       full += text;
       yield { event: 'delta', data: { text } };
     }

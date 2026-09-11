@@ -28,6 +28,12 @@ export class AgentController {
     return { code, message, data: null };
   }
 
+  /** 当前登录用户 id（AuthMiddleware 已解析，未登录为 null）；BIGINT 以 string 传递 */
+  private currentUserId(): string | null {
+    const id = (this.ctx as any).userId;
+    return id === undefined || id === null || id === '' ? null : String(id);
+  }
+
   /** 检查智能体是否可用（前端用于判断是否展示对话入口） */
   @Get('/status')
   status() {
@@ -49,7 +55,7 @@ export class AgentController {
     const deviceId = typeof body?.deviceId === 'string' ? body.deviceId : '';
 
     // 从 ctx 中获取登录用户 id（AuthMiddleware 已解析，未登录为 null）
-    const userId = (this.ctx as any).user?.id ?? null;
+    const userId = this.currentUserId();
 
     if (!this.agentService.isAvailable()) {
       return this.fail('智能体暂未启用，请稍后再试');
@@ -80,7 +86,7 @@ export class AgentController {
 
     const sessionId = body?.sessionId ? Number(body.sessionId) || null : null;
     const deviceId = typeof body?.deviceId === 'string' ? body.deviceId : '';
-    const userId = (this.ctx as any).user?.id ?? null;
+    const userId = this.currentUserId();
 
     const sse = (event: string, data: unknown) =>
       `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
@@ -129,7 +135,7 @@ export class AgentController {
   /** 获取当前用户/设备的会话列表 */
   @Get('/sessions')
   async sessions() {
-    const userId = (this.ctx as any).user?.id ?? null;
+    const userId = this.currentUserId();
     const deviceId = typeof this.ctx.query.deviceId === 'string' ? this.ctx.query.deviceId : '';
     const list = await this.sessionService.listSessions(userId, deviceId);
     return this.ok(
@@ -150,7 +156,7 @@ export class AgentController {
     if (!sessionId || sessionId <= 0) {
       return this.fail('无效的会话 id');
     }
-    const userId = (this.ctx as any).user?.id ?? null;
+    const userId = this.currentUserId();
     const deviceId = typeof this.ctx.query.deviceId === 'string' ? this.ctx.query.deviceId : '';
 
     const owned = await this.sessionService.verifyOwnership(sessionId, userId, deviceId);

@@ -1,6 +1,7 @@
 /**
  * 【m6-agent 模块】对话会话（wudong_m6_chat_session）
  * 一次对话 = 一个 session，包含多条 message
+ * 约定：BIGINT 外键以 string 传递（与 order/m1/m3 既有实体一致）
  */
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
@@ -10,7 +11,7 @@ export class ChatSessionEntity {
   id: number;
 
   @Column({ name: 'user_id', type: 'bigint', unsigned: true, nullable: true, comment: '登录用户 id，未登录为 null' })
-  userId: number | null;
+  userId: string | null;
 
   @Column({ name: 'device_id', type: 'varchar', length: 64, default: '', comment: '未登录用户的设备标识' })
   deviceId: string;
