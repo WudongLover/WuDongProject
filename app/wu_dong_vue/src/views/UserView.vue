@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import * as api from '@/api'
 import { unwrapError } from '@/api'
-import type { Address, Message, UserProfile } from '@/types'
+import type { Address, Message, UserProfile, UserStats } from '@/types'
 import { useUserStore } from '@/stores/user'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
@@ -18,6 +18,11 @@ const pwdSaving = ref(false)
 const favorites = ref<{ id: string; name: string; cover: string; type: string; price?: number; to?: string }[]>([])
 const messages = ref<Message[]>([])
 const addresses = ref<Address[]>([])
+const stats = ref<UserStats>({ favorites: 0, unreadMessages: 0, likesReceived: 0 })
+const addressFormVisible = ref(false)
+const addressEditingId = ref('')
+const addressSaving = ref(false)
+const addressForm = ref({ name: '', phone: '', region: '', detail: '', isDefault: false })
 
 const favType = ref('全部')
 const favTypes = ['全部', '非遗商品', '特产', '民宿', '餐厅', '路线', '游记']
@@ -40,13 +45,28 @@ async function loadMessages() {
   messages.value = res.data
 }
 
+async function loadAddresses() {
+  const res = await api.addressApi.list()
+  addresses.value = res.data
+}
+
+async function loadStats() {
+  const res = await api.getUserStats()
+  stats.value = res.data
+}
+
 onMounted(async () => {
   if (!userStore.isLoggedIn) {
     userStore.toast('请先登录')
     return
   }
   profileForm.value = { name: userStore.user!.name, bio: userStore.user!.bio }
-  await Promise.all([loadFavorites(), loadMessages(), api.getAddresses().then((r) => (addresses.value = r.data))])
+  await Promise.all([
+    loadFavorites(),
+    loadMessages(),
+    loadStats(),
+    loadAddresses(),
+  ])
 })
 
 async function saveProfile() {
@@ -86,18 +106,99 @@ async function savePassword() {
 
 async function readAll() {
   await api.markAllMessagesRead()
-  await loadMessages()
+  await Promise.all([loadMessages(), loadStats()])
 }
 
 async function readOne(m: Message) {
   await api.markMessageRead(m.id)
-  await loadMessages()
+  await Promise.all([loadMessages(), loadStats()])
 }
 
 async function unfav(f: { targetType: string; targetId: string; id: string }) {
   await api.toggleFavorite(f.targetType, f.targetId || f.id)
   userStore.toast('已取消收藏')
-  await loadFavorites()
+  await Promise.all([loadFavorites(), loadStats()])
+}
+
+function startAddAddress() {
+  addressEditingId.value = ''
+  addressForm.value = { name: '', phone: '', region: '', detail: '', isDefault: false }
+  addressFormVisible.value = true
+}
+
+function startEditAddress(address: Address) {
+  addressEditingId.value = address.id
+  addressForm.value = {
+    name: address.name,
+    phone: address.phone,
+    region: address.region,
+    detail: address.detail,
+    isDefault: address.isDefault,
+  }
+  addressFormVisible.value = true
+}
+
+function cancelAddressEdit() {
+  addressFormVisible.value = false
+  addressEditingId.value = ''
+  addressForm.value = { name: '', phone: '', region: '', detail: '', isDefault: false }
+}
+
+async function saveAddress() {
+  const payload = {
+    name: addressForm.value.name.trim(),
+    phone: addressForm.value.phone.trim(),
+    region: addressForm.value.region.trim(),
+    detail: addressForm.value.detail.trim(),
+    isDefault: addressForm.value.isDefault,
+  }
+  if (!payload.name || !payload.region || !payload.detail) {
+    userStore.toast('请完整填写收货信息')
+    return
+  }
+  if (!/^1\d{10}$/.test(payload.phone)) {
+    userStore.toast('请输入正确的手机号')
+    return
+  }
+  addressSaving.value = true
+  try {
+    if (addressEditingId.value) {
+      await api.addressApi.update(addressEditingId.value, payload)
+      userStore.toast('地址已更新')
+    } else {
+      await api.addressApi.create(payload)
+      userStore.toast('地址已新增')
+    }
+    cancelAddressEdit()
+    await loadAddresses()
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  } finally {
+    addressSaving.value = false
+  }
+}
+
+async function setDefaultAddress(address: Address) {
+  if (address.isDefault) return
+  try {
+    await api.addressApi.setDefault(address.id)
+    userStore.toast('已设为默认地址')
+    await loadAddresses()
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  }
+}
+
+async function removeAddress(address: Address) {
+  if (!window.confirm(`确定删除“${address.name}”的收货地址吗？`)) return
+  try {
+    await api.addressApi.remove(address.id)
+    userStore.toast('地址已删除')
+    if (addressEditingId.value === address.id) cancelAddressEdit()
+    await loadAddresses()
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  }
 }
 </script>
 
@@ -113,9 +214,9 @@ async function unfav(f: { targetType: string; targetId: string; id: string }) {
           <span class="phone">{{ userStore.user.phone }}</span>
         </div>
         <div class="u-stats">
-          <div><b>{{ favorites.length }}</b><span>收藏</span></div>
-          <div><b>{{ messages.filter((m) => !m.read).length }}</b><span>未读消息</span></div>
-          <div><b>12</b><span>获赞</span></div>
+          <div><b>{{ stats.favorites }}</b><span>收藏</span></div>
+          <div><b>{{ stats.unreadMessages }}</b><span>未读消息</span></div>
+          <div><b>{{ stats.likesReceived }}</b><span>获赞</span></div>
         </div>
       </div>
 
@@ -245,9 +346,45 @@ async function unfav(f: { targetType: string; targetId: string; id: string }) {
           <section v-else-if="panel === 'addresses'" class="panel">
             <div class="panel-head">
               <h3>收货地址</h3>
-              <button class="btn btn-outline" @click="userStore.toast('新增地址功能待后端就绪')">+ 新增地址</button>
+              <button class="btn btn-outline" @click="startAddAddress">
+                <AppIcon name="plus" :size="15" /> 新增地址
+              </button>
             </div>
-            <div class="addr-list">
+
+            <div v-if="addressFormVisible" class="addr-form">
+              <b>{{ addressEditingId ? '编辑地址' : '新增地址' }}</b>
+              <div class="addr-fields">
+                <label>
+                  <span>收货人</span>
+                  <input v-model="addressForm.name" maxlength="64" placeholder="请输入收货人姓名" />
+                </label>
+                <label>
+                  <span>手机号</span>
+                  <input v-model="addressForm.phone" maxlength="11" placeholder="请输入手机号" />
+                </label>
+                <label class="wide">
+                  <span>地区</span>
+                  <input v-model="addressForm.region" maxlength="128" placeholder="省 / 市 / 区" />
+                </label>
+                <label class="wide">
+                  <span>详细地址</span>
+                  <input v-model="addressForm.detail" maxlength="255" placeholder="街道、楼栋、门牌号" />
+                </label>
+              </div>
+              <label class="addr-default">
+                <input v-model="addressForm.isDefault" type="checkbox" />
+                设为默认地址
+              </label>
+              <div class="form-actions">
+                <button class="btn btn-ghost" @click="cancelAddressEdit">取消</button>
+                <button class="btn btn-primary" :disabled="addressSaving" @click="saveAddress">
+                  {{ addressSaving ? '保存中...' : '保存地址' }}
+                </button>
+              </div>
+            </div>
+
+            <EmptyState v-if="!addresses.length" text="暂无收货地址" />
+            <div v-else class="addr-list">
               <div v-for="a in addresses" :key="a.id" class="addr" :class="{ def: a.isDefault }">
                 <div class="a-top">
                   <b>{{ a.name }}</b>
@@ -255,6 +392,13 @@ async function unfav(f: { targetType: string; targetId: string; id: string }) {
                   <i v-if="a.isDefault" class="tag tag-red">默认</i>
                 </div>
                 <p>{{ a.region }} {{ a.detail }}</p>
+                <div class="addr-actions">
+                  <button v-if="!a.isDefault" @click="setDefaultAddress(a)">
+                    <AppIcon name="star" :size="14" /> 设为默认
+                  </button>
+                  <button @click="startEditAddress(a)">编辑</button>
+                  <button class="danger" @click="removeAddress(a)">删除</button>
+                </div>
               </div>
             </div>
             <p class="note">衣 / 食（特产）实物订单将使用收货地址配送；身份证等敏感信息按规范脱敏存储。</p>
@@ -556,6 +700,70 @@ async function unfav(f: { targetType: string; targetId: string; id: string }) {
   margin-bottom: 16px;
 }
 
+.addr-form {
+  margin: 16px 0 20px;
+  padding: 18px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+.addr-form > b {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+
+.addr-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 14px;
+}
+
+.addr-fields label {
+  display: grid;
+  gap: 6px;
+}
+
+.addr-fields label span {
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.addr-fields input {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.addr-fields .wide {
+  grid-column: 1 / -1;
+}
+
+.addr-default {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.addr-default input {
+  accent-color: var(--accent);
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
 .addr {
   border: 1px solid var(--line);
   border-radius: var(--radius);
@@ -592,6 +800,32 @@ async function unfav(f: { targetType: string; targetId: string; id: string }) {
   font-size: 13px;
   color: var(--text-2);
   line-height: 1.8;
+}
+
+.addr-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--line);
+}
+
+.addr-actions button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--primary);
+  font-size: 12px;
+}
+
+.addr-actions button:hover {
+  color: var(--accent);
+}
+
+.addr-actions .danger {
+  color: var(--accent);
+  margin-left: auto;
 }
 
 .note {
@@ -679,6 +913,14 @@ async function unfav(f: { targetType: string; targetId: string; id: string }) {
 
   .addr-list {
     grid-template-columns: 1fr;
+  }
+
+  .addr-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .addr-fields .wide {
+    grid-column: auto;
   }
 }
 </style>

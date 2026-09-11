@@ -9,7 +9,6 @@ import type {
   Restaurant,
   Scenic,
   TravelRoute,
-  Address,
   UserProfile,
 } from '@/types'
 import { img, scene } from './images'
@@ -1207,10 +1206,7 @@ export const initialMessages: Message[] = [
   { id: 'm4', type: 'SYSTEM', title: '苗年节早鸟优惠开启', content: '「苗年节庆 · 三日狂欢」路线现已开放预订，前 50 名立减 100 元。', date: '2026-09-06 08:00', read: true },
 ]
 
-export const initialAddresses: Address[] = [
-  { id: 'ad1', name: '刘一', phone: '138****1234', region: '广东省 广州市 天河区', detail: '珠江新城华夏路 26 号 1201', isDefault: true },
-  { id: 'ad2', name: '刘一', phone: '138****1234', region: '贵州省 黔东南州 雷山县', detail: '乌东村三组 24 号（假期收货）', isDefault: false },
-]
+export const initialFavoriteIds = ['g1', 'h1', 'f1', 'rt1', 'p1', 'p3']
 
 export const defaultUser: UserProfile = {
   id: 'u0',
@@ -1218,7 +1214,8 @@ export const defaultUser: UserProfile = {
   phone: '138****1234',
   avatar: img('chinese traveler avatar illustration minimal backpack', 'square'),
   bio: '想去有云的地方',
-  favorites: ['g1', 'h1', 'f1', 'rt1', 'p1', 'p3'],
+  status: 'ENABLED',
+  hasPassword: false,
 }
 
 /** 首页「逛一逛」词条，点击落到对应文化内容（culture.ts 的 cultureEntries 按 label 匹配） */
