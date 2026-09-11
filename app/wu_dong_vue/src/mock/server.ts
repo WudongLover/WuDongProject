@@ -3,7 +3,6 @@
  * 后端 FastAPI 就绪后，仅需将 src/api 中的实现切换为 axios 调用。
  */
 import type {
-  Address,
   CartItem,
   Message,
   Order,
@@ -28,7 +27,6 @@ import {
   initialCart,
   initialOrders,
   initialMessages,
-  initialAddresses,
   initialFavoriteIds,
   defaultUser,
   hotKeywords,
@@ -61,7 +59,6 @@ const db = {
   cart: [...initialCart] as CartItem[],
   orders: [...initialOrders] as Order[],
   messages: [...initialMessages] as Message[],
-  addresses: [...initialAddresses] as Address[],
   favorites: new Set(initialFavoriteIds),
   likedPosts: new Set<string>(),
   smsCode: '123456' as string, // 对齐后端 Mock：验证码固定 123456
@@ -547,11 +544,6 @@ export async function markAllMessagesRead() {
   await delay(100)
   db.messages.forEach((m) => (m.read = true))
   return ok(true)
-}
-
-export async function getAddresses() {
-  await delay(140)
-  return ok(db.addresses)
 }
 
 /* ---------- 个人资料 ---------- */

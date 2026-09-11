@@ -19,6 +19,7 @@ import { ScenicEntity } from '../modules/m4-ticket/entity/scenic_entity';
 import { RouteEntity } from '../modules/m4-ticket/entity/route_entity';
 import { RouteDayEntity } from '../modules/m4-ticket/entity/route_day_entity';
 import { RefreshTokenEntity } from '../modules/user/entity/refresh_token_entity';
+import { AddressEntity } from '../modules/user/entity/address_entity';
 import { OrderEntity } from '../modules/order/entity/order_entity';
 import { OrderItemEntity } from '../modules/order/entity/order_item_entity';
 import { PaymentEntity } from '../modules/order/entity/payment_entity';
@@ -77,6 +78,7 @@ export default {
           HomestayEntity, RoomTypeEntity, RoomCalendarEntity,
           TicketEntity, ScenicEntity, RouteEntity, RouteDayEntity,
           RefreshTokenEntity,
+          AddressEntity,
           AuthUserEntity,
           ChatSessionEntity,
           ChatMessageEntity,

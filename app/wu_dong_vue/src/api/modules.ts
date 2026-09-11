@@ -173,4 +173,4 @@ export { cartApi } from './cart'
 export const getMessages = S.getMessages
 export const markMessageRead = S.markMessageRead
 export const markAllMessagesRead = S.markAllMessagesRead
-export const getAddresses = S.getAddresses
+export { addressApi } from './address'

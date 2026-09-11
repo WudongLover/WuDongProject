@@ -9,7 +9,6 @@ import type {
   Restaurant,
   Scenic,
   TravelRoute,
-  Address,
   UserProfile,
 } from '@/types'
 import { img, scene } from './images'
@@ -1205,11 +1204,6 @@ export const initialMessages: Message[] = [
   { id: 'm2', type: 'ORDER', title: '包裹已发出', content: '您购买的手工苗银花丝手镯已由顺丰揽收，运单号 SF1388…0091。', date: '2026-09-05 18:40', read: false },
   { id: 'm3', type: 'INTERACT', title: '收到新的点赞', content: '「追云者」赞了你的游记《一个人的乌东》。', date: '2026-09-06 09:12', read: false },
   { id: 'm4', type: 'SYSTEM', title: '苗年节早鸟优惠开启', content: '「苗年节庆 · 三日狂欢」路线现已开放预订，前 50 名立减 100 元。', date: '2026-09-06 08:00', read: true },
-]
-
-export const initialAddresses: Address[] = [
-  { id: 'ad1', name: '刘一', phone: '138****1234', region: '广东省 广州市 天河区', detail: '珠江新城华夏路 26 号 1201', isDefault: true },
-  { id: 'ad2', name: '刘一', phone: '138****1234', region: '贵州省 黔东南州 雷山县', detail: '乌东村三组 24 号（假期收货）', isDefault: false },
 ]
 
 export const initialFavoriteIds = ['g1', 'h1', 'f1', 'rt1', 'p1', 'p3']
