@@ -3,7 +3,7 @@
  * access token 只保存在本模块内存中；refresh token 走 HttpOnly Cookie。
  */
 import type { UserProfile } from '@/types'
-import { ApiError } from '@/mock/server'
+import { ApiError } from './contracts'
 
 const BASE = '/api/user'
 
