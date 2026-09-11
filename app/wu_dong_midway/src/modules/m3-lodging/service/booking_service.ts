@@ -7,13 +7,18 @@
  */
 import { Inject, Provide } from '@midwayjs/core';
 import { InjectDataSource } from '@midwayjs/typeorm';
-import { DataSource, In } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { ApiError } from '../../m5-community/error/api_error';
 import { OrderService } from '../../order/service/order_service';
 import { HomestayEntity } from '../entity/homestay_entity';
 import { LodgingOrderExtEntity } from '../entity/order_ext_entity';
-import { RoomCalendarEntity } from '../entity/room_calendar_entity';
 import { RoomTypeEntity } from '../entity/room_type_entity';
+import {
+  addDays,
+  daysBetween,
+  RoomCalendarService,
+  todayStr,
+} from './room_calendar_service';
 
 /** 民宿预订入参（结构化预订参数，userId 由 controller 从鉴权上下文注入） */
 export interface LodgingBookingInput {
@@ -33,26 +38,13 @@ const MAX_NIGHTS = 30;
 /** 未支付订单的支付截止时长（毫秒）：30 分钟 */
 const PAY_EXPIRE_MS = 30 * 60 * 1000;
 
-/** 'YYYY-MM-DD' 加 n 天，仍返回 'YYYY-MM-DD'（按本地零点计算，避免 UTC 偏移） */
-function addDays(dateStr: string, n: number): string {
-  const d = new Date(`${dateStr}T00:00:00`);
-  d.setDate(d.getDate() + n);
-  const p = (v: number) => String(v).padStart(2, '0');
-  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
-}
-
-function daysBetween(from: string, to: string): number {
-  return Math.round(
-    (new Date(`${to}T00:00:00`).getTime() -
-      new Date(`${from}T00:00:00`).getTime()) /
-      86400000,
-  );
-}
-
 @Provide()
 export class LodgingBookingService {
   @Inject()
   orderService!: OrderService;
+
+  @Inject()
+  roomCalendar!: RoomCalendarService;
 
   @InjectDataSource('default')
   dataSource!: DataSource;
@@ -93,11 +85,7 @@ export class LodgingBookingService {
     }
 
     // 入住日期不能早于今天
-    const today = new Date();
-    const todayStr = `${today.getFullYear()}-${String(
-      today.getMonth() + 1,
-    ).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-    if (checkInDate < todayStr) {
+    if (checkInDate < todayStr()) {
       throw new ApiError(1004, '入住日期不能早于今天');
     }
 
@@ -123,10 +111,9 @@ export class LodgingBookingService {
         throw new ApiError(1004, `该房型最多入住 ${roomType.maxGuests} 人`);
       }
 
-      // 一次性取出入住区间的房态，按日期建索引
-      const calendars = await em.find(RoomCalendarEntity, {
-        where: { roomTypeId, date: In(stayDates) },
-      });
+      // 一次性取出入住区间的房态，按日期建索引；
+      // 日历行缺失时按房型总库存补齐（空表/未覆盖日期不再一律判满房）
+      const calendars = await this.roomCalendar.ensure(em, roomType, stayDates);
       const calMap = new Map(calendars.map((c) => [c.date, c]));
 
       // 服务端逐晚算价并预检（缺行/停售/满房都不可订）
