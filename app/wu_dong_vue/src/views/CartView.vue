@@ -1,18 +1,37 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { unwrapError } from '@/api'
 import { useCartStore } from '@/stores/cart'
 import { useUserStore } from '@/stores/user'
-import { unwrapError } from '@/api'
+import { useMockPay } from '@/composables/useMockPay'
 import QtyStepper from '@/components/QtyStepper.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
+import PayDialog from '@/components/PayDialog.vue'
 
 const router = useRouter()
 const cartStore = useCartStore()
 const userStore = useUserStore()
+// 购物车是支付入口：结算即下单，并立刻弹出虚拟支付
+const { pendingOrder, askPay, onPaid, onDismiss } = useMockPay()
 
-onMounted(() => cartStore.load())
+// 购物车是私有数据，接口要求 Bearer token：未登录先引导登录
+onMounted(async () => {
+  if (!userStore.requireLogin()) {
+    router.replace({ path: '/login', query: { redirect: '/cart' } })
+    return
+  }
+  await loadCart()
+})
+
+async function loadCart() {
+  try {
+    await cartStore.load()
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  }
+}
 
 function shopGroups() {
   const map = new Map<string, typeof cartStore.items>()
@@ -25,8 +44,46 @@ function shopGroups() {
 
 async function toggleShop(items: { checked: boolean; id: string }[], checked: boolean) {
   // 逐项串行提交，避免并发响应覆盖彼此勾选状态
-  for (const item of items) {
-    if (item.checked !== checked) await cartStore.toggleChecked(item.id, checked)
+  try {
+    for (const item of items) {
+      if (item.checked !== checked) await cartStore.toggleChecked(item.id, checked)
+    }
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  }
+}
+
+async function removeChecked() {
+  try {
+    for (const item of cartStore.items.filter((i) => i.checked)) {
+      await cartStore.remove(item.id)
+    }
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  }
+}
+
+async function toggleItem(id: string, checked: boolean) {
+  try {
+    await cartStore.toggleChecked(id, checked)
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  }
+}
+
+async function changeQty(id: string, qty: number) {
+  try {
+    await cartStore.updateQty(id, qty)
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  }
+}
+
+async function removeItem(id: string) {
+  try {
+    await cartStore.remove(id)
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
   }
 }
 
@@ -37,10 +94,10 @@ async function checkout() {
   }
   try {
     const order = await cartStore.checkout()
-    userStore.toast('下单成功，去支付')
-    router.push({ path: '/orders', query: { highlight: order.orderNo, pay: '1' } })
+    askPay(order)
   } catch (e) {
     userStore.toast(unwrapError(e).message)
+    await loadCart()
   }
 }
 </script>
@@ -73,7 +130,7 @@ async function checkout() {
         </label>
 
         <div v-for="item in g.items" :key="item.id" class="cart-item" :class="{ off: !item.checked }">
-          <input type="checkbox" :checked="item.checked" @change="cartStore.toggleChecked(item.id, !item.checked)" />
+          <input type="checkbox" :checked="item.checked" @change="toggleItem(item.id, !item.checked)" />
           <img :src="item.cover" :alt="item.title" />
           <div class="ci-info">
             <b>{{ item.title }}</b>
@@ -81,25 +138,28 @@ async function checkout() {
             <span v-if="item.qty >= item.stock" class="stock-warn">库存紧张：仅剩 {{ item.stock }} 件</span>
           </div>
           <span class="price ci-price">{{ item.price }}</span>
-          <QtyStepper :model-value="item.qty" :max="item.stock" @update:model-value="(v) => cartStore.updateQty(item.id, v)" />
+          <QtyStepper :model-value="item.qty" :max="item.stock" @update:model-value="(v) => changeQty(item.id, v)" />
           <span class="ci-sum">¥{{ (item.price * item.qty).toFixed(0) }}</span>
-          <button class="ci-del" aria-label="删除" @click="cartStore.remove(item.id)">
+          <button class="ci-del" aria-label="删除" @click="removeItem(item.id)">
             <AppIcon name="trash" :size="16" />
           </button>
         </div>
       </div>
 
       <div class="settle-bar">
-        <button class="del-checked" @click="cartStore.items.filter((i) => i.checked).forEach((i) => cartStore.remove(i.id))">
+        <button class="del-checked" @click="removeChecked">
           <AppIcon name="trash" :size="14" /> 删除选中
         </button>
         <div class="total">
           已选 <b>{{ cartStore.checkedItems.length }}</b> 件 · 合计
           <span class="price">{{ cartStore.checkedTotal }}</span>
         </div>
-        <button class="btn btn-primary btn-lg" @click="checkout">去结算（按商家拆单）</button>
+        <button class="btn btn-primary btn-lg" @click="checkout">结算并支付</button>
       </div>
     </template>
+
+    <!-- 下单后立即弹虚拟支付 -->
+    <PayDialog :order="pendingOrder" @paid="onPaid" @dismiss="onDismiss" />
   </div>
 </template>
 

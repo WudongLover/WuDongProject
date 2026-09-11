@@ -1,43 +1,24 @@
 /**
  * 购物车真实后端接口（wu_dong_midway /api/cart）
- * 返回统一信封 { code, message, data }，data 为最新购物车列表
+ * 身份统一走 Authorization: Bearer（apiFetch 注入），后端按 ctx.userId 归属数据；
+ * 已移除 X-User-Id 头，未登录一律 401。
  */
 import type { CartItem } from '@/types'
-
-interface Envelope<T> {
-  code: number
-  message: string
-  data: T
-}
-
-async function request<T>(path: string, init: RequestInit = {}): Promise<Envelope<T>> {
-  const user = sessionStorage.getItem('wudong_user')
-  let userId = '1'
-  try {
-    userId = String(JSON.parse(user || '{}').id || 1)
-  } catch {}
-
-  const response = await fetch(`/api/cart${path}`, {
-    ...init,
-    headers: {
-      'content-type': 'application/json',
-      'x-user-id': userId,
-      ...init.headers,
-    },
-  })
-  const body = await response.json()
-  if (!response.ok || body?.code !== 0) {
-    throw new Error(body?.message || '购物车请求失败')
-  }
-  return body as Envelope<T>
-}
+import type { Envelope } from './contracts'
+import { apiFetch } from './http'
 
 export const cartApi = {
-  list: () => request<CartItem[]>('/'),
+  list: () => apiFetch<Envelope<CartItem[]>>('/cart/'),
   add: (payload: { productId: string; skuId?: string; qty: number; shop?: string }) =>
-    request<CartItem[]>('/', { method: 'POST', body: JSON.stringify(payload) }),
+    apiFetch<Envelope<CartItem[]>>('/cart/', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
   update: (id: string, patch: { qty?: number; checked?: boolean }) =>
-    request<CartItem[]>(`/${id}`, { method: 'PUT', body: JSON.stringify(patch) }),
-  remove: (id: string) => request<CartItem[]>(`/${id}`, { method: 'DELETE' }),
-  check: () => request<{ invalidIds: string[] }>('/check', { method: 'POST' }),
+    apiFetch<Envelope<CartItem[]>>(`/cart/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(patch),
+    }),
+  remove: (id: string) => apiFetch<Envelope<CartItem[]>>(`/cart/${id}`, { method: 'DELETE' }),
+  check: () => apiFetch<Envelope<{ invalidIds: string[] }>>('/cart/check', { method: 'POST' }),
 }

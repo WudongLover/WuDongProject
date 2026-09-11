@@ -50,20 +50,7 @@ async function load() {
 
 onMounted(async () => {
   await load()
-  if (route.query.pay === '1' && highlight.value) {
-    userStore.toast('订单已创建，请在列表中完成支付')
-  }
 })
-
-async function pay(o: Order) {
-  try {
-    await api.payOrder(o.orderNo)
-    userStore.toast('支付成功')
-    await load()
-  } catch (e) {
-    userStore.toast(unwrapError(e).message)
-  }
-}
 
 async function cancel(o: Order) {
   try {
@@ -88,6 +75,48 @@ async function refund(o: Order) {
 
 function review(o: Order) {
   userStore.toast('评价功能演示：感谢您的反馈 ★★★★★')
+}
+
+interface OrderLine {
+  key: string
+  title: string
+  cover: string
+  sub: string
+  qtyText: string
+  amount: number
+}
+
+/**
+ * 订单展示行：
+ * - 购物车合并支付只建一张订单，这里把订单明细逐项拆成独立行展示；
+ * - 门票/住宿/餐位等无明细的订单，回退为单行（标题 + 摘要）。
+ */
+function orderLines(o: Order): OrderLine[] {
+  if (o.items?.length) {
+    return o.items.map((it, i) => ({
+      key: `${o.orderNo}-${it.id ?? i}`,
+      title: it.title,
+      cover: it.cover,
+      sub: [it.sku, `单价 ¥${it.price.toFixed(2)}`].filter(Boolean).join(' · '),
+      qtyText: `× ${it.qty}`,
+      amount: it.amount,
+    }))
+  }
+  return [
+    {
+      key: o.orderNo,
+      title: o.title,
+      cover: o.cover,
+      sub: o.summary,
+      qtyText: `共 ${o.qty} 份`,
+      amount: o.amount,
+    },
+  ]
+}
+
+/** 订单商品总件数（购物车单按明细累加） */
+function orderQty(o: Order): number {
+  return o.items?.length ? o.items.reduce((n, it) => n + it.qty, 0) : o.qty
 }
 </script>
 
@@ -118,17 +147,25 @@ function review(o: Order) {
         <span class="o-status" :class="statusMap[o.status].cls">{{ statusMap[o.status].text }}</span>
       </div>
       <div class="o-body">
-        <img :src="o.cover" :alt="o.title" />
-        <div class="o-info">
-          <b>{{ o.title }}</b>
-          <span>{{ o.summary }}</span>
+        <div class="o-lines">
+          <div v-for="line in orderLines(o)" :key="line.key" class="o-line">
+            <img :src="line.cover" :alt="line.title" />
+            <div class="o-info">
+              <b>{{ line.title }}</b>
+              <span>{{ line.sub }}</span>
+            </div>
+            <div class="o-amount">
+              <span class="price">{{ line.amount }}</span>
+              <small>{{ line.qtyText }}</small>
+            </div>
+          </div>
         </div>
-        <div class="o-amount">
-          <span class="price">{{ o.amount }}</span>
-          <small>共 {{ o.qty }} 份</small>
+        <div v-if="(o.items?.length || 0) > 1" class="o-total">
+          <span>共 {{ orderQty(o) }} 件 · 合计</span>
+          <b class="price">{{ o.amount }}</b>
         </div>
         <div class="o-actions">
-          <button v-if="o.status === 'UNPAID'" class="btn btn-primary" @click="pay(o)">模拟支付</button>
+          <!-- 支付入口在购物车/立即购买（下单即弹虚拟支付），这里只做查看与售后 -->
           <button v-if="['UNPAID', 'PAID'].includes(o.status)" class="btn btn-ghost" @click="cancel(o)">取消</button>
           <button v-if="['PAID', 'CONFIRMED'].includes(o.status)" class="btn btn-ghost" @click="refund(o)">申请退款</button>
           <button v-if="o.status === 'COMPLETED'" class="btn btn-outline" @click="review(o)">评价</button>
@@ -226,18 +263,56 @@ function review(o: Order) {
 .st-refund { color: var(--text-3); }
 
 .o-body {
-  display: grid;
-  grid-template-columns: 110px 1fr auto auto;
-  gap: 18px;
+  display: flex;
+  gap: 22px;
   align-items: center;
   padding: 16px 20px;
 }
 
-.o-body img {
+.o-lines {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.o-line {
+  display: grid;
+  grid-template-columns: 110px 1fr auto;
+  gap: 18px;
+  align-items: center;
+  padding: 10px 0;
+  border-top: 1px dashed var(--line);
+}
+
+.o-line:first-child {
+  padding-top: 0;
+  border-top: none;
+}
+
+.o-line:last-child {
+  padding-bottom: 0;
+}
+
+.o-line img {
   width: 110px;
   height: 82px;
   object-fit: cover;
   border-radius: var(--radius);
+}
+
+.o-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  font-size: 11.5px;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+
+.o-total .price {
+  font-size: 18px;
 }
 
 .o-info b {
@@ -288,18 +363,33 @@ function review(o: Order) {
 
 @media (max-width: 899px) {
   .o-body {
-    grid-template-columns: 90px 1fr;
-    row-gap: 12px;
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
-  .o-amount {
+  .o-lines {
+    flex-basis: 100%;
+  }
+
+  .o-line {
+    grid-template-columns: 72px 1fr;
+    row-gap: 6px;
+  }
+
+  .o-line img {
+    width: 72px;
+    height: 58px;
+    grid-row: span 2;
+  }
+
+  .o-line .o-amount {
+    grid-column: 2;
     text-align: left;
   }
 
   .o-actions {
     flex-direction: row;
     flex-wrap: wrap;
-    grid-column: 1 / -1;
   }
 }
 </style>

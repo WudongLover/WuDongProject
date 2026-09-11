@@ -1,18 +1,21 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import * as api from '@/api'
 import { unwrapError } from '@/api'
 import type { Homestay, RoomType } from '@/types'
 import { useUserStore } from '@/stores/user'
 import { useFavoriteStore } from '@/stores/favorite'
+import { useMockPay } from '@/composables/useMockPay'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
+import PayDialog from '@/components/PayDialog.vue'
 
 const route = useRoute()
-const router = useRouter()
 const userStore = useUserStore()
 const favStore = useFavoriteStore()
+// 民宿下单（预占房态）后立即弹虚拟支付
+const { pendingOrder, askPay, onPaid, onDismiss } = useMockPay()
 
 const stay = ref<Homestay | null>(null)
 const notFound = ref(false)
@@ -105,7 +108,7 @@ async function bookRoom() {
       contactPhone: guestPhone.value,
     })
     openRoom.value = null
-    router.push(`/order/pay/${order.data.orderNo}`)
+    askPay(order.data)
   } catch (e) {
     bookErr.value = unwrapError(e).message
   } finally {
@@ -274,6 +277,9 @@ async function bookRoom() {
         </div>
       </div>
     </transition>
+
+    <!-- 民宿下单后立即弹虚拟支付 -->
+    <PayDialog :order="pendingOrder" @paid="onPaid" @dismiss="onDismiss" />
   </div>
 </template>
 
