@@ -1,4 +1,4 @@
-import 'dotenv/config';
+﻿import 'dotenv/config';
 import { MidwayConfig } from '@midwayjs/core';
 import { PostEntity } from '../modules/m5-community/entity/post_entity';
 import { CommentEntity } from '../modules/m5-community/entity/comment_entity';
@@ -32,6 +32,7 @@ import { LodgingOrderExtEntity } from '../modules/m3-lodging/entity/order_ext_en
 import { UserEntity as AuthUserEntity } from '../modules/user/entity/user_entity';
 import { ChatSessionEntity } from '../modules/m6-agent/entity/chat_session_entity';
 import { ChatMessageEntity } from '../modules/m6-agent/entity/chat_message_entity';
+import { StoryEntity } from '../modules/common/entity/story_entity';
 
 /**
  * 通用配置（本地开发与生产一致）
@@ -88,6 +89,7 @@ export default {
           TimeSlotEntity,
           MealOrderExtEntity,
           LodgingOrderExtEntity,
+          StoryEntity,
         ],
       },
     },
