@@ -267,6 +267,8 @@ export interface Message {
   content: string
   date: string
   read: boolean
+  relatedType: string | null
+  relatedId: string | null
 }
 
 export interface Address {

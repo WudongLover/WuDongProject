@@ -41,7 +41,7 @@ async function loadFavorites() {
 }
 
 async function loadMessages() {
-  const res = await api.getMessages()
+  const res = await api.messageApi.list()
   messages.value = res.data
 }
 
@@ -105,12 +105,12 @@ async function savePassword() {
 }
 
 async function readAll() {
-  await api.markAllMessagesRead()
+  await api.messageApi.markAllRead()
   await Promise.all([loadMessages(), loadStats()])
 }
 
 async function readOne(m: Message) {
-  await api.markMessageRead(m.id)
+  await api.messageApi.markRead(m.id)
   await Promise.all([loadMessages(), loadStats()])
 }
 

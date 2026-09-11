@@ -4,7 +4,6 @@
  */
 import type {
   CartItem,
-  Message,
   Order,
   OrderStatus,
   OrderType,
@@ -26,7 +25,6 @@ import {
   posts,
   initialCart,
   initialOrders,
-  initialMessages,
   initialFavoriteIds,
   defaultUser,
   hotKeywords,
@@ -58,7 +56,6 @@ const db = {
   user: null as UserProfile | null,
   cart: [...initialCart] as CartItem[],
   orders: [...initialOrders] as Order[],
-  messages: [...initialMessages] as Message[],
   favorites: new Set(initialFavoriteIds),
   likedPosts: new Set<string>(),
   smsCode: '123456' as string, // 对齐后端 Mock：验证码固定 123456
@@ -527,24 +524,6 @@ export async function getOrders(filter?: { type?: OrderType | 'ALL'; status?: Or
 }
 
 /* ---------- 消息 / 地址 ---------- */
-
-export async function getMessages() {
-  await delay(180)
-  return ok(db.messages)
-}
-
-export async function markMessageRead(id: string) {
-  await delay(100)
-  const m = db.messages.find((x) => x.id === id)
-  if (m) m.read = true
-  return ok(true)
-}
-
-export async function markAllMessagesRead() {
-  await delay(100)
-  db.messages.forEach((m) => (m.read = true))
-  return ok(true)
-}
 
 /* ---------- 个人资料 ---------- */
 

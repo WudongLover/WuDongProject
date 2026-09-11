@@ -1199,13 +1199,6 @@ export const initialOrders: Order[] = [
   },
 ]
 
-export const initialMessages: Message[] = [
-  { id: 'm1', type: 'ORDER', title: '订单已确认', content: '您预订的「枕云山舍 · 苗族木屋大床房」已获商家确认，入住当天出示订单号即可。', date: '2026-09-01 10:24', read: false },
-  { id: 'm2', type: 'ORDER', title: '包裹已发出', content: '您购买的手工苗银花丝手镯已由顺丰揽收，运单号 SF1388…0091。', date: '2026-09-05 18:40', read: false },
-  { id: 'm3', type: 'INTERACT', title: '收到新的点赞', content: '「追云者」赞了你的游记《一个人的乌东》。', date: '2026-09-06 09:12', read: false },
-  { id: 'm4', type: 'SYSTEM', title: '苗年节早鸟优惠开启', content: '「苗年节庆 · 三日狂欢」路线现已开放预订，前 50 名立减 100 元。', date: '2026-09-06 08:00', read: true },
-]
-
 export const initialFavoriteIds = ['g1', 'h1', 'f1', 'rt1', 'p1', 'p3']
 
 export const defaultUser: UserProfile = {

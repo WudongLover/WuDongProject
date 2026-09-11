@@ -170,7 +170,5 @@ export function checkFavorite(targetType: string, targetId: string | number): Pr
 export { cartApi } from './cart'
 
 /* 消息 / 地址 / 资料 */
-export const getMessages = S.getMessages
-export const markMessageRead = S.markMessageRead
-export const markAllMessagesRead = S.markAllMessagesRead
+export { messageApi } from './message'
 export { addressApi } from './address'

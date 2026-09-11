@@ -21,6 +21,7 @@ import { RouteEntity } from '../modules/m4-ticket/entity/route_entity';
 import { RouteDayEntity } from '../modules/m4-ticket/entity/route_day_entity';
 import { RefreshTokenEntity } from '../modules/user/entity/refresh_token_entity';
 import { AddressEntity } from '../modules/user/entity/address_entity';
+import { MessageEntity } from '../modules/user/entity/message_entity';
 import { OrderEntity } from '../modules/order/entity/order_entity';
 import { OrderItemEntity } from '../modules/order/entity/order_item_entity';
 import { PaymentEntity } from '../modules/order/entity/payment_entity';
@@ -81,6 +82,7 @@ export default {
           TicketEntity, ScenicEntity, RouteEntity, RouteDayEntity,
           RefreshTokenEntity,
           AddressEntity,
+          MessageEntity,
           AuthUserEntity,
           ChatSessionEntity,
           ChatMessageEntity,
