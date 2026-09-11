@@ -28,7 +28,8 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   const res = await fetch(`${BASE}${path}`, {
     headers: {
       'content-type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      'x-user-id': getMockUserId(),
+      ...(token ? { authorization: `Bearer ${token}` } : {}),
       ...init?.headers,
     },
     ...init,

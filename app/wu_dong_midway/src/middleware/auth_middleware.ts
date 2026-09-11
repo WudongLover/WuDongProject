@@ -9,8 +9,10 @@ const TOKEN_REQUIRED_PATHS = [
   '/api/user/password',
   '/api/favorites',
 ];
-/** m3/m4/m5 的写操作需要登录，公开查询放行 */
-const TOKEN_REQUIRED_WRITE_PREFIXES = ['/api/app/m3', '/api/app/m4', '/api/posts'];
+/** m2/m3/m4 的写操作需要登录，公开查询放行 */
+const TOKEN_REQUIRED_WRITE_PREFIXES = ['/api/app/m2', '/api/app/m3', '/api/app/m4'];
+/** 订单：读（我的订单）写都需要登录 */
+const TOKEN_REQUIRED_ALL_PREFIXES = ['/api/app/order'];
 
 /**
  * C 端鉴权中间件：
@@ -32,7 +34,8 @@ export class AuthMiddleware {
         (ctx.method !== 'GET' &&
           TOKEN_REQUIRED_WRITE_PREFIXES.some((prefix) =>
             path.startsWith(prefix)
-          ));
+          )) ||
+        TOKEN_REQUIRED_ALL_PREFIXES.some((prefix) => path.startsWith(prefix));
 
       const header = ctx.headers.authorization || '';
       const id = this.auth.verify(header.replace(/^Bearer\s+/i, ''));

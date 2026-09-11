@@ -19,6 +19,13 @@ import { ScenicEntity } from '../modules/m4-ticket/entity/scenic_entity';
 import { RouteEntity } from '../modules/m4-ticket/entity/route_entity';
 import { RouteDayEntity } from '../modules/m4-ticket/entity/route_day_entity';
 import { RefreshTokenEntity } from '../modules/user/entity/refresh_token_entity';
+import { OrderEntity } from '../modules/order/entity/order_entity';
+import { PaymentEntity } from '../modules/order/entity/payment_entity';
+import { RestaurantEntity } from '../modules/m2-meal/entity/restaurant_entity';
+import { DishEntity } from '../modules/m2-meal/entity/dish_entity';
+import { TimeSlotEntity } from '../modules/m2-meal/entity/time_slot_entity';
+import { MealOrderExtEntity } from '../modules/m2-meal/entity/order_ext_entity';
+import { LodgingOrderExtEntity } from '../modules/m3-lodging/entity/order_ext_entity';
 // user 模块（C 端鉴权）实体：与 m5 的临时只读实体同表不同用途，二者都要注册，
 // 否则 AuthService 注入的 UserEntity 没有 metadata，登录接口直接 500
 import { UserEntity as AuthUserEntity } from '../modules/user/entity/user_entity';
@@ -68,6 +75,13 @@ export default {
           TicketEntity, ScenicEntity, RouteEntity, RouteDayEntity,
           RefreshTokenEntity,
           AuthUserEntity,
+          OrderEntity,
+          PaymentEntity,
+          RestaurantEntity,
+          DishEntity,
+          TimeSlotEntity,
+          MealOrderExtEntity,
+          LodgingOrderExtEntity,
         ],
       },
     },
