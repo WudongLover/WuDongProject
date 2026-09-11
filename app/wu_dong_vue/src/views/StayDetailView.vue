@@ -94,31 +94,6 @@ async function bookRoom() {
   if (!/^1\d{10}$/.test(guestPhone.value)) return (bookErr.value = '请填写 11 位手机号')
   submitting.value = true
   try {
-<<<<<<< HEAD
-    const room = openRoom.value!
-    // 计算总价：每晚价格 = 房型基础价 + 当日浮动价
-    let totalAmount = 0
-    for (let i = 0; i < nights.value; i++) {
-      const d = new Date(checkIn.value)
-      d.setDate(d.getDate() + i)
-      const dateStr = d.toISOString().slice(0, 10)
-      const cal = calendar.value.find((c) => c.date === dateStr)
-      totalAmount += room.price + (cal?.priceDelta || 0)
-    }
-    const order = await api.createOrder({
-      type: 'LODGING',
-      title: `${stay.value!.name} · ${room.name}`,
-      cover: stay.value!.cover,
-      summary: `${checkIn.value} 入住 · ${checkOut.value} 离店 · ${nights.value} 晚 · ${guestName.value}`,
-      amount: totalAmount,
-      qty: nights.value,
-      shop: stay.value!.name,
-      // 写 wudong_m3_order_ext 的预订参数（后端 m3_order_ext 这三列 NOT NULL）
-      homestayId: stay.value!.id,
-      roomTypeId: room.id,
-      checkIn: checkIn.value,
-      checkOut: checkOut.value,
-=======
     // 金额与房态由服务端按日历重算/预占，前端只提交预订参数
     const order = await api.createLodgingBooking({
       homestayId: String(stay.value!.id),
@@ -126,7 +101,6 @@ async function bookRoom() {
       checkInDate: checkIn.value,
       checkOutDate: checkOut.value,
       guests: guests.value,
->>>>>>> origin/lanub/v0911
       contactName: guestName.value.trim(),
       contactPhone: guestPhone.value,
     })

@@ -56,26 +56,10 @@ async function submitBooking() {
   if (!/^1\d{10}$/.test(phoneTail.value)) return (bookErr.value = '请填写 11 位手机号')
   submitting.value = true
   try {
-<<<<<<< HEAD
-    const order = await api.createOrder({
-      type: 'MEAL',
-      title: `${rest.value!.name} · 餐位预订`,
-      cover: rest.value!.cover,
-      summary: `${bookDate.value} ${slot.value?.name} · ${guests.value} 人 · ${contact.value}`,
-      amount: rest.value!.pricePerCapita * guests.value,
-      qty: guests.value,
-      shop: rest.value!.name,
-      // 写 wudong_m2_order_ext 的预订参数（后端 dining_date 列 NOT NULL）
-      restaurantId: rest.value!.id,
-      slotId: slotId.value,
-      diningDate: bookDate.value,
-      diningTime: slot.value?.name || '',
-=======
     const order = await api.createMealBooking({
       restaurantId: String(rest.value!.id),
       slotId: String(slotId.value),
       diningDate: bookDate.value,
->>>>>>> origin/lanub/v0911
       guests: guests.value,
       contactName: contact.value.trim(),
       contactPhone: phoneTail.value,
