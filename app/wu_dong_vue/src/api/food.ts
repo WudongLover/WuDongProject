@@ -5,6 +5,7 @@
  */
 import type { Dish, Product, Restaurant, TimeSlot } from '@/types'
 import type { Envelope } from './contracts'
+import type { GoodsPage } from './modules'
 import { apiFetch } from './http'
 
 // ==================== 餐厅 ====================
@@ -82,13 +83,4 @@ export async function getSpecialties(): Promise<Envelope<{ items: Product[]; tot
     ...res,
     data: { items: res.data?.items || [], total: res.data?.total || 0 },
   }
-}
-
-/** 特产列表（分页） */
-export async function getSpecialties() {
-  const res = await apiFetch<Envelope<{ list: any[]; total: number }>>(
-    '/v1/m2/specialty/page?page=1&pageSize=100',
-  )
-  const items = (res.data.list || []).map(toProduct)
-  return { code: 0, message: 'ok', data: { items, total: res.data.total || 0 } }
 }
