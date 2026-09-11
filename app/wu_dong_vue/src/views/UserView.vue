@@ -34,6 +34,7 @@ const addressFormVisible = ref(false)
 const addressEditingId = ref('')
 const addressSaving = ref(false)
 const addressForm = ref({ name: '', phone: '', region: '', detail: '', isDefault: false })
+const loading = ref(false)
 
 const favType = ref('全部')
 const favTypes = ['全部', '非遗商品', '特产', '民宿', '餐厅', '路线', '游记']
@@ -72,12 +73,14 @@ onMounted(async () => {
     return
   }
   profileForm.value = { name: userStore.user!.name, bio: userStore.user!.bio }
-  await Promise.all([
-    loadFavorites(),
-    loadMessages(),
-    loadStats(),
-    loadAddresses(),
-  ])
+  loading.value = true
+  try {
+    await Promise.all([loadFavorites(), loadMessages(), loadStats(), loadAddresses()])
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  } finally {
+    loading.value = false
+  }
 })
 
 async function saveProfile() {
@@ -116,19 +119,31 @@ async function savePassword() {
 }
 
 async function readAll() {
-  await api.messageApi.markAllRead()
-  await Promise.all([loadMessages(), loadStats()])
+  try {
+    await api.messageApi.markAllRead()
+    await Promise.all([loadMessages(), loadStats()])
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  }
 }
 
 async function readOne(m: Message) {
-  await api.messageApi.markRead(m.id)
-  await Promise.all([loadMessages(), loadStats()])
+  try {
+    await api.messageApi.markRead(m.id)
+    await Promise.all([loadMessages(), loadStats()])
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  }
 }
 
 async function unfav(f: { targetType: string; targetId: string; id: string }) {
-  await api.toggleFavorite(f.targetType, f.targetId)
-  userStore.toast('已取消收藏')
-  await Promise.all([loadFavorites(), loadStats()])
+  try {
+    await api.toggleFavorite(f.targetType, f.targetId)
+    userStore.toast('已取消收藏')
+    await Promise.all([loadFavorites(), loadStats()])
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  }
 }
 
 function startAddAddress() {

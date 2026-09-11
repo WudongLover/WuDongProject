@@ -8,7 +8,6 @@ import type {
   Restaurant,
   Scenic,
   TravelRoute,
-  UserProfile,
 } from '@/types'
 import * as S from '@/mock/server'
 import type { Envelope } from '@/mock/server'
@@ -40,7 +39,6 @@ export {
   getUserStats,
   refreshAccess as bootstrap,
 } from './auth'
-export const currentUser = S.currentUser
 
 /* 商品（衣 / 特产）：真实后端 m1-goods，路由前缀 /api/v1/m1 */
 export interface GoodsQuery {
