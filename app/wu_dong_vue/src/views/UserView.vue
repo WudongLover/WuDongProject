@@ -3,15 +3,16 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import * as api from '@/api'
 import { unwrapError } from '@/api'
-import type { Address, Message, UserProfile, UserStats } from '@/types'
+import type { Address, Message, Post, UserProfile, UserStats } from '@/types'
 import { useUserStore } from '@/stores/user'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
+import PostCard from '@/components/PostCard.vue'
 
 const userStore = useUserStore()
 const router = useRouter()
 
-type Panel = 'profile' | 'security' | 'favorites' | 'addresses' | 'messages'
+type Panel = 'profile' | 'security' | 'posts' | 'favorites' | 'addresses' | 'messages'
 const panel = ref<Panel>('profile')
 
 const profileForm = ref({ name: '', bio: '' })
@@ -31,7 +32,14 @@ const favorites = ref<
 >([])
 const messages = ref<Message[]>([])
 const addresses = ref<Address[]>([])
-const stats = ref<UserStats>({ favorites: 0, unreadMessages: 0, likesReceived: 0 })
+const posts = ref<Post[]>([])
+const stats = ref<UserStats>({
+  favorites: 0,
+  unreadMessages: 0,
+  likesReceived: 0,
+  following: 0,
+  followers: 0,
+})
 const addressFormVisible = ref(false)
 const addressEditingId = ref('')
 const addressSaving = ref(false)
@@ -59,6 +67,11 @@ async function loadMessages() {
   messages.value = res.data
 }
 
+async function loadPosts() {
+  const res = await api.userProfileApi.posts(userStore.user!.id)
+  posts.value = res.data
+}
+
 async function loadAddresses() {
   const res = await api.addressApi.list()
   addresses.value = res.data
@@ -77,7 +90,13 @@ onMounted(async () => {
   profileForm.value = { name: userStore.user!.name, bio: userStore.user!.bio }
   loading.value = true
   try {
-    await Promise.all([loadFavorites(), loadMessages(), loadStats(), loadAddresses()])
+    await Promise.all([
+      loadFavorites(),
+      loadMessages(),
+      loadPosts(),
+      loadStats(),
+      loadAddresses(),
+    ])
   } catch (e) {
     userStore.toast(unwrapError(e).message)
   } finally {
@@ -257,6 +276,8 @@ async function removeAddress(address: Address) {
           <div><b>{{ stats.favorites }}</b><span>收藏</span></div>
           <div><b>{{ stats.unreadMessages }}</b><span>未读消息</span></div>
           <div><b>{{ stats.likesReceived }}</b><span>获赞</span></div>
+          <div><b>{{ stats.following }}</b><span>关注</span></div>
+          <div><b>{{ stats.followers }}</b><span>粉丝</span></div>
         </div>
       </div>
 
@@ -267,6 +288,9 @@ async function removeAddress(address: Address) {
           </button>
           <button :class="{ on: panel === 'security' }" @click="panel = 'security'">
             <AppIcon name="eye" :size="16" /> 账号安全
+          </button>
+          <button :class="{ on: panel === 'posts' }" @click="panel = 'posts'">
+            <AppIcon name="camera" :size="16" /> 我的游记
           </button>
           <button :class="{ on: panel === 'favorites' }" @click="panel = 'favorites'">
             <AppIcon name="heart" :size="16" /> 我的收藏
@@ -280,6 +304,18 @@ async function removeAddress(address: Address) {
           </button>
           <router-link to="/orders" class="menu-link"><AppIcon name="ticket" :size="16" /> 我的订单</router-link>
           <router-link to="/cart" class="menu-link"><AppIcon name="cart" :size="16" /> 购物车</router-link>
+          <router-link
+            :to="`/users/${userStore.user.id}?tab=following`"
+            class="menu-link"
+          >
+            <AppIcon name="user" :size="16" /> 我的关注
+          </router-link>
+          <router-link
+            :to="`/users/${userStore.user.id}?tab=followers`"
+            class="menu-link"
+          >
+            <AppIcon name="heart" :size="16" /> 我的粉丝
+          </router-link>
           <button class="quit" @click="userStore.logout(); userStore.toast('已退出登录')">
             <AppIcon name="close" :size="16" /> 退出登录
           </button>
@@ -345,6 +381,17 @@ async function removeAddress(address: Address) {
             <button class="btn btn-primary" :disabled="pwdSaving" @click="savePassword">
               {{ userStore.user.hasPassword ? '修改密码' : '设置密码' }}
             </button>
+          </section>
+
+          <!-- 我的游记 -->
+          <section v-else-if="panel === 'posts'" class="panel">
+            <div class="panel-head">
+              <h3>我的游记</h3>
+            </div>
+            <EmptyState v-if="!posts.length" text="还没有发布游记" />
+            <div v-else class="post-grid">
+              <PostCard v-for="post in posts" :key="post.id" :item="post" />
+            </div>
           </section>
 
           <!-- 我的收藏 -->
@@ -678,6 +725,13 @@ async function removeAddress(address: Address) {
   margin-top: 16px;
 }
 
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
 .fav-item {
   position: relative;
   border: 1px solid var(--line);
@@ -949,6 +1003,10 @@ async function removeAddress(address: Address) {
 
   .fav-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .post-grid {
+    grid-template-columns: 1fr;
   }
 
   .addr-list {

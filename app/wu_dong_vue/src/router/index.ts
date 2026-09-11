@@ -25,6 +25,11 @@ const router = createRouter({
     { path: '/order/pay/:orderNo', name: 'order-pay', component: () => import('@/views/OrderPayView.vue') },
     { path: '/order/result/:orderNo', name: 'order-result', component: () => import('@/views/OrderResultView.vue') },
     { path: '/user', name: 'user', component: () => import('@/views/UserView.vue') },
+    {
+      path: '/users/:id',
+      name: 'public-user',
+      component: () => import('@/views/PublicUserView.vue'),
+    },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 })

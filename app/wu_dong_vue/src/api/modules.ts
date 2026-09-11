@@ -170,3 +170,4 @@ export { cartApi } from './cart'
 /* 消息 / 地址 / 资料 */
 export { messageApi } from './message'
 export { addressApi } from './address'
+export { userProfileApi } from './userProfile'

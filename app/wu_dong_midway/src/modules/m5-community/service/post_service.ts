@@ -2,6 +2,7 @@
  * 【m5-community 模块】帖子（wudong_m5_post）
  * service 层：业务逻辑 + VO 组装（VO 结构对齐前端 types.ts：Post / PostComment / PostAuthor）
  * 跨模块只经对方 Service（当前作者信息临时直读，见 entity/user_entity.ts 注释）
+ * 公开用户主页需要按作者查询游记，见 listByAuthor()。
  */
 import { Inject, Provide } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
@@ -109,6 +110,18 @@ export class PostService {
       rows.map((r) => r.id)
     );
     return rows.map((r) => this.toPostVo(r, likedSet.has(r.id)));
+  }
+
+  async listByAuthor(ctx: Context, authorId: number): Promise<PostVo[]> {
+    if (!Number.isFinite(authorId) || authorId <= 0) {
+      throw new ApiError(1004, '用户 ID 无效', 400);
+    }
+    const rows = await this.postMapper.findByAuthor(authorId);
+    const likedSet = await this.postMapper.findLikedPostIds(
+      this.currentUserId(ctx),
+      rows.map((row) => row.id)
+    );
+    return rows.map((row) => this.toPostVo(row, likedSet.has(row.id)));
   }
 
   /** 详情：阅读数原子 +1；评论按 parent_id 组装楼中楼 */

@@ -322,6 +322,27 @@ export interface UserStats {
   favorites: number
   unreadMessages: number
   likesReceived: number
+  following: number
+  followers: number
+}
+
+export interface PublicUserProfile {
+  id: string
+  name: string
+  avatar: string
+  bio: string
+  postCount: number
+  likesReceived: number
+  followingCount: number
+  followerCount: number
+  isFollowing: boolean
+}
+
+export interface FollowUser {
+  id: string
+  name: string
+  avatar: string
+  bio: string
 }
 
 /* ================= 文化导览（前端固定内容，不计划迁后端） ================= */
