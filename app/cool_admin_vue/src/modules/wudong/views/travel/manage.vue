@@ -107,9 +107,10 @@ defineOptions({
 });
 
 import { reactive, ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import { Location, Edit, Star, Clock, Picture, View, Delete } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { Location, Edit, Star, Clock, Picture, View, Delete, Top, Bottom } from '@element-plus/icons-vue';
 import { useCrud, useSearch, useTable, useUpsert } from '@cool-vue/crud';
+import { ossImage } from '../../utils/oss-image';
 
 // ==================== 类型定义 ====================
 type ScenicStatus = 'ENABLED' | 'DISABLED';
@@ -139,14 +140,16 @@ function generateMockScenics(): ScenicItem[] {
 		'梯田徒步路线全长约5公里，沿途经过层层叠叠的梯田，春季灌水如镜，秋季金黄一片。路线难度适中，适合亲子徒步。'
 	];
 	const statuses: ScenicStatus[] = ['ENABLED', 'ENABLED', 'ENABLED', 'ENABLED', 'ENABLED', 'DISABLED'];
+	const imageFiles = ['m4-scenic1-cover.jpg', 'm4-scenic2-cover.jpg'];
 
 	const list: ScenicItem[] = [];
 	for (let i = 1; i <= 18; i++) {
 		const d = new Date(Date.now() - i * 3600 * 1000 * 30);
+		const cover = ossImage(imageFiles[i % imageFiles.length]);
 		list.push({
 			id: String(5000 + i),
 			name: names[i % names.length],
-			cover: '',
+			cover,
 			openTime: openTimes[i % openTimes.length],
 			address: addresses[i % addresses.length],
 			intro: intros[i % intros.length],
@@ -208,6 +211,7 @@ const statusOptions = [
 	{ label: '开放中', value: 'ENABLED', type: 'success' },
 	{ label: '已关闭', value: 'DISABLED', type: 'info' }
 ];
+const statusFilterOptions = [{ label: '全部状态', value: '' }, ...statusOptions];
 
 // ==================== 详情弹窗 ====================
 const detailVisible = ref(false);
@@ -229,6 +233,16 @@ function editItem() {
 		detailVisible.value = false;
 		Crud.value?.rowEdit(detailItem.value);
 	}
+}
+
+async function toggleScenicStatus(id: string, status: ScenicStatus) {
+	const action = status === 'ENABLED' ? '开放景点' : '关闭景点';
+	try {
+		await ElMessageBox.confirm(`确认${action}？`, '状态确认', { type: 'warning' });
+		await mockService.update({ id, status });
+		ElMessage.success(`景点已${status === 'ENABLED' ? '开放' : '关闭'}`);
+		Crud.value?.refresh();
+	} catch { /* cancel */ }
 }
 
 // ==================== cl-table ====================
@@ -256,7 +270,7 @@ const Table = useTable({
 			label: '操作',
 			type: 'op',
 			width: 148,
-			buttons: [
+			buttons: ({ scope }: { scope: { row: ScenicItem } }) => [
 				{
 					label: '',
 					type: 'primary',
@@ -270,6 +284,15 @@ const Table = useTable({
 					onClick: ({ scope }: { scope: { row: ScenicItem } }) =>
 						Crud.value?.rowEdit(scope.row)
 				},
+				scope.row.status === 'ENABLED'
+					? {
+						label: '', type: 'warning', props: { icon: Bottom, size: 'small', title: '关闭景点', 'aria-label': '关闭景点' },
+						onClick: ({ scope }: { scope: { row: ScenicItem } }) => toggleScenicStatus(scope.row.id, 'DISABLED')
+					}
+					: {
+						label: '', type: 'success', props: { icon: Top, size: 'small', title: '开放景点', 'aria-label': '开放景点' },
+						onClick: ({ scope }: { scope: { row: ScenicItem } }) => toggleScenicStatus(scope.row.id, 'ENABLED')
+					},
 				{
 					label: '',
 					type: 'danger',
@@ -283,19 +306,23 @@ const Table = useTable({
 
 // ==================== cl-upsert ====================
 const Upsert = useUpsert({
+	dialog: { width: '780px', height: '74vh', class: 'wudong-upsert-dialog' },
+	props: { labelPosition: 'top' },
+	op: { saveButtonText: '保存景点', closeButtonText: '取消' },
 	items: [
-		{ prop: 'name', label: '景点名称', component: { name: 'el-input' }, required: true },
-		{ prop: 'cover', label: '封面图', component: { name: 'cl-upload' } },
-		{ prop: 'rating', label: '评分', value: 5.0, component: { name: 'el-input-number', props: { min: 0, max: 5, precision: 1 } } },
-		{ prop: 'openTime', label: '开放时间', component: { name: 'el-input', props: { placeholder: '如 08:00 - 18:00' } } },
-		{ prop: 'address', label: '地址', component: { name: 'el-input' }, required: true },
+		{ prop: 'name', label: '景点名称', span: 24, component: { name: 'el-input', props: { placeholder: '输入景点名称' } }, required: true },
+		{ prop: 'cover', label: '封面图', span: 24, component: { name: 'cl-upload' } },
+		{ prop: 'rating', label: '用户评分', span: 12, value: 5.0, component: { name: 'el-input-number', props: { min: 0, max: 5, precision: 1 } } },
+		{ prop: 'openTime', label: '开放时间', span: 12, component: { name: 'el-input', props: { placeholder: '如 08:00 - 18:00' } } },
+		{ prop: 'address', label: '详细地址', span: 24, component: { name: 'el-input', props: { placeholder: '输入景点地址' } }, required: true },
 		{
 			prop: 'status',
 			label: '状态',
+			span: 24,
 			value: 'ENABLED',
 			component: { name: 'el-radio-group', options: statusOptions }
 		},
-		{ prop: 'intro', label: '景点介绍', component: { name: 'el-input', props: { type: 'textarea', rows: 5 } } }
+		{ prop: 'intro', label: '景点介绍', span: 24, component: { name: 'el-input', props: { type: 'textarea', rows: 6, maxlength: 800, showWordLimit: true, placeholder: '介绍景点特色、游玩建议与服务信息' } } }
 	]
 });
 
@@ -310,7 +337,7 @@ const Search = useSearch({
 		{
 			prop: 'status',
 			label: '状态',
-			component: { name: 'el-select', options: statusOptions, props: { clearable: true, placeholder: '全部状态' } }
+			component: { name: 'el-select', options: statusFilterOptions, props: { clearable: true, placeholder: '全部状态' } }
 		}
 	]
 });
@@ -325,6 +352,17 @@ const Crud = useCrud({ service: mockService }, app => {
 :deep(.detail-dialog) {
 	.el-dialog__body { padding: 0; }
 	.el-dialog__footer { padding: 0; border-top: 1px solid #ebeef5; }
+}
+
+:deep(.wudong-upsert-dialog) {
+	.el-dialog { overflow: hidden; border-radius: 10px; }
+	.el-dialog__header { padding: 20px 26px; margin-right: 0; border-bottom: 1px solid #e1e6df; background: #f8faf7; }
+	.el-dialog__title { color: #25473b; font-size: 18px; font-weight: 700; }
+	.el-dialog__body { padding: 24px 26px 6px; }
+	.el-dialog__footer { padding: 14px 26px; border-top: 1px solid #e1e6df; }
+	.el-form-item__label { color: #506158; font-weight: 650; }
+	.el-input__wrapper, .el-textarea__inner { box-shadow: 0 0 0 1px #dce4da inset; }
+	.el-input__wrapper.is-focus, .el-textarea__inner:focus { box-shadow: 0 0 0 1px #287a5a inset; }
 }
 
 .detail-banner {

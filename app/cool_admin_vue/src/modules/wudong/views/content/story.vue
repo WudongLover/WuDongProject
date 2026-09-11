@@ -54,6 +54,7 @@ const options = reactive({
 		{ label: '已下线', value: 'OFFLINE', type: 'danger' }
 	]
 });
+const statusFilterOptions = [{ label: '全部状态', value: '' }, ...options.status];
 
 // cl-table
 const Table = useTable({
@@ -256,7 +257,7 @@ const Search = useSearch({
 		{
 			label: '状态',
 			prop: 'status',
-			component: { name: 'cl-select', props: { options: options.status } }
+			component: { name: 'cl-select', props: { options: statusFilterOptions } }
 		},
 		{
 			label: '关键字',

@@ -158,7 +158,7 @@ export async function logout() {
   }
 }
 
-export async function updateProfile(patch: Partial<Pick<UserProfile, 'name' | 'bio'>>) {
+export async function updateProfile(patch: Partial<Pick<UserProfile, 'name' | 'bio' | 'avatar'>>) {
   const res = await request<UserProfile>('/profile', { method: 'POST', body: patch }, true)
   return res
 }

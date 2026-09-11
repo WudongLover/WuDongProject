@@ -555,7 +555,7 @@ export async function getAddresses() {
 
 /* ---------- 个人资料 ---------- */
 
-export async function updateProfile(patch: Partial<Pick<UserProfile, 'name' | 'bio'>>) {
+export async function updateProfile(patch: Partial<Pick<UserProfile, 'name' | 'bio' | 'avatar'>>) {
   await delay(200)
   if (!db.user) throw new ApiError(1001, '未登录')
   Object.assign(db.user, patch)

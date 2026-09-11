@@ -139,9 +139,10 @@ defineOptions({
 });
 
 import { reactive, ref } from 'vue';
-import { ElMessage } from 'element-plus';
-import { Location, Edit, MagicStick, Bell, PriceTag, House, Warning, View, Delete } from '@element-plus/icons-vue';
+import { ElMessage, ElMessageBox } from 'element-plus';
+import { Location, Edit, MagicStick, Bell, PriceTag, House, Warning, View, Delete, Top, Bottom } from '@element-plus/icons-vue';
 import { useCrud, useSearch, useTable, useUpsert } from '@cool-vue/crud';
+import { ossImage } from '../../utils/oss-image';
 
 // ==================== 类型定义 ====================
 type HomestayStatus = 'ENABLED' | 'DISABLED';
@@ -178,16 +179,18 @@ function generateMockHomestays(): HomestayItem[] {
 	const tagsPool = [['观景房', '亲子房', '独立卫浴'], ['山景房', '阳台', '早餐提供'], ['榻榻米', '日式风格', '温泉'], ['loft', '家庭房', '厨房可用'], ['星空房', '情侣房', '浪漫']];
 	const facilitiesPool = [['免费WiFi', '停车场', '空调'], ['免费WiFi', '早餐', '接送服务'], ['免费WiFi', '茶室', '书吧'], ['免费WiFi', '烧烤', '露营装备'], ['免费WiFi', '洗衣机', '厨房']];
 	const statuses: HomestayStatus[] = ['ENABLED', 'ENABLED', 'ENABLED', 'ENABLED', 'DISABLED'];
+	const imageFiles = ['m3-stay1-cover.jpg', 'm3-stay2-cover.jpg', 'm3-stay3-cover.jpg', 'm3-stay4-cover.jpg'];
 
 	const list: HomestayItem[] = [];
 	for (let i = 1; i <= 20; i++) {
 		const d = new Date(Date.now() - i * 3600 * 1000 * 24);
+		const cover = ossImage(imageFiles[i % imageFiles.length]);
 		list.push({
 			id: String(4000 + i),
 			merchantId: '0',
 			name: names[i % names.length] + `（${String(i).padStart(2, '0')}号院）`,
-			cover: '',
-			images: [],
+			cover,
+			images: [cover],
 			rating: Math.round((4.2 + Math.random() * 0.8) * 10) / 10,
 			score: {
 				location: Math.round((4.0 + Math.random()) * 10) / 10,
@@ -261,6 +264,7 @@ const statusOptions = [
 	{ label: '营业中', value: 'ENABLED', type: 'success' },
 	{ label: '已停业', value: 'DISABLED', type: 'info' }
 ];
+const statusFilterOptions = [{ label: '全部状态', value: '' }, ...statusOptions];
 
 // ==================== 详情弹窗 ====================
 const detailVisible = ref(false);
@@ -282,6 +286,16 @@ function editItem() {
 		detailVisible.value = false;
 		Crud.value?.rowEdit(detailItem.value);
 	}
+}
+
+async function toggleHomestayStatus(id: string, status: HomestayStatus) {
+	const action = status === 'ENABLED' ? '恢复营业' : '设为停业';
+	try {
+		await ElMessageBox.confirm(`确认将该民宿${action}？`, '状态确认', { type: 'warning' });
+		await mockService.update({ id, status });
+		ElMessage.success(`民宿已${action}`);
+		Crud.value?.refresh();
+	} catch { /* cancel */ }
 }
 
 // ==================== cl-table ====================
@@ -328,7 +342,7 @@ const Table = useTable({
 			label: '操作',
 			type: 'op',
 			width: 148,
-			buttons: [
+			buttons: ({ scope }: { scope: { row: HomestayItem } }) => [
 				{
 					label: '',
 					type: 'primary',
@@ -342,6 +356,15 @@ const Table = useTable({
 					onClick: ({ scope }: { scope: { row: HomestayItem } }) =>
 						Crud.value?.rowEdit(scope.row)
 				},
+				scope.row.status === 'ENABLED'
+					? {
+						label: '', type: 'warning', props: { icon: Bottom, size: 'small', title: '设为停业', 'aria-label': '设为停业' },
+						onClick: ({ scope }: { scope: { row: HomestayItem } }) => toggleHomestayStatus(scope.row.id, 'DISABLED')
+					}
+					: {
+						label: '', type: 'success', props: { icon: Top, size: 'small', title: '恢复营业', 'aria-label': '恢复营业' },
+						onClick: ({ scope }: { scope: { row: HomestayItem } }) => toggleHomestayStatus(scope.row.id, 'ENABLED')
+					},
 				{
 					label: '',
 					type: 'danger',
@@ -355,21 +378,26 @@ const Table = useTable({
 
 // ==================== cl-upsert ====================
 const Upsert = useUpsert({
+	dialog: { width: '780px', height: '74vh', class: 'wudong-upsert-dialog' },
+	props: { labelPosition: 'top' },
+	op: { saveButtonText: '保存民宿', closeButtonText: '取消' },
 	items: [
-		{ prop: 'name', label: '民宿名称', component: { name: 'el-input' }, required: true },
-		{ prop: 'cover', label: '封面图', component: { name: 'cl-upload' } },
-		{ prop: 'rating', label: '评分', value: 5.0, component: { name: 'el-input-number', props: { min: 0, max: 5, precision: 1 } } },
-		{ prop: 'address', label: '地址', component: { name: 'el-input' }, required: true },
-		{ prop: 'tags', label: '标签', component: { name: 'el-input', props: { placeholder: '多个标签用逗号分隔' } } },
-		{ prop: 'facilities', label: '设施', component: { name: 'el-input', props: { placeholder: '多个设施用逗号分隔' } } },
+		{ prop: 'name', label: '民宿名称', span: 24, component: { name: 'el-input', props: { placeholder: '输入民宿名称' } }, required: true },
+		{ prop: 'cover', label: '封面图', span: 24, component: { name: 'cl-upload' } },
+		{ prop: 'images', label: '民宿图集', span: 24, component: { name: 'cl-upload', props: { multiple: true, limit: 6, draggable: true } } },
+		{ prop: 'rating', label: '综合评分', span: 12, value: 5.0, component: { name: 'el-input-number', props: { min: 0, max: 5, precision: 1 } } },
+		{ prop: 'address', label: '详细地址', span: 12, component: { name: 'el-input', props: { placeholder: '输入民宿地址' } }, required: true },
+		{ prop: 'tags', label: '房型标签', span: 12, component: { name: 'el-input', props: { placeholder: '多个标签用逗号分隔' } } },
+		{ prop: 'facilities', label: '配套设施', span: 12, component: { name: 'el-input', props: { placeholder: '多个设施用逗号分隔' } } },
 		{
 			prop: 'status',
 			label: '状态',
+			span: 24,
 			value: 'ENABLED',
 			component: { name: 'el-radio-group', options: statusOptions }
 		},
-		{ prop: 'intro', label: '民宿介绍', component: { name: 'el-input', props: { type: 'textarea', rows: 4 } } },
-		{ prop: 'notice', label: '入住须知', component: { name: 'el-input', props: { type: 'textarea', rows: 3 } } }
+		{ prop: 'intro', label: '民宿介绍', span: 24, component: { name: 'el-input', props: { type: 'textarea', rows: 5, maxlength: 600, showWordLimit: true, placeholder: '介绍环境、房型与服务特色' } } },
+		{ prop: 'notice', label: '入住须知', span: 24, component: { name: 'el-input', props: { type: 'textarea', rows: 3, maxlength: 400, showWordLimit: true, placeholder: '填写入住和退房规则等注意事项' } } }
 	]
 });
 
@@ -384,7 +412,7 @@ const Search = useSearch({
 		{
 			prop: 'status',
 			label: '状态',
-			component: { name: 'el-select', options: statusOptions, props: { clearable: true, placeholder: '全部状态' } }
+			component: { name: 'el-select', options: statusFilterOptions, props: { clearable: true, placeholder: '全部状态' } }
 		}
 	]
 });
@@ -399,6 +427,17 @@ const Crud = useCrud({ service: mockService }, app => {
 :deep(.detail-dialog) {
 	.el-dialog__body { padding: 0; }
 	.el-dialog__footer { padding: 0; border-top: 1px solid #ebeef5; }
+}
+
+:deep(.wudong-upsert-dialog) {
+	.el-dialog { overflow: hidden; border-radius: 10px; }
+	.el-dialog__header { padding: 20px 26px; margin-right: 0; border-bottom: 1px solid #e1e6df; background: #f8faf7; }
+	.el-dialog__title { color: #25473b; font-size: 18px; font-weight: 700; }
+	.el-dialog__body { padding: 24px 26px 6px; }
+	.el-dialog__footer { padding: 14px 26px; border-top: 1px solid #e1e6df; }
+	.el-form-item__label { color: #506158; font-weight: 650; }
+	.el-input__wrapper, .el-textarea__inner { box-shadow: 0 0 0 1px #dce4da inset; }
+	.el-input__wrapper.is-focus, .el-textarea__inner:focus { box-shadow: 0 0 0 1px #287a5a inset; }
 }
 
 .detail-banner {

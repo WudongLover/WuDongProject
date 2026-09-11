@@ -162,6 +162,7 @@ import { ElMessage, ElMessageBox } from 'element-plus';
 import { Search as SearchIcon, Location, Pointer, Star, View, Reading, ChatDotRound, InfoFilled, Edit, Delete, CircleCheck, CircleClose } from '@element-plus/icons-vue';
 import { useCrud, useSearch, useTable, useUpsert } from '@cool-vue/crud';
 import { useCool } from '/@/cool';
+import { ossImage } from '../../utils/oss-image';
 
 const { service } = useCool();
 
@@ -196,10 +197,18 @@ function generateMockPosts(): PostItem[] {
 	const places = ['观景台', '苗寨中心', '酸汤鱼馆', '银饰作坊', '云上山居', '芦笙场'];
 	const authors = ['苗岭小哥', '旅行的猫', '山居日记', '摄影师阿杰', '美食猎人', '亲子游天下'];
 	const statuses: PostStatus[] = ['PENDING', 'PASSED', 'PASSED', 'PASSED', 'REJECTED'];
+	const imageFiles = [
+		'109_sea-of-clouds-mountain-sunrise_c1b39d04.jpg',
+		'112_silversmith-crafting-silver-workshop_748d05e3.jpg',
+		'114_long-outdoor-table-banquet-feast_a067861e.jpg',
+		'121_traditional-chinese-village-street_e5458950.jpg',
+		'126_misty-forest-hiking-trail_641f9d68.jpg'
+	];
 
 	const list: PostItem[] = [];
 	for (let i = 1; i <= 48; i++) {
 		const d = new Date(Date.now() - i * 3600 * 1000 * 6);
+		const image = ossImage(imageFiles[i % imageFiles.length]);
 		list.push({
 			id: 1000 + i,
 			userId: 2000 + (i % 6),
@@ -207,7 +216,7 @@ function generateMockPosts(): PostItem[] {
 			title: `乌东游记 ${String(i).padStart(2, '0')}：${['云海日出', '苗寨夜色', '长桌宴体验', '银饰制作', '山间徒步', '糯米酒香'][i % 6]}`,
 			content:
 				'这是一篇来自乌东苗寨的真实游记。清晨五点登上观景台，云海在脚下翻涌，远处的苗寨若隐若现。白天体验了银饰制作，老师傅的手艺令人惊叹。晚上的长桌宴上，酸汤鱼和糯米酒让人回味无穷。',
-			images: [],
+			images: [image],
 			topic: topics[i % topics.length],
 			place: places[i % places.length],
 			likes: Math.floor(Math.random() * 500),
@@ -302,6 +311,7 @@ const statusOptions = [
 	{ label: '已通过', value: 'PASSED', type: 'success' },
 	{ label: '已拒绝', value: 'REJECTED', type: 'danger' }
 ];
+const statusFilterOptions = [{ label: '全部状态', value: '' }, ...statusOptions];
 
 const topicOptions = [
 	{ label: '#乌东云海', value: '#乌东云海' },
@@ -457,7 +467,7 @@ const Table = useTable({
 			label: '操作',
 			type: 'op',
 			width: 196,
-			buttons: [
+			buttons: ({ scope }: { scope: { row: PostItem } }) => [
 				{
 					label: '',
 					type: 'primary',
@@ -470,20 +480,18 @@ const Table = useTable({
 					props: { icon: Edit, size: 'small', title: '编辑内容', 'aria-label': '编辑内容' },
 					onClick: ({ scope }: { scope: { row: PostItem } }) => Crud.value?.rowEdit(scope.row)
 				},
-				{
-					label: '',
-					type: 'success',
-					props: { icon: CircleCheck, size: 'small', title: '审核通过', 'aria-label': '审核通过' },
-					show: ({ scope }: { scope: { row: PostItem } }) => scope.row.status === 'PENDING',
-					onClick: ({ scope }: { scope: { row: PostItem } }) => auditPost(scope.row.id, 'PASSED')
-				},
-				{
-					label: '',
-					type: 'danger',
-					props: { icon: CircleClose, size: 'small', title: '审核拒绝', 'aria-label': '审核拒绝' },
-					show: ({ scope }: { scope: { row: PostItem } }) => scope.row.status === 'PENDING',
-					onClick: ({ scope }: { scope: { row: PostItem } }) => auditPost(scope.row.id, 'REJECTED')
-				},
+				...(scope.row.status === 'PENDING'
+					? [
+						{
+							label: '', type: 'success', props: { icon: CircleCheck, size: 'small', title: '审核通过', 'aria-label': '审核通过' },
+							onClick: ({ scope }: { scope: { row: PostItem } }) => auditPost(scope.row.id, 'PASSED')
+						},
+						{
+							label: '', type: 'danger', props: { icon: CircleClose, size: 'small', title: '审核拒绝', 'aria-label': '审核拒绝' },
+							onClick: ({ scope }: { scope: { row: PostItem } }) => auditPost(scope.row.id, 'REJECTED')
+						}
+					]
+					: []),
 				{
 					label: '',
 					type: 'danger',
@@ -499,13 +507,27 @@ const Table = useTable({
 const Upsert = useUpsert({
 	dialog: {
 		width: '760px',
+		height: '74vh',
 		class: 'community-upsert-dialog'
+	},
+	props: {
+		labelPosition: 'top'
 	},
 	op: {
 		saveButtonText: '保存内容',
 		closeButtonText: '暂不保存'
 	},
 	items: [
+		{
+			type: 'tabs',
+			props: {
+				justify: 'left',
+				labels: [
+					{ label: '内容编辑', value: '内容编辑' },
+					{ label: '内容分发', value: '内容分发' }
+				]
+			}
+		},
 		{
 			prop: 'title',
 			label: '内容标题',
@@ -553,6 +575,13 @@ const Upsert = useUpsert({
 			required: true
 		},
 		{
+			prop: 'images',
+			label: '内容图片',
+			group: '内容编辑',
+			span: 24,
+			component: { name: 'cl-upload', props: { multiple: true, limit: 9, draggable: true } }
+		},
+		{
 			prop: 'status',
 			label: '审核状态',
 			group: '内容分发',
@@ -597,7 +626,7 @@ const Search = useSearch({
 			label: '状态',
 			component: {
 				name: 'el-select',
-				options: statusOptions,
+				options: statusFilterOptions,
 				props: {
 					clearable: true,
 					placeholder: '全部状态'

@@ -12,7 +12,9 @@ const userStore = useUserStore()
 type Panel = 'profile' | 'security' | 'favorites' | 'addresses' | 'messages'
 const panel = ref<Panel>('profile')
 
-const profileForm = ref({ name: '', bio: '' })
+const profileForm = ref({ name: '', bio: '', avatar: '' })
+const avatarInput = ref<HTMLInputElement | null>(null)
+const avatarUploading = ref(false)
 const pwdForm = ref({ oldPassword: '', newPassword: '', confirm: '' })
 const pwdSaving = ref(false)
 const favorites = ref<{ id: string; name: string; cover: string; type: string; price?: number; to?: string }[]>([])
@@ -45,7 +47,7 @@ onMounted(async () => {
     userStore.toast('请先登录')
     return
   }
-  profileForm.value = { name: userStore.user!.name, bio: userStore.user!.bio }
+  profileForm.value = { name: userStore.user!.name, bio: userStore.user!.bio, avatar: userStore.user!.avatar }
   await Promise.all([loadFavorites(), loadMessages(), api.getAddresses().then((r) => (addresses.value = r.data))])
 })
 
@@ -57,6 +59,30 @@ async function saveProfile() {
     userStore.toast('资料已保存')
   } catch (e) {
     userStore.toast(unwrapError(e).message)
+  }
+}
+
+async function chooseAvatar(event: Event) {
+  const file = (event.target as HTMLInputElement).files?.[0]
+  if (!file) return
+  if (!file.type.startsWith('image/')) {
+    userStore.toast('请选择图片文件')
+    return
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    userStore.toast('图片大小不能超过 10MB')
+    return
+  }
+  avatarUploading.value = true
+  try {
+    const res = await api.uploadImage(file, 'avatar')
+    profileForm.value.avatar = res.data.url
+    userStore.toast('头像上传成功，请保存修改')
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  } finally {
+    avatarUploading.value = false
+    if (avatarInput.value) avatarInput.value.value = ''
   }
 }
 
@@ -106,7 +132,7 @@ async function unfav(f: { targetType: string; targetId: string; id: string }) {
     <template v-if="userStore.isLoggedIn && userStore.user">
       <!-- 头部资料卡 -->
       <div class="u-hero">
-        <img class="avatar" :src="userStore.user.avatar" :alt="userStore.user.name" />
+        <img class="avatar" :src="profileForm.avatar || userStore.user.avatar" :alt="userStore.user.name" />
         <div class="u-name">
           <h1>{{ userStore.user.name }}</h1>
           <p>{{ userStore.user.bio || '这个人很懒，什么都没写' }}</p>
@@ -148,6 +174,16 @@ async function unfav(f: { targetType: string; targetId: string; id: string }) {
           <!-- 我的资料 -->
           <section v-if="panel === 'profile'" class="panel">
             <h3>我的资料</h3>
+            <div class="avatar-field">
+              <img class="avatar-preview" :src="profileForm.avatar || userStore.user.avatar" :alt="userStore.user.name" />
+              <div>
+                <input ref="avatarInput" class="sr-only" type="file" accept="image/jpeg,image/png,image/webp,image/gif" @change="chooseAvatar" />
+                <button class="btn btn-outline" type="button" :disabled="avatarUploading" @click="avatarInput?.click()">
+                  {{ avatarUploading ? '上传中…' : '更换头像' }}
+                </button>
+                <p class="avatar-tip">支持 JPG、PNG、WEBP、GIF，单张不超过 10MB</p>
+              </div>
+            </div>
             <div class="field">
               <label>昵称</label>
               <input v-model="profileForm.name" maxlength="12" />
@@ -318,6 +354,39 @@ async function unfav(f: { targetType: string; targetId: string; id: string }) {
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid rgba(215, 224, 230, 0.4);
+}
+
+.avatar-field {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.avatar-preview {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--line);
+}
+
+.avatar-tip {
+  margin-top: 7px;
+  font-size: 12px;
+  color: var(--text-3);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .u-name h1 {

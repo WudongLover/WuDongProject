@@ -148,8 +148,9 @@ defineOptions({
 
 import { reactive, ref, computed } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Search as SearchIcon, Edit, Opportunity, Star, Box, PriceTag, Brush, User, Document } from '@element-plus/icons-vue';
+import { Search as SearchIcon, Edit, Opportunity, Star, Box, PriceTag, Brush, User, Document, View, Delete, Top, Bottom } from '@element-plus/icons-vue';
 import { useCrud, useSearch, useTable, useUpsert } from '@cool-vue/crud';
+import { ossImage } from '../../utils/oss-image';
 
 // ==================== 类型定义 ====================
 type ProductStatus = 'ON_SHELF' | 'OFF_SHELF';
@@ -193,10 +194,17 @@ function generateMockProducts(): ProductItem[] {
 		{ name: '吴师傅', title: '苗族银饰大师', avatar: '', story: '家族三代从事银饰制作，独创浮雕工艺' }
 	];
 	const statuses: ProductStatus[] = ['ON_SHELF', 'ON_SHELF', 'ON_SHELF', 'OFF_SHELF'];
+	const imageFiles = [
+		'004_handcrafted-miao-silver-filigree-bracelet-_bc373861.jpg',
+		'010_indigo-blue-batik-square-scarf-folded-crac_7c8bb2d7.jpg',
+		'015_colorful-miao-embroidery-dragon-wall-hangi_48870d33.jpg',
+		'021_delicate-silver-butterfly-earrings-on-line_4ac55c25.jpg'
+	];
 
 	const list: ProductItem[] = [];
 	for (let i = 1; i <= 32; i++) {
 		const d = new Date(Date.now() - i * 3600 * 1000 * 12);
+		const cover = ossImage(imageFiles[i % imageFiles.length]);
 		list.push({
 			id: String(2000 + i),
 			module: 'GOODS',
@@ -208,8 +216,8 @@ function generateMockProducts(): ProductItem[] {
 			sales: Math.floor(Math.random() * 500),
 			rating: Math.round((4.0 + Math.random()) * 10) / 10,
 			stock: Math.floor(Math.random() * 200),
-			cover: '',
-			images: [],
+			cover,
+			images: [cover],
 			detail: '<p>这是一件来自乌东苗寨的手工艺品，由非遗传承人亲手制作。</p><p>每一件作品都凝聚了匠人的心血和苗族千年文化的积淀。</p>',
 			craft: crafts[i % crafts.length],
 			artisan: artisans[i % artisans.length],
@@ -278,6 +286,7 @@ const statusOptions = [
 	{ label: '在售', value: 'ON_SHELF', type: 'success' },
 	{ label: '已下架', value: 'OFF_SHELF', type: 'info' }
 ];
+const statusFilterOptions = [{ label: '全部状态', value: '' }, ...statusOptions];
 
 const categoryOptions = [
 	{ label: '银饰', value: '100' },
@@ -387,41 +396,40 @@ const Table = useTable({
 		{
 			label: '操作',
 			type: 'op',
-			width: 220,
-			buttons: [
+			width: 172,
+			buttons: ({ scope }: { scope: { row: ProductItem } }) => [
 				{
-					label: '详情',
+					label: '',
 					type: 'primary',
-					text: true,
+					props: { icon: View, size: 'small', title: '查看详情', 'aria-label': '查看详情' },
 					onClick: ({ scope }: { scope: { row: ProductItem } }) => viewDetail(scope.row.id)
 				},
 				{
-					label: '编辑',
+					label: '',
 					type: 'primary',
-					text: true,
+					props: { icon: Edit, size: 'small', title: '编辑商品', 'aria-label': '编辑商品' },
 					onClick: ({ scope }: { scope: { row: ProductItem } }) =>
 						Crud.value?.rowEdit(scope.row)
 				},
-				{
-					label: '下架',
+				scope.row.status === 'ON_SHELF'
+					? {
+					label: '',
 					type: 'warning',
-					text: true,
-					show: ({ scope }: { scope: { row: ProductItem } }) => scope.row.status === 'ON_SHELF',
+					props: { icon: Bottom, size: 'small', title: '下架商品', 'aria-label': '下架商品' },
 					onClick: ({ scope }: { scope: { row: ProductItem } }) =>
 						toggleShelf(scope.row.id, 'OFF_SHELF')
-				},
-				{
-					label: '上架',
+					}
+					: {
+					label: '',
 					type: 'success',
-					text: true,
-					show: ({ scope }: { scope: { row: ProductItem } }) => scope.row.status === 'OFF_SHELF',
+					props: { icon: Top, size: 'small', title: '上架商品', 'aria-label': '上架商品' },
 					onClick: ({ scope }: { scope: { row: ProductItem } }) =>
 						toggleShelf(scope.row.id, 'ON_SHELF')
 				},
 				{
-					label: '删除',
+					label: '',
 					type: 'danger',
-					text: true,
+					props: { icon: Delete, size: 'small', title: '删除商品', 'aria-label': '删除商品' },
 					confirm: '确认删除该商品？删除后不可恢复。'
 				}
 			]
@@ -431,26 +439,32 @@ const Table = useTable({
 
 // ==================== cl-upsert ====================
 const Upsert = useUpsert({
+	dialog: { width: '780px', height: '74vh', class: 'wudong-upsert-dialog' },
+	props: { labelPosition: 'top' },
+	op: { saveButtonText: '保存商品', closeButtonText: '取消' },
 	items: [
-		{ prop: 'title', label: '商品标题', component: { name: 'el-input' }, required: true },
-		{ prop: 'subtitle', label: '副标题', component: { name: 'el-input' } },
+		{ prop: 'title', label: '商品标题', span: 24, component: { name: 'el-input', props: { placeholder: '输入商品标题' } }, required: true },
+		{ prop: 'subtitle', label: '副标题', span: 24, component: { name: 'el-input', props: { placeholder: '补充一句商品卖点' } } },
 		{
 			prop: 'categoryId',
 			label: '分类',
+			span: 12,
 			component: { name: 'el-select', options: categoryOptions, props: { clearable: true } }
 		},
-		{ prop: 'price', label: '售价(元)', value: 0, component: { name: 'el-input-number', props: { min: 0, precision: 2 } }, required: true },
-		{ prop: 'marketPrice', label: '划线价(元)', value: null, component: { name: 'el-input-number', props: { min: 0, precision: 2 } } },
-		{ prop: 'stock', label: '库存', value: 0, component: { name: 'el-input-number', props: { min: 0 } } },
-		{ prop: 'cover', label: '封面图', component: { name: 'cl-upload' } },
-		{ prop: 'craft', label: '非遗工艺介绍', component: { name: 'el-input', props: { type: 'textarea', rows: 3 } } },
+		{ prop: 'price', label: '售价（元）', span: 12, value: 0, component: { name: 'el-input-number', props: { min: 0, precision: 2 } }, required: true },
+		{ prop: 'marketPrice', label: '划线价（元）', span: 12, value: null, component: { name: 'el-input-number', props: { min: 0, precision: 2 } } },
+		{ prop: 'stock', label: '库存', span: 12, value: 0, component: { name: 'el-input-number', props: { min: 0 } } },
+		{ prop: 'cover', label: '商品封面', span: 24, component: { name: 'cl-upload' } },
+		{ prop: 'images', label: '商品图集', span: 24, component: { name: 'cl-upload', props: { multiple: true, limit: 6, draggable: true } } },
+		{ prop: 'craft', label: '非遗工艺介绍', span: 24, component: { name: 'el-input', props: { type: 'textarea', rows: 4, maxlength: 500, showWordLimit: true, placeholder: '描述工艺渊源、制作方式与文化价值' } } },
 		{
 			prop: 'status',
 			label: '状态',
+			span: 24,
 			value: 'ON_SHELF',
 			component: { name: 'el-radio-group', options: statusOptions }
 		},
-		{ prop: 'detail', label: '图文详情', component: { name: 'el-input', props: { type: 'textarea', rows: 5 } } }
+		{ prop: 'detail', label: '图文详情', span: 24, component: { name: 'el-input', props: { type: 'textarea', rows: 6, maxlength: 1500, showWordLimit: true, placeholder: '填写商品详情、材质和购买说明' } } }
 	]
 });
 
@@ -465,7 +479,7 @@ const Search = useSearch({
 		{
 			prop: 'status',
 			label: '状态',
-			component: { name: 'el-select', options: statusOptions, props: { clearable: true, placeholder: '全部状态' } }
+			component: { name: 'el-select', options: statusFilterOptions, props: { clearable: true, placeholder: '全部状态' } }
 		}
 	]
 });
@@ -486,6 +500,17 @@ const Crud = useCrud({ service: mockService }, app => {
 		padding: 0;
 		border-top: 1px solid #ebeef5;
 	}
+}
+
+:deep(.wudong-upsert-dialog) {
+	.el-dialog { overflow: hidden; border-radius: 10px; }
+	.el-dialog__header { padding: 20px 26px; margin-right: 0; border-bottom: 1px solid #e1e6df; background: #f8faf7; }
+	.el-dialog__title { color: #25473b; font-size: 18px; font-weight: 700; }
+	.el-dialog__body { padding: 24px 26px 6px; }
+	.el-dialog__footer { padding: 14px 26px; border-top: 1px solid #e1e6df; }
+	.el-form-item__label { color: #506158; font-weight: 650; }
+	.el-input__wrapper, .el-textarea__inner { box-shadow: 0 0 0 1px #dce4da inset; }
+	.el-input__wrapper.is-focus, .el-textarea__inner:focus { box-shadow: 0 0 0 1px #287a5a inset; }
 }
 
 // 顶部 Banner
@@ -734,4 +759,8 @@ const Crud = useCrud({ service: mockService }, app => {
 	gap: 12px;
 	padding: 16px 32px;
 }
+
+:deep(.cl-table .cl-table__op) { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; margin-bottom: 0; }
+:deep(.cl-table .cl-table__op .el-button) { margin-bottom: 0; }
+:deep(.cl-table .cl-table__op .el-button + .el-button) { margin-left: 0; }
 </style>

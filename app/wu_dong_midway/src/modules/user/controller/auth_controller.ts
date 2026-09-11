@@ -97,7 +97,8 @@ export class AuthController {
       data: await this.service.updateProfile(
         this.userId(),
         body?.name,
-        body?.bio
+        body?.bio,
+        body?.avatar
       ),
     };
   }
