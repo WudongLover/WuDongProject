@@ -1,22 +1,30 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import * as api from '@/api'
-import type { Banner, Homestay, LiveInfo, Post, Product, Restaurant, TravelRoute } from '@/types'
+import type { Banner, LiveInfo, Post } from '@/types'
 import SectionTitle from '@/components/SectionTitle.vue'
-import ProductCard from '@/components/ProductCard.vue'
-import RestaurantCard from '@/components/RestaurantCard.vue'
-import HomestayCard from '@/components/HomestayCard.vue'
-import RouteCard from '@/components/RouteCard.vue'
 import PostCard from '@/components/PostCard.vue'
 import AppIcon from '@/components/AppIcon.vue'
+import CultureStrip from '@/components/CultureStrip.vue'
 import { scene } from '@/mock/images'
+
+/**
+ * 首页只做文旅介绍，不做商品陈列：卡片、价格、销量一概不上。
+ * 想买东西的人从导航或每个模块的「查看全部」进列表页。
+ */
+const yi = api.getCultureSection('YI')
+const shi = api.getCultureSection('SHI')
+const zhu = api.getCultureSection('ZHU')
+const xing = api.getCultureSection('XING')
+
+/** 词条跳文化内容：文案对上就跳对应段落，对不上退回该模块列表页 */
+function entryTo(kw: string, fallback: string) {
+  const hit = api.cultureEntries.find((e) => e.label === kw)
+  return hit ? `/culture/${hit.storyId}` : fallback
+}
 
 const banners = ref<Banner[]>([])
 const announcements = ref<string[]>([])
-const goods = ref<Product[]>([])
-const restaurants = ref<Restaurant[]>([])
-const homestays = ref<Homestay[]>([])
-const routesList = ref<TravelRoute[]>([])
 const posts = ref<Post[]>([])
 const hotKeywords = ref<string[]>([])
 const live = ref<LiveInfo | null>(null)
@@ -39,20 +47,12 @@ async function loadLive() {
 }
 
 onMounted(async () => {
-  // 商品走真实后端，其余板块仍为 mock；两者 id 体系不同，不能混用 recommends.goods
-  const [res, goodsRes] = await Promise.all([
-    api.getHomeData(),
-    api.getGoodsList({ module: 'GOODS', page_size: 4 }),
-  ])
+  // 首页不再拉商品/餐厅/民宿/路线列表，只取导览与社区内容
+  const res = await api.getHomeData()
   banners.value = res.data.banners
   announcements.value = res.data.announcements
-  goods.value = goodsRes.data.items
-  restaurants.value = res.data.recommends.restaurants
-  homestays.value = res.data.recommends.homestays
   posts.value = res.data.recommends.posts
   hotKeywords.value = res.data.hotKeywords
-  const routeRes = await api.getRoutePage({ page: 1, size: 3, status: 'ON_SHELF' })
-  routesList.value = routeRes.data.list
   timer = setInterval(() => go(cur.value + 1), 5200)
   await loadLive()
   liveTimer = setInterval(loadLive, 60 * 1000)
@@ -76,7 +76,7 @@ onUnmounted(() => {
             <em class="eyebrow">{{ i === 0 ? 'WUDONG VILLAGE' : i === 1 ? 'STAY IN CLOUDS' : 'LONG TABLE FEAST' }}</em>
             <h1>{{ b.title }}</h1>
             <p>{{ b.subtitle }}</p>
-            <router-link :to="b.link" class="btn btn-primary btn-lg hero-btn">立即探索</router-link>
+            <router-link :to="b.link" class="btn btn-outline btn-lg hero-btn">了解乌东</router-link>
           </div>
         </div>
       </transition-group>
@@ -114,43 +114,55 @@ onUnmounted(() => {
         </transition-group>
       </div>
       <div class="hot">
-        <span>热搜：</span>
-        <router-link v-for="k in hotKeywords.slice(0, 4)" :key="k" :to="`/search?kw=${k}`">{{ k }}</router-link>
+        <span>逛一逛：</span>
+        <router-link v-for="k in hotKeywords.slice(0, 4)" :key="k" :to="entryTo(k, '/trip')">{{ k }}</router-link>
       </div>
     </div>
 
     <!-- 衣 -->
     <section class="container sec">
       <SectionTitle eyebrow="YI · INTANGIBLE HERITAGE" title="指尖上的苗艺" more="/goods" />
-      <div class="grid-4">
-        <ProductCard v-for="(g, i) in goods" :key="g.id" :item="g" class="rise" :style="{ animationDelay: `${i * 60}ms` }" />
-      </div>
+      <CultureStrip v-if="yi?.stories[0]" :story="yi.stories[0]" class="sec-culture rise" />
+      <ul v-if="yi?.entries?.length" class="entry-row rise">
+        <li v-for="e in yi.entries" :key="e.label">
+          <router-link :to="e.to">{{ e.label }}</router-link>
+        </li>
+      </ul>
     </section>
 
     <!-- 食 -->
     <section class="sec-band">
       <div class="container sec">
         <SectionTitle eyebrow="SHI · TASTE OF MIAO" title="酸与火的席面" more="/food" />
-        <div class="grid-3">
-          <RestaurantCard v-for="(r, i) in restaurants" :key="r.id" :item="r" class="rise" :style="{ animationDelay: `${i * 70}ms` }" />
-        </div>
+        <CultureStrip v-if="shi?.stories[0]" :story="shi.stories[0]" class="sec-culture rise" />
+        <ul v-if="shi?.entries?.length" class="entry-row rise">
+          <li v-for="e in shi.entries" :key="e.label">
+            <router-link :to="e.to">{{ e.label }}</router-link>
+          </li>
+        </ul>
       </div>
     </section>
 
     <!-- 住 -->
     <section class="container sec">
       <SectionTitle eyebrow="ZHU · MOUNTAIN LODGE" title="住进吊脚楼" more="/stay" />
-      <div class="grid-3">
-        <HomestayCard v-for="(h, i) in homestays" :key="h.id" :item="h" class="rise" :style="{ animationDelay: `${i * 70}ms` }" />
-      </div>
+      <CultureStrip v-if="zhu?.stories[0]" :story="zhu.stories[0]" class="sec-culture rise" />
+      <ul v-if="zhu?.entries?.length" class="entry-row rise">
+        <li v-for="e in zhu.entries" :key="e.label">
+          <router-link :to="e.to">{{ e.label }}</router-link>
+        </li>
+      </ul>
     </section>
 
     <!-- 行 -->
     <section class="container sec">
       <SectionTitle eyebrow="XING · JOURNEY" title="山水与节庆" more="/trip" />
-      <div class="grid-3">
-        <RouteCard v-for="(r, i) in routesList" :key="r.id" :item="r" class="rise" :style="{ animationDelay: `${i * 70}ms` }" />
-      </div>
+      <CultureStrip v-if="xing?.stories[0]" :story="xing.stories[0]" class="sec-culture rise" />
+      <ul v-if="xing?.entries?.length" class="entry-row rise">
+        <li v-for="e in xing.entries" :key="e.label">
+          <router-link :to="e.to">{{ e.label }}</router-link>
+        </li>
+      </ul>
     </section>
 
     <!-- 文化故事条 -->
@@ -164,7 +176,7 @@ onUnmounted(() => {
             杨光银，乌东村州级银饰锻造技艺传承人。十四岁随父学艺，守着老银铺的炉火四十余年。
             他坚持不用模具，每一件银器上的纹样都由手锤一寸寸敲出。到乌东，你可以坐进他的工坊，亲手敲一枚戒指。
           </p>
-          <router-link to="/product/1" class="btn btn-outline story-btn">认识他的作品</router-link>
+          <router-link to="/culture/yi-silver-hammer" class="btn btn-outline story-btn">读他的故事</router-link>
         </div>
       </div>
     </section>
@@ -172,7 +184,7 @@ onUnmounted(() => {
     <!-- 社区 -->
     <section class="container sec">
       <SectionTitle eyebrow="SHEQU · COMMUNITY" title="他们正在记录乌东" more="/community" />
-      <div class="waterfall">
+      <div class="waterfall card-grid">
         <PostCard v-for="p in posts" :key="p.id" :item="p" />
       </div>
     </section>
@@ -428,25 +440,35 @@ onUnmounted(() => {
   padding-top: 58px;
 }
 
-.grid-4 {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+/* 模块区里的文化条 */
+.sec-culture {
+  margin-bottom: 22px;
 }
 
-.grid-3 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
+/* 无价格入口：只给名字，价格与库存留给列表页 */
+.entry-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 22px;
 }
 
-@media (max-width: 1023px) {
-  .grid-4 { grid-template-columns: repeat(2, 1fr); }
-  .grid-3 { grid-template-columns: repeat(2, 1fr); }
+.entry-row a {
+  display: inline-block;
+  padding: 6px 18px;
+  font-size: 13px;
+  letter-spacing: 0.1em;
+  color: var(--text-2);
+  background: #fff;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  transition: all 0.2s;
 }
 
-@media (max-width: 599px) {
-  .grid-4, .grid-3 { grid-template-columns: 1fr; }
+.entry-row a:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: rgba(35, 69, 107, 0.06);
 }
 
 /* ---------- 深色带 ---------- */

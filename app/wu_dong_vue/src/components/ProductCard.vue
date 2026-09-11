@@ -5,11 +5,22 @@ defineProps<{ item: Product }>()
 </script>
 
 <template>
-  <router-link :to="`/product/${item.id}`" class="product-card">
-    <div class="cover">
+  <router-link :to="`/product/${item.id}`" class="product-card card-hover">
+    <div class="cover card-media">
       <img :src="item.cover" :alt="item.title" loading="lazy" />
+      <img
+        v-if="item.images[1]"
+        class="img-alt"
+        :src="item.images[1]"
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+      />
       <span class="cat-tag">{{ item.category }}</span>
       <span v-if="item.stock <= 5" class="stock-tag">仅剩 {{ item.stock }} 件</span>
+      <div class="card-veil">
+        <span class="veil-cta">查看详情 <i>→</i></span>
+      </div>
     </div>
     <div class="body">
       <h3>{{ item.title }}</h3>
@@ -35,37 +46,37 @@ defineProps<{ item: Product }>()
   border: 1px solid var(--line);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease), border-color 0.3s;
-}
-
-.product-card:hover {
-  transform: translateY(-5px);
-  box-shadow: var(--shadow-2);
-  border-color: rgba(35, 69, 107, 0.3);
 }
 
 .cover {
   position: relative;
   aspect-ratio: 1 / 0.86;
-  overflow: hidden;
   background: var(--indigo-mist);
 }
 
-.cover img {
+.cover > img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.6s var(--ease);
 }
 
-.product-card:hover .cover img {
-  transform: scale(1.06);
+/* 悬停时换到第二张实拍图，图片不够时只做推近 */
+.img-alt {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+
+.product-card:hover .img-alt,
+.product-card:focus-visible .img-alt {
+  opacity: 1;
 }
 
 .cat-tag {
   position: absolute;
   left: 10px;
   top: 10px;
+  z-index: 4;
   background: rgba(22, 48, 77, 0.85);
   color: var(--silver-light);
   font-size: 11px;
@@ -78,6 +89,7 @@ defineProps<{ item: Product }>()
   position: absolute;
   right: 10px;
   top: 10px;
+  z-index: 4;
   background: rgba(181, 68, 46, 0.92);
   color: #fff;
   font-size: 11px;

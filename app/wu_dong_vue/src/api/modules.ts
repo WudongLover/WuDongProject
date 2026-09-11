@@ -19,6 +19,15 @@ export const getHomeData = S.getHomeData
 export const getLiveInfo = S.getLiveInfo
 export const searchAll = S.searchAll
 
+/* 文化导览：前端固定内容，不计划迁后端；页面仍统一从 @/api 取，守住"页面不直接访问 mock" */
+export {
+  cultureSections,
+  cultureEntries,
+  getCultureSection,
+  findCultureStory,
+  relatedCultureStories,
+} from '@/mock/culture'
+
 /* 认证 */
 export {
   sendSmsCode,
@@ -99,8 +108,12 @@ export * from './order'
 
 /* 社区（真实后端 http://127.0.0.1:8001，vite 代理 /api） */
 
-export function getPosts(): Promise<Envelope<Post[]>> {
-  return apiFetch<Envelope<Post[]>>('/posts')
+export function getPosts(topic?: string, sort?: 'hot' | 'new'): Promise<Envelope<Post[]>> {
+  const params = new URLSearchParams()
+  if (topic) params.set('topic', topic)
+  if (sort) params.set('sort', sort)
+  const qs = params.toString()
+  return apiFetch<Envelope<Post[]>>(`/posts${qs ? `?${qs}` : ''}`)
 }
 export function getPostDetail(id: string): Promise<Envelope<Post>> {
   return apiFetch<Envelope<Post>>(`/posts/${id}`)
@@ -113,12 +126,17 @@ export function togglePostLike(id: string): Promise<Envelope<{ liked: boolean; l
 export function getComments(postId: string): Promise<Envelope<PostComment[]>> {
   return apiFetch<Envelope<PostComment[]>>(`/posts/${postId}/comments`)
 }
-/** 新增评论 */
-export function addComment(postId: string, content: string): Promise<Envelope<PostComment[]>> {
+/** 新增评论（支持回复 parentCommentId） */
+export function addComment(postId: string, content: string, parentCommentId?: string): Promise<Envelope<PostComment[]>> {
   return apiFetch<Envelope<PostComment[]>>(`/posts/${postId}/comments`, {
     method: 'POST',
-    body: JSON.stringify({ content }),
+    body: JSON.stringify({ content, parentId: parentCommentId ? Number(parentCommentId) : undefined }),
   })
+}
+
+/** 发布游记 */
+export function publishPost(data: { title: string; content: string; topic?: string; place?: string }): Promise<Envelope<Post>> {
+  return apiFetch<Envelope<Post>>('/posts', { method: 'POST', body: JSON.stringify(data) })
 }
 
 /** 逻辑删除帖子 */
@@ -132,9 +150,20 @@ export function deleteComment(postId: string, commentId: string): Promise<Envelo
 }
 
 /* 收藏 */
-export const getFavorites = S.getFavorites
-export const toggleFavorite = S.toggleFavorite
-export const isFavorite = S.isFavorite
+export function toggleFavorite(targetType: string, targetId: string | number): Promise<Envelope<{ favorited: boolean }>> {
+  return apiFetch<Envelope<{ favorited: boolean }>>('/favorites', {
+    method: 'PUT',
+    body: JSON.stringify({ targetType, targetId: Number(targetId) }),
+  })
+}
+
+export function getFavorites(): Promise<Envelope<{ id: string; targetType: string; name: string; cover: string; type: string; price?: number; targetId: string }[]>> {
+  return apiFetch('/favorites')
+}
+
+export function checkFavorite(targetType: string, targetId: string | number): Promise<Envelope<{ favorited: boolean }>> {
+  return apiFetch<Envelope<{ favorited: boolean }>>(`/favorites/${targetType}/${targetId}`)
+}
 
 /* 购物车 */
 export const getCart = S.getCart

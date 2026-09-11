@@ -168,13 +168,24 @@ export interface PostAuthor {
   bio?: string
 }
 
-export interface PostComment {
+export interface PostReply {
   id: string
+  userId: string
   user: string
   avatar: string
   content: string
   date: string
-  replies?: { user: string; content: string; date: string }[]
+  replyToUser?: string
+}
+
+export interface PostComment {
+  id: string
+  userId: string
+  user: string
+  avatar: string
+  content: string
+  date: string
+  replies?: PostReply[]
 }
 
 export interface Post {
@@ -284,4 +295,55 @@ export interface UserProfile {
   favorites: string[]
   /** 是否已设置登录密码（未设置时个人中心显示「设置密码」） */
   hasPassword?: boolean
+}
+
+/* ================= 文化导览（前端固定内容，不计划迁后端） ================= */
+
+export type CultureModule = 'YI' | 'SHI' | 'ZHU' | 'XING'
+
+/** 文化详情页尾部的导流目标 */
+export interface CultureStoryLink {
+  label: string
+  /** 站内路由，只用列表页路径与已有 query，不新增 query 协议 */
+  to: string
+}
+
+/** 站内跳转项：模块入口、文化词条共用。只带文字不带价格，用于首页保持介绍性 */
+export interface CultureLink {
+  label: string
+  to: string
+}
+
+export interface CultureStory {
+  /** 路由参数，全站唯一。前缀 yi- / shi- / zhu- / xing- 便于排查冲突 */
+  id: string
+  module: CultureModule
+  /** 卡片与详情页上方的英文小标，如 YI · SILVER */
+  eyebrow: string
+  title: string
+  /** 30-50 字，卡片正文与详情页导语共用 */
+  summary: string
+  /** 2-4 段纯文本，详情页分段渲染 */
+  paragraphs: string[]
+  /** 配图。prompt 须逐字来自 mock/image-map.ts 已命中的 key，否则会退化成外网文生图链接 */
+  cover: string
+  /** 一句话知识锚点，详情页以引文样式展示 */
+  quote?: string
+  links?: CultureStoryLink[]
+}
+
+/** 一个模块的文化导览区配置（列表页头部用） */
+export interface CultureSection {
+  module: CultureModule
+  /** 中文单字章位：衣 / 食 / 住 / 行 */
+  glyph: string
+  /** 与各列表页 hero 的 eyebrow 同风格，如 YI · INTANGIBLE HERITAGE */
+  eyebrow: string
+  /** 导览区主标题，如「先认识乌东的银」 */
+  title: string
+  /** 60-90 字，一段话讲清这个模块的文旅特色 */
+  intro: string
+  stories: CultureStory[]
+  /** 模块的无价格入口，如「银饰 · 蜡染 · 刺绣 · 苗族服饰」→ /goods */
+  entries?: CultureLink[]
 }

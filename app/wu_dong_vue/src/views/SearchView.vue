@@ -74,35 +74,35 @@ const hasResult = () => results.value && Object.values(results.value).some((a) =
       <template v-else>
         <section v-if="results!.goods.length" class="sec">
           <SectionTitle title="商品与特产" :more="undefined" />
-          <div class="grid">
+          <div class="grid card-grid">
             <ProductCard v-for="g in results!.goods" :key="g.id" :item="g" />
           </div>
         </section>
 
         <section v-if="results!.restaurants.length" class="sec">
           <SectionTitle title="餐厅" />
-          <div class="grid-2">
+          <div class="grid-2 card-grid">
             <RestaurantCard v-for="r in results!.restaurants" :key="r.id" :item="r" />
           </div>
         </section>
 
         <section v-if="results!.homestays.length" class="sec">
           <SectionTitle title="民宿" />
-          <div class="grid-2">
+          <div class="grid-2 card-grid">
             <HomestayCard v-for="h in results!.homestays" :key="h.id" :item="h" />
           </div>
         </section>
 
         <section v-if="results!.routes.length" class="sec">
           <SectionTitle title="路线" />
-          <div class="grid-2">
+          <div class="grid-2 card-grid">
             <RouteCard v-for="r in results!.routes" :key="r.id" :item="r" />
           </div>
         </section>
 
         <section v-if="results!.posts.length" class="sec">
           <SectionTitle title="游记" />
-          <div class="waterfall">
+          <div class="waterfall card-grid">
             <PostCard v-for="p in results!.posts" :key="p.id" :item="p" />
           </div>
         </section>

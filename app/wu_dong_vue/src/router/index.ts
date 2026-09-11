@@ -18,6 +18,7 @@ const router = createRouter({
     { path: '/routes/:id', name: 'route', component: () => import('@/views/TripDetailView.vue') },
     { path: '/community', name: 'community', component: () => import('@/views/CommunityView.vue') },
     { path: '/posts/:id', name: 'post', component: () => import('@/views/PostDetailView.vue') },
+    { path: '/culture/:id', name: 'culture', component: () => import('@/views/CultureDetailView.vue') },
     { path: '/search', name: 'search', component: () => import('@/views/SearchView.vue') },
     { path: '/cart', name: 'cart', component: () => import('@/views/CartView.vue') },
     { path: '/orders', name: 'orders', component: () => import('@/views/OrdersView.vue') },
