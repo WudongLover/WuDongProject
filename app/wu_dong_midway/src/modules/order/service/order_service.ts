@@ -1,4 +1,5 @@
 /**
+<<<<<<< HEAD
  * 【order 模块】订单公共链路业务逻辑
  *
  * 职责：create（下单）/ list（列表）/ pay / cancel / refund 五个用例，与订单状态机。
@@ -94,10 +95,32 @@ function isDuplicateKey(err: unknown): boolean {
 /** 前端 m4-order.ts 的 CreateOrderPayload */
 export interface CreateOrderPayload {
   type: string;
+=======
+ * 【order 模块】订单主表业务逻辑（公共订单链路）
+ *
+ * 通用能力，不识别具体业务类型（GOODS/MEAL/LODGING...）：
+ * - createOrder：建主表 + 生成单号（供各业务模块在自己的事务内调用，传入 manager 保证原子性）
+ * - pay：mock 支付（不接真实支付 API，只落一条 SUCCESS 支付记录并置 PAID，幂等）
+ * - cancelOrder：状态置 CANCELLED（库存回补由业务模块方负责，见 m3 booking_service）
+ * - list / detail：订单查询
+ */
+import { Inject, Provide } from '@midwayjs/core';
+import { InjectDataSource, InjectEntityModel } from '@midwayjs/typeorm';
+import { DataSource, EntityManager, Repository } from 'typeorm';
+import { ApiError } from '../../m5-community/error/api_error';
+import { OrderEntity, OrderStatus, OrderType } from '../entity/order_entity';
+import { PaymentEntity } from '../entity/payment_entity';
+
+/** 建单入参：字段与 wudong_common_order 列对齐，业务模块负责组装展示快照 */
+export interface CreateOrderInput {
+  userId: string;
+  type: OrderType;
+>>>>>>> origin/lanub/v0911
   title: string;
   cover?: string;
   summary?: string;
   amount: number;
+<<<<<<< HEAD
   qty: number;
   shop?: string;
   /** 购物车结算：待并入本单的购物车项 */
@@ -142,10 +165,20 @@ export interface OrderVo {
   qty: number;
   date: string;
   shop: string;
+=======
+  qty?: number;
+  shopName?: string;
+  merchantId?: string;
+  /** 初始状态：住宿 UNPAID（默认），餐饮 CONFIRMED */
+  status?: OrderStatus;
+  /** 支付截止时间：住宿下单时写入 now+30min */
+  expireAt?: Date;
+>>>>>>> origin/lanub/v0911
 }
 
 @Provide()
 export class OrderService {
+<<<<<<< HEAD
   @Inject()
   mapper: OrderMapper;
 
@@ -241,11 +274,105 @@ export class OrderService {
       patch: { status: 'PAID', paidAt },
       payment: {
         payNo: this.createNo('PAY'),
+=======
+  @InjectDataSource('default')
+  dataSource: DataSource;
+
+  @InjectEntityModel(OrderEntity)
+  orderRepo: Repository<OrderEntity>;
+
+  @InjectEntityModel(PaymentEntity)
+  paymentRepo: Repository<PaymentEntity>;
+
+  /** 单号：WD + yymmdd + 6 位随机 */
+  private genNo(prefix: string) {
+    const d = new Date();
+    const ymd =
+      String(d.getFullYear()).slice(2) +
+      String(d.getMonth() + 1).padStart(2, '0') +
+      String(d.getDate()).padStart(2, '0');
+    const rand = String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
+    return prefix + ymd + rand;
+  }
+
+  private orderRepoOf(em?: EntityManager): Repository<OrderEntity> {
+    return em ? em.getRepository(OrderEntity) : this.orderRepo;
+  }
+
+  /**
+   * 建单：返回落库后的订单实体。
+   * 传入 em 时在调用方事务内执行（供 m2/m3 booking service 做「建单 + 写 ext + 扣库存」原子化）。
+   */
+  async createOrder(
+    input: CreateOrderInput,
+    em?: EntityManager,
+  ): Promise<OrderEntity> {
+    const repo = this.orderRepoOf(em);
+    const order = repo.create({
+      orderNo: this.genNo('WD'),
+      userId: input.userId,
+      merchantId: input.merchantId ?? '0',
+      type: input.type,
+      status: input.status ?? 'UNPAID',
+      title: input.title,
+      cover: input.cover ?? '',
+      summary: input.summary ?? '',
+      amount: input.amount,
+      qty: input.qty ?? 1,
+      shopName: input.shopName ?? '',
+      expireAt: input.expireAt ?? null,
+    });
+    return repo.save(order);
+  }
+
+  /** 订单列表（当前用户，可选 type/status 过滤） */
+  async list(
+    userId: string,
+    filter?: { type?: string; status?: string },
+  ): Promise<OrderEntity[]> {
+    const where: any = { userId };
+    if (filter?.type && filter.type !== 'ALL') where.type = filter.type;
+    if (filter?.status && filter.status !== 'ALL') where.status = filter.status;
+    return this.orderRepo.find({ where, order: { createdAt: 'DESC', id: 'DESC' } });
+  }
+
+  /** 订单详情：主表 + 支付记录 */
+  async detail(orderNo: string, userId?: string) {
+    const where: any = { orderNo };
+    if (userId) where.userId = userId;
+    const order = await this.orderRepo.findOne({ where });
+    if (!order) return null;
+    const payments = await this.paymentRepo.find({
+      where: { orderNo },
+      order: { id: 'ASC' },
+    });
+    return { ...order, payments };
+  }
+
+  /**
+   * mock 支付：不接真实支付 API，直接落一条 SUCCESS 支付记录并置 PAID。
+   * 幂等：订单已是 PAID 直接返回，不重复写支付记录。
+   */
+  async pay(orderNo: string, userId: string): Promise<OrderEntity> {
+    return this.dataSource.transaction(async (em) => {
+      const orderRepo = em.getRepository(OrderEntity);
+      const order = await orderRepo.findOne({ where: { orderNo, userId } });
+      if (!order) throw new ApiError(1003, '订单不存在', 404);
+      if (order.status === 'PAID') return order;
+      if (order.status !== 'UNPAID') {
+        throw new ApiError(1004, `订单状态 ${order.status} 不可支付`);
+      }
+
+      const paymentRepo = em.getRepository(PaymentEntity);
+      const payment = paymentRepo.create({
+        payNo: this.genNo('PAY'),
+>>>>>>> origin/lanub/v0911
         orderNo: order.orderNo,
         userId,
         amount: order.amount,
         status: 'SUCCESS',
         provider: 'mock',
+<<<<<<< HEAD
         credential: `mock-${Date.now()}`,
         paidAt,
       },
@@ -659,3 +786,36 @@ export class OrderService {
     };
   }
 }
+=======
+        credential: `mock-${order.orderNo}`,
+        paidAt: new Date(),
+      });
+      await paymentRepo.save(payment);
+
+      order.status = 'PAID';
+      order.paidAt = new Date();
+      return orderRepo.save(order);
+    });
+  }
+
+  /**
+   * 取消：仅做状态流转，库存回补由业务模块（m3）在其自己的 cancel 入口完成。
+   */
+  async cancelOrder(
+    orderNo: string,
+    userId: string,
+    em?: EntityManager,
+  ): Promise<OrderEntity> {
+    const repo = this.orderRepoOf(em);
+    const order = await repo.findOne({ where: { orderNo, userId } });
+    if (!order) throw new ApiError(1003, '订单不存在', 404);
+    if (!['UNPAID', 'PAID', 'CONFIRMED'].includes(order.status)) {
+      throw new ApiError(1004, `订单状态 ${order.status} 不可取消`);
+    }
+    order.status = 'CANCELLED';
+    order.cancelledAt = new Date();
+    order.cancelReason = order.cancelReason || '用户取消';
+    return repo.save(order);
+  }
+}
+>>>>>>> origin/lanub/v0911

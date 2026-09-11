@@ -1,5 +1,6 @@
 import { Inject, Provide } from '@midwayjs/core';
 import { FindOptionsWhere, Like } from 'typeorm';
+import { ApiError } from '../../m5-community/error/api_error';
 import { RestaurantEntity } from '../entity/restaurant_entity';
 import { RestaurantMapper } from '../mapper/restaurant_mapper';
 
@@ -29,14 +30,35 @@ export class RestaurantService {
   }
 
   /**
-   * 单点查询
+   * 单点查询：餐厅 + 菜品 + 时段（对齐前端 Restaurant 类型）
+   * 余量降级：时段 left 直接取 capacity，不读/不扣 slot_quota
    */
   async info(id: number) {
     const entity = await this.mapper.findById(id);
     if (!entity) {
-      throw new Error('餐厅不存在');
+      throw new ApiError(1003, '餐厅不存在或已歇业', 404);
     }
-    return entity;
+    const [dishes, slots] = await Promise.all([
+      this.mapper.listDishes(id),
+      this.mapper.listSlots(id),
+    ]);
+    return {
+      ...entity,
+      dishes: dishes.map((d) => ({
+        id: d.id,
+        name: d.name,
+        price: d.price,
+        img: d.img,
+        signature: d.isSignature === 1,
+      })),
+      slots: slots.map((s) => ({
+        id: s.id,
+        name: s.name,
+        capacity: s.capacity,
+        left: s.capacity,
+      })),
+      reviews: [],
+    };
   }
 
   /**

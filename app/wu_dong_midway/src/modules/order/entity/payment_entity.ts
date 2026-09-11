@@ -1,26 +1,26 @@
 /**
  * 【order 模块】支付单（wudong_common_payment）
- * entity 层：表字段映射（列对齐 wudong 库）
+ * entity 层：mock 支付凭证。不接真实支付 API，pay 接口成功后落一条 SUCCESS 记录。
  *
- * 规范 8.2 pay：当前为 mock 支付凭证，接入真实渠道时只改 provider / credential。
- *
- * 注：本表的 callback_payload 曾被 cool-admin 的 synchronize 误删过一次
- * （见 config.local.ts 的 synchronize 注释），已按 wudong_schema.sql 恢复。
+ * 约定同 order_entity：synchronize 关闭、列名 snake_case、DECIMAL 转 number。
  */
 import {
   Column,
   CreateDateColumn,
   Entity,
-  Index,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { decimalNotNullTransformer } from './transformers';
+
+const decimalTransformer = {
+  to: (value: number | null) => value,
+  from: (value: string | null) => (value === null ? null : Number(value)),
+};
+
+/** 支付状态：PENDING / SUCCESS / FAILED / REFUNDED */
+export type PaymentStatus = 'PENDING' | 'SUCCESS' | 'FAILED' | 'REFUNDED';
 
 @Entity('wudong_common_payment')
-@Index('uk_pay_no', ['payNo'], { unique: true })
-@Index('idx_order_no', ['orderNo'])
-@Index('idx_status', ['status'])
 export class PaymentEntity {
   @PrimaryGeneratedColumn({ type: 'bigint', unsigned: true })
   id: string;
@@ -34,30 +34,25 @@ export class PaymentEntity {
   @Column({ name: 'user_id', type: 'bigint', unsigned: true })
   userId: string;
 
-  /** 支付金额（回调时强校验） */
   @Column({
     type: 'decimal',
     precision: 10,
     scale: 2,
-    transformer: decimalNotNullTransformer,
+    transformer: decimalTransformer,
   })
   amount: number;
 
-  /** PENDING / SUCCESS / FAILED / REFUNDED */
   @Column({ type: 'varchar', length: 16, default: 'PENDING' })
-  status: string;
+  status: PaymentStatus;
 
-  /** mock / wechat */
   @Column({ type: 'varchar', length: 16, default: 'mock' })
   provider: string;
 
-  /** mock 支付凭证 */
   @Column({ type: 'varchar', length: 500, default: '' })
   credential: string;
 
-  /** 回调原文（幂等校验） */
   @Column({ name: 'callback_payload', type: 'json', nullable: true })
-  callbackPayload: Record<string, unknown> | null;
+  callbackPayload: any;
 
   @Column({ name: 'paid_at', type: 'datetime', nullable: true })
   paidAt: Date | null;

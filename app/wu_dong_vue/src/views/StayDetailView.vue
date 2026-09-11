@@ -25,6 +25,7 @@ const openRoom = ref<RoomType | null>(null)
 const calendar = ref<{ date: string; stock: number; priceDelta: number }[]>([])
 const guestName = ref('')
 const guestPhone = ref('')
+const guests = ref(1)
 const submitting = ref(false)
 const bookErr = ref('')
 
@@ -82,13 +83,18 @@ async function openCalendar(room: RoomType) {
 
 async function bookRoom() {
   bookErr.value = ''
+  if (!userStore.requireLogin()) return
+  if (!Number.isInteger(guests.value) || guests.value < 1) {
+    return (bookErr.value = '请填写入住人数')
+  }
+  if (guests.value > openRoom.value!.maxGuests) {
+    return (bookErr.value = `该房型最多入住 ${openRoom.value!.maxGuests} 人`)
+  }
   if (!guestName.value.trim()) return (bookErr.value = '请填写入住人姓名')
   if (!/^1\d{10}$/.test(guestPhone.value)) return (bookErr.value = '请填写 11 位手机号')
-  if (nights.value > 1 && calendar.value.some((c) => c.date >= checkIn.value && c.date < checkOut.value && c.stock === 0)) {
-    return (bookErr.value = '所选日期中存在满房，请调整日期')
-  }
   submitting.value = true
   try {
+<<<<<<< HEAD
     const room = openRoom.value!
     // 计算总价：每晚价格 = 房型基础价 + 当日浮动价
     let totalAmount = 0
@@ -112,11 +118,20 @@ async function bookRoom() {
       roomTypeId: room.id,
       checkIn: checkIn.value,
       checkOut: checkOut.value,
+=======
+    // 金额与房态由服务端按日历重算/预占，前端只提交预订参数
+    const order = await api.createLodgingBooking({
+      homestayId: String(stay.value!.id),
+      roomTypeId: String(openRoom.value!.id),
+      checkInDate: checkIn.value,
+      checkOutDate: checkOut.value,
+      guests: guests.value,
+>>>>>>> origin/lanub/v0911
       contactName: guestName.value.trim(),
       contactPhone: guestPhone.value,
     })
     openRoom.value = null
-    router.push({ path: '/orders', query: { highlight: order.data.orderNo, pay: '1' } })
+    router.push(`/order/pay/${order.data.orderNo}`)
   } catch (e) {
     bookErr.value = unwrapError(e).message
   } finally {
@@ -268,8 +283,13 @@ async function bookRoom() {
             </div>
           </div>
 
+          <div class="field" style="margin: 0 0 14px">
+            <label>入住人数（最多 {{ openRoom.maxGuests }} 人）</label>
+            <input v-model.number="guests" type="number" min="1" :max="openRoom.maxGuests" placeholder="入住人数" />
+          </div>
+
           <div class="amount-row">
-            <span>{{ openRoom.price }} × {{ nights }} 晚</span>
+            <span>{{ openRoom.price }} 起 × {{ nights }} 晚</span>
             <span class="price">¥{{ totalPrice }}</span>
           </div>
 

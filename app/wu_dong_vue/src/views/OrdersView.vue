@@ -67,8 +67,9 @@ async function pay(o: Order) {
 
 async function cancel(o: Order) {
   try {
-    await api.cancelOrder(o.orderNo)
-    userStore.toast('订单已取消')
+    // 住宿单走 m3 入口以在同事务回补房态，其余走通用订单入口
+    await api.cancelOrder(o.orderNo, o.type)
+    userStore.toast(o.type === 'LODGING' ? '订单已取消，房态已释放' : '订单已取消')
     await load()
   } catch (e) {
     userStore.toast(unwrapError(e).message)

@@ -9,6 +9,7 @@ const TOKEN_REQUIRED_PATHS = [
   '/api/user/password',
   '/api/favorites',
 ];
+<<<<<<< HEAD
 /** m3/m4/m5 的写操作需要登录，公开查询放行 */
 const TOKEN_REQUIRED_WRITE_PREFIXES = ['/api/app/m3', '/api/app/m4', '/api/posts'];
 /**
@@ -26,6 +27,12 @@ const TOKEN_EXEMPT_PREFIXES = ['/api/app/m4/order'];
 function matchesPrefix(path: string, prefixes: string[]): boolean {
   return prefixes.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 }
+=======
+/** m2/m3/m4 的写操作需要登录，公开查询放行 */
+const TOKEN_REQUIRED_WRITE_PREFIXES = ['/api/app/m2', '/api/app/m3', '/api/app/m4'];
+/** 订单：读（我的订单）写都需要登录 */
+const TOKEN_REQUIRED_ALL_PREFIXES = ['/api/app/order'];
+>>>>>>> origin/lanub/v0911
 
 /**
  * C 端鉴权中间件：
@@ -45,8 +52,15 @@ export class AuthMiddleware {
       const needToken =
         TOKEN_REQUIRED_PATHS.includes(path) ||
         (ctx.method !== 'GET' &&
+<<<<<<< HEAD
           matchesPrefix(path, TOKEN_REQUIRED_WRITE_PREFIXES) &&
           !matchesPrefix(path, TOKEN_EXEMPT_PREFIXES));
+=======
+          TOKEN_REQUIRED_WRITE_PREFIXES.some((prefix) =>
+            path.startsWith(prefix)
+          )) ||
+        TOKEN_REQUIRED_ALL_PREFIXES.some((prefix) => path.startsWith(prefix));
+>>>>>>> origin/lanub/v0911
 
       // 始终尝试解析 token：公开 GET 也能识别登录用户（如帖子 liked 状态）
       const header = ctx.headers.authorization || '';
