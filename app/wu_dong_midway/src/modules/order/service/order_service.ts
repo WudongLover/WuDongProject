@@ -9,9 +9,10 @@
  */
 import { Inject, Provide } from '@midwayjs/core';
 import { InjectDataSource, InjectEntityModel } from '@midwayjs/typeorm';
-import { DataSource, EntityManager, Repository } from 'typeorm';
+import { DataSource, EntityManager, In, Repository } from 'typeorm';
 import { ApiError } from '../../m5-community/error/api_error';
 import { OrderEntity, OrderStatus, OrderType } from '../entity/order_entity';
+import { OrderItemEntity } from '../entity/order_item_entity';
 import { PaymentEntity } from '../entity/payment_entity';
 
 /** 建单入参：字段与 wudong_common_order 列对齐，业务模块负责组装展示快照 */
@@ -41,6 +42,9 @@ export class OrderService {
 
   @InjectEntityModel(PaymentEntity)
   paymentRepo: Repository<PaymentEntity>;
+
+  @InjectEntityModel(OrderItemEntity)
+  orderItemRepo: Repository<OrderItemEntity>;
 
   /** 单号：WD + yymmdd + 6 位随机 */
   private genNo(prefix: string) {
@@ -91,7 +95,11 @@ export class OrderService {
     const where: any = { userId };
     if (filter?.type && filter.type !== 'ALL') where.type = filter.type;
     if (filter?.status && filter.status !== 'ALL') where.status = filter.status;
-    return this.orderRepo.find({ where, order: { createdAt: 'DESC', id: 'DESC' } });
+    const orders = await this.orderRepo.find({
+      where,
+      order: { createdAt: 'DESC', id: 'DESC' },
+    });
+    return this.attachItems(orders);
   }
 
   /** 订单详情：主表 + 支付记录 */
@@ -104,7 +112,43 @@ export class OrderService {
       where: { orderNo },
       order: { id: 'ASC' },
     });
-    return { ...order, payments };
+    const items = await this.orderItemRepo.find({
+      where: { orderId: order.id },
+      order: { id: 'ASC' },
+    });
+    return { ...order, items, payments };
+  }
+
+  /**
+   * 给订单挂上商品明细（一次批量查询，避免 N+1）。
+   * 购物车合并支付只建一张订单，明细在前端按商品逐项展示。
+   */
+  async withItems(order: OrderEntity): Promise<OrderEntity> {
+    return (await this.attachItems([order]))[0];
+  }
+
+  private async attachItems(orders: OrderEntity[]): Promise<OrderEntity[]> {
+    if (!orders.length) return orders;
+    const rows = await this.orderItemRepo.find({
+      where: { orderId: In(orders.map((o) => String(o.id))) },
+      order: { id: 'ASC' },
+    });
+    const grouped = new Map<string, OrderItemEntity[]>();
+    for (const row of rows) {
+      const key = String(row.orderId);
+      const list = grouped.get(key) ?? [];
+      list.push(row);
+      grouped.set(key, list);
+    }
+    for (const order of orders) {
+      (order as any).items = grouped.get(String(order.id)) ?? [];
+    }
+    return orders;
+  }
+
+  /** 按单号取当前用户的订单（供取消/释放库存分发使用） */
+  async findByOrderNo(orderNo: string, userId: string): Promise<OrderEntity | null> {
+    return this.orderRepo.findOne({ where: { orderNo, userId } });
   }
 
   /**

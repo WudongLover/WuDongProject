@@ -25,9 +25,13 @@ export class CartMapper {
     return this.cartModel.findOne({ where: { id, userId, deletedAt: IsNull() } });
   }
 
-  /** 同商品同 SKU 合并数量用（DDL：uk_user_sku） */
+  /**
+   * 同商品同 SKU 合并数量用（DDL：uk_user_sku）。
+   * 唯一键不含 deleted_at，软删除行仍占用键位，因此必须连已删除行一起查，
+   * 命中后由 service 恢复该行（清 deleted_at）并覆盖数量，避免重复加购报唯一键冲突。
+   */
   async findBySku(userId: string, skuId: string): Promise<CartItemEntity | null> {
-    return this.cartModel.findOne({ where: { userId, skuId, deletedAt: IsNull() } });
+    return this.cartModel.findOne({ where: { userId, skuId }, withDeleted: true });
   }
 
   async save(item: CartItemEntity): Promise<CartItemEntity> {

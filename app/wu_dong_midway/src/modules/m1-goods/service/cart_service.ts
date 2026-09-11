@@ -64,9 +64,19 @@ export class CartService {
       throw new ApiError(1003, '商品不存在或已下架', 404);
     }
 
-    const skuId = String(payload?.skuId || '0');
+    let skuId = String(payload?.skuId || '0');
     if (skuId !== '0' && !/^\d+$/.test(skuId)) {
       throw new ApiError(1004, '参数错误：规格 ID 不合法');
+    }
+    // 未指定规格时回退到该商品的首个 SKU：
+    // DDL 的 uk_user_sku(user_id, sku_id) 不含 product_id，若所有无规格商品都落 sku_id=0，
+    // 同一用户加入第二件商品会命中唯一键并覆盖前一件。
+    if (skuId === '0') {
+      const firstSku = await this.skuModel.findOne({
+        where: { productId: product.id },
+        order: { id: 'ASC' },
+      });
+      if (firstSku) skuId = String(firstSku.id);
     }
     const sku =
       skuId !== '0'
@@ -83,7 +93,9 @@ export class CartService {
     }
 
     const existing = await this.cartMapper.findBySku(userId, skuId);
-    const nextQty = (existing?.qty ?? 0) + qty;
+    // 已软删除的历史行（删过/下过单）不算累加基数，命中时复用该行并覆盖数量
+    const alive = existing && !existing.deletedAt ? existing : null;
+    const nextQty = (alive?.qty ?? 0) + qty;
     if (nextQty > stock) {
       throw new ApiError(3002, `库存不足，最多可购买 ${stock} 件`);
     }
@@ -95,7 +107,7 @@ export class CartService {
       skuId,
       merchantId: product.merchantId,
       qty: nextQty,
-      checked: existing ? existing.checked : true,
+      checked: alive ? alive.checked : true,
       title: product.title,
       cover: product.cover,
       skuName: sku?.name || '默认规格',
@@ -104,6 +116,7 @@ export class CartService {
       shopName:
         payload?.shop?.trim() ||
         (product.module === 'SPECIALTY' ? '乌东特产合作社' : '乌东非遗工坊'),
+      deletedAt: null,
     });
     await this.cartMapper.save(item);
     return this.list(userId);
