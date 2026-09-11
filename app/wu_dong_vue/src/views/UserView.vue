@@ -15,7 +15,18 @@ const panel = ref<Panel>('profile')
 const profileForm = ref({ name: '', bio: '' })
 const pwdForm = ref({ oldPassword: '', newPassword: '', confirm: '' })
 const pwdSaving = ref(false)
-const favorites = ref<{ id: string; name: string; cover: string; type: string; price?: number; to?: string }[]>([])
+const favorites = ref<
+  {
+    id: string
+    targetType: string
+    targetId: string
+    name: string
+    cover: string
+    type: string
+    price?: number
+    to?: string
+  }[]
+>([])
 const messages = ref<Message[]>([])
 const addresses = ref<Address[]>([])
 const stats = ref<UserStats>({ favorites: 0, unreadMessages: 0, likesReceived: 0 })
@@ -115,7 +126,7 @@ async function readOne(m: Message) {
 }
 
 async function unfav(f: { targetType: string; targetId: string; id: string }) {
-  await api.toggleFavorite(f.targetType, f.targetId || f.id)
+  await api.toggleFavorite(f.targetType, f.targetId)
   userStore.toast('已取消收藏')
   await Promise.all([loadFavorites(), loadStats()])
 }

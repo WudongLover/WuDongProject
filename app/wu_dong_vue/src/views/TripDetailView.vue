@@ -5,6 +5,7 @@ import * as api from '@/api'
 import { unwrapError } from '@/api'
 import type { TravelRoute } from '@/types'
 import { useUserStore } from '@/stores/user'
+import { useFavoriteStore } from '@/stores/favorite'
 import { useMockPay } from '@/composables/useMockPay'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
@@ -12,6 +13,7 @@ import PayDialog from '@/components/PayDialog.vue'
 
 const route = useRoute()
 const userStore = useUserStore()
+const favoriteStore = useFavoriteStore()
 // 路线下单后立即弹虚拟支付
 const { pendingOrder, askPay, onPaid, onDismiss } = useMockPay()
 
@@ -23,6 +25,7 @@ const visitorName = ref('')
 const visitorPhone = ref('')
 const submitting = ref(false)
 const errText = ref('')
+const favorited = ref(false)
 
 function dayStr(offset: number) {
   const d = new Date()
@@ -35,6 +38,10 @@ onMounted(async () => {
   try {
     const res = await api.getRouteDetail(route.params.id as string)
     routeData.value = res.data
+    if (userStore.isLoggedIn) {
+      const fav = await api.checkFavorite('ROUTE', routeData.value.id)
+      favorited.value = fav.data.favorited
+    }
   } catch {
     notFound.value = true
   }
@@ -64,6 +71,16 @@ async function book() {
     errText.value = unwrapError(e).message
   } finally {
     submitting.value = false
+  }
+}
+
+async function toggleFavorite() {
+  if (!userStore.requireLogin()) return
+  try {
+    favorited.value = await favoriteStore.toggle('ROUTE', routeData.value!.id)
+    userStore.toast(favorited.value ? '已收藏路线' : '已取消收藏')
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
   }
 }
 </script>
@@ -139,6 +156,9 @@ async function book() {
               <span class="price">{{ routeData.price }}</span>
               <em>/人起</em>
             </div>
+            <button class="route-fav" :class="{ on: favorited }" @click="toggleFavorite">
+              <AppIcon name="heart" :size="15" /> {{ favorited ? '已收藏路线' : '收藏路线' }}
+            </button>
             <div class="field">
               <label>出发日期</label>
               <input v-model="departDate" type="date" :min="dayStr(1)" />
@@ -417,6 +437,19 @@ async function book() {
   font-style: normal;
   font-size: 12px;
   color: var(--text-3);
+}
+
+.route-fav {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-bottom: 16px;
+  color: var(--primary);
+  font-size: 13px;
+}
+
+.route-fav.on {
+  color: var(--accent);
 }
 
 .field {

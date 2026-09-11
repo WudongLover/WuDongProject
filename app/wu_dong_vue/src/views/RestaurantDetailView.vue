@@ -6,6 +6,7 @@ import { unwrapError } from '@/api'
 import { getRestaurantDetail } from '@/api/food'
 import type { Restaurant } from '@/types'
 import { useUserStore } from '@/stores/user'
+import { useFavoriteStore } from '@/stores/favorite'
 import QtyStepper from '@/components/QtyStepper.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
@@ -13,11 +14,13 @@ import AppIcon from '@/components/AppIcon.vue'
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
+const favoriteStore = useFavoriteStore()
 
 const rest = ref<Restaurant | null>(null)
 const notFound = ref(false)
 const curImg = ref(0)
 const showBook = ref(false)
+const favorited = ref(false)
 
 /* 预订表单 */
 const bookDate = ref('')
@@ -43,6 +46,10 @@ onMounted(async () => {
     const res = await getRestaurantDetail(route.params.id as string)
     rest.value = res.data
     slotId.value = res.data.slots[0]?.id || ''
+    if (userStore.isLoggedIn) {
+      const fav = await api.checkFavorite('RESTAURANT', rest.value.id)
+      favorited.value = fav.data.favorited
+    }
   } catch {
     notFound.value = true
   }
@@ -70,6 +77,16 @@ async function submitBooking() {
     bookErr.value = unwrapError(e).message
   } finally {
     submitting.value = false
+  }
+}
+
+async function toggleFavorite() {
+  if (!userStore.requireLogin()) return
+  try {
+    favorited.value = await favoriteStore.toggle('RESTAURANT', rest.value!.id)
+    userStore.toast(favorited.value ? '已收藏餐厅' : '已取消收藏')
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
   }
 }
 </script>
@@ -117,9 +134,14 @@ async function submitBooking() {
             <li><AppIcon name="location" :size="15" /> {{ rest.address }}</li>
             <li><AppIcon name="clock" :size="15" /> 营业时间 {{ rest.hours }}</li>
           </ul>
-          <button class="btn btn-primary btn-lg book-btn" @click="showBook = true">
-            <AppIcon name="calendar" :size="17" /> 预订餐位
-          </button>
+          <div class="action-row">
+            <button class="btn btn-primary btn-lg book-btn" @click="showBook = true">
+              <AppIcon name="calendar" :size="17" /> 预订餐位
+            </button>
+            <button class="btn btn-outline btn-lg fav-btn" :class="{ on: favorited }" @click="toggleFavorite">
+              <AppIcon name="heart" :size="17" /> {{ favorited ? '已收藏' : '收藏' }}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -350,6 +372,17 @@ async function submitBooking() {
 
 .book-btn {
   margin-top: 22px;
+}
+
+.action-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.fav-btn.on {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 section.dishes,
