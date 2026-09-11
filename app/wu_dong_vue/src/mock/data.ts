@@ -1,15 +1,11 @@
 import type {
   Banner,
-  CartItem,
   Homestay,
-  Message,
-  Order,
   Post,
   Product,
   Restaurant,
   Scenic,
   TravelRoute,
-  UserProfile,
 } from '@/types'
 import { img, scene } from './images'
 
@@ -1082,141 +1078,6 @@ export const posts: Post[] = [
     ],
   },
 ]
-
-/* ================= 购物车 / 订单 / 用户 ================= */
-
-export const initialCart: CartItem[] = [
-  {
-    id: 'c1',
-    productId: 'g1',
-    title: '手工苗银花丝手镯',
-    cover: goods[0].cover,
-    sku: '中号 · 圈口 58mm',
-    price: 868,
-    qty: 1,
-    stock: 12,
-    shop: '乌东银铺 · 杨光银',
-    checked: true,
-  },
-  {
-    id: 'c2',
-    productId: 'sp4',
-    title: '红酸汤底料',
-    cover: specialties[3].cover,
-    sku: '400g × 2 袋',
-    price: 45,
-    qty: 2,
-    stock: 100,
-    shop: '乌东特产合作社',
-    checked: true,
-  },
-  {
-    id: 'c3',
-    productId: 'sp1',
-    title: '雷山银球茶 · 明前特级',
-    cover: specialties[0].cover,
-    sku: '100g × 2 礼盒',
-    price: 298,
-    qty: 1,
-    stock: 20,
-    shop: '乌东特产合作社',
-    checked: false,
-  },
-]
-
-export const initialOrders: Order[] = [
-  {
-    orderNo: 'WD2609010001',
-    type: 'LODGING',
-    status: 'CONFIRMED',
-    title: '枕云山舍 · 苗族木屋大床房',
-    cover: homestays[0].cover,
-    summary: '09-29 入住 · 09-30 离店 · 2 晚',
-    amount: 976,
-    qty: 1,
-    date: '2026-09-01',
-    shop: '枕云山舍',
-  },
-  {
-    orderNo: 'WD2609020007',
-    type: 'ROUTE',
-    status: 'PAID',
-    title: '苗寨漫游记 · 一日精华',
-    cover: routes[0].cover,
-    summary: '10-02 出发 · 2 大 1 小',
-    amount: 814,
-    qty: 3,
-    date: '2026-09-02',
-    shop: '乌东旅行社',
-  },
-  {
-    orderNo: 'WD2609050012',
-    type: 'GOODS',
-    status: 'IN_PROGRESS',
-    title: '手工苗银花丝手镯',
-    cover: goods[0].cover,
-    summary: '中号 · 圈口 58mm × 1 · 已发货（顺丰）',
-    amount: 868,
-    qty: 1,
-    date: '2026-09-05',
-    shop: '乌东银铺 · 杨光银',
-  },
-  {
-    orderNo: 'WD2609060021',
-    type: 'MEAL',
-    status: 'UNPAID',
-    title: '云雾长桌宴 · 餐位预订',
-    cover: restaurants[0].cover,
-    summary: '09-10 晚餐 17:30 场 · 4 人',
-    amount: 352,
-    qty: 4,
-    date: '2026-09-06',
-    shop: '云雾长桌宴',
-  },
-  {
-    orderNo: 'WD2608180033',
-    type: 'TICKET',
-    status: 'COMPLETED',
-    title: '乌东苗寨景区 · 家庭套票',
-    cover: scenics[0].cover,
-    summary: '08-18 入园 · 2 大 1 小 · 已核销',
-    amount: 138,
-    qty: 3,
-    date: '2026-08-18',
-    shop: '乌东苗寨景区',
-  },
-  {
-    orderNo: 'WD2607220044',
-    type: 'GOODS',
-    status: 'REFUNDED',
-    title: '百鸟衣改良礼服',
-    cover: goods[3].cover,
-    summary: '尺码不合 · 已全额退款',
-    amount: 2680,
-    qty: 1,
-    date: '2026-07-22',
-    shop: '乌东服饰工坊',
-  },
-]
-
-export const initialMessages: Message[] = [
-  { id: 'm1', type: 'ORDER', title: '订单已确认', content: '您预订的「枕云山舍 · 苗族木屋大床房」已获商家确认，入住当天出示订单号即可。', date: '2026-09-01 10:24', read: false },
-  { id: 'm2', type: 'ORDER', title: '包裹已发出', content: '您购买的手工苗银花丝手镯已由顺丰揽收，运单号 SF1388…0091。', date: '2026-09-05 18:40', read: false },
-  { id: 'm3', type: 'INTERACT', title: '收到新的点赞', content: '「追云者」赞了你的游记《一个人的乌东》。', date: '2026-09-06 09:12', read: false },
-  { id: 'm4', type: 'SYSTEM', title: '苗年节早鸟优惠开启', content: '「苗年节庆 · 三日狂欢」路线现已开放预订，前 50 名立减 100 元。', date: '2026-09-06 08:00', read: true },
-]
-
-export const initialFavoriteIds = ['g1', 'h1', 'f1', 'rt1', 'p1', 'p3']
-
-export const defaultUser: UserProfile = {
-  id: 'u0',
-  name: '山间旅人',
-  phone: '138****1234',
-  avatar: img('chinese traveler avatar illustration minimal backpack', 'square'),
-  bio: '想去有云的地方',
-  status: 'ENABLED',
-  hasPassword: false,
-}
 
 /** 首页「逛一逛」词条，点击落到对应文化内容（culture.ts 的 cultureEntries 按 label 匹配） */
 export const hotKeywords = ['银饰', '长桌宴', '云海民宿', '苗年节', '蓝染体验', '酸汤鱼']

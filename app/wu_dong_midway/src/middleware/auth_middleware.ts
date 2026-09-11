@@ -11,7 +11,7 @@ const TOKEN_REQUIRED_PATHS = [
   '/api/favorites',
 ];
 /** 当前用户私有资源前缀：列表、详情、写操作全部需要登录 */
-const TOKEN_REQUIRED_PREFIXES = ['/api/user/addresses'];
+const TOKEN_REQUIRED_PREFIXES = ['/api/user/addresses', '/api/user/messages'];
 /** m2/m3/m4 的写操作需要登录，公开查询放行 */
 const TOKEN_REQUIRED_WRITE_PREFIXES = ['/api/app/m2', '/api/app/m3', '/api/app/m4'];
 /**

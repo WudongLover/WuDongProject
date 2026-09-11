@@ -54,6 +54,17 @@ CREATE TABLE `wudong_common_refresh_token` (
   KEY `idx_user` (`user_id`)
 ) ENGINE=InnoDB COMMENT='刷新令牌（验证码存 Redis，不建表）';
 
+-- 1.2.1 用户关注关系（follower_id 关注 following_id）
+CREATE TABLE `wudong_common_user_follow` (
+  `id`           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `follower_id`  BIGINT UNSIGNED NOT NULL COMMENT '关注发起人',
+  `following_id` BIGINT UNSIGNED NOT NULL COMMENT '被关注用户',
+  `created_at`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_follower_following` (`follower_id`, `following_id`),
+  KEY `idx_following` (`following_id`)
+) ENGINE=InnoDB COMMENT='用户关注关系';
+
 -- 1.3 收货地址（对应 Address）
 CREATE TABLE `wudong_common_address` (
   `id`         BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

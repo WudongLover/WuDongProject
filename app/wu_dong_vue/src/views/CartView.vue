@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { unwrapError } from '@/api'
+import { addressApi } from '@/api/address'
+import type { Address } from '@/types'
 import { useCartStore } from '@/stores/cart'
 import { useUserStore } from '@/stores/user'
 import { useMockPay } from '@/composables/useMockPay'
@@ -13,6 +15,9 @@ import PayDialog from '@/components/PayDialog.vue'
 const router = useRouter()
 const cartStore = useCartStore()
 const userStore = useUserStore()
+const addresses = ref<Address[]>([])
+const selectedAddressId = ref('')
+const selectedAddress = computed(() => addresses.value.find((a) => a.id === selectedAddressId.value))
 // 购物车是支付入口：结算即下单，并立刻弹出虚拟支付
 const { pendingOrder, askPay, onPaid, onDismiss } = useMockPay()
 
@@ -22,8 +27,21 @@ onMounted(async () => {
     router.replace({ path: '/login', query: { redirect: '/cart' } })
     return
   }
-  await loadCart()
+  await Promise.all([loadCart(), loadAddresses()])
 })
+
+async function loadAddresses() {
+  try {
+    const res = await addressApi.list()
+    addresses.value = Array.isArray(res.data) ? res.data : []
+    if (!addresses.value.some((a) => a.id === selectedAddressId.value)) {
+      selectedAddressId.value =
+        addresses.value.find((a) => a.isDefault)?.id || addresses.value[0]?.id || ''
+    }
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  }
+}
 
 async function loadCart() {
   try {
@@ -92,8 +110,12 @@ async function checkout() {
     userStore.toast('请先勾选商品')
     return
   }
+  if (!selectedAddressId.value) {
+    userStore.toast('请先添加并选择收货地址')
+    return
+  }
   try {
-    const order = await cartStore.checkout()
+    const order = await cartStore.checkout(selectedAddressId.value)
     askPay(order)
   } catch (e) {
     userStore.toast(unwrapError(e).message)
@@ -146,6 +168,26 @@ async function checkout() {
         </div>
       </div>
 
+      <div class="shipping-box">
+        <div class="shipping-main">
+          <label for="cart-address">收货地址</label>
+          <select
+            id="cart-address"
+            v-model="selectedAddressId"
+            :disabled="!addresses.length"
+          >
+            <option v-if="!addresses.length" value="">暂无收货地址</option>
+            <option v-for="address in addresses" :key="address.id" :value="address.id">
+              {{ address.name }} {{ address.phone }} · {{ address.region }} {{ address.detail }}
+            </option>
+          </select>
+          <p v-if="selectedAddress">
+            {{ selectedAddress.region }} {{ selectedAddress.detail }}
+          </p>
+        </div>
+        <router-link to="/user">管理地址</router-link>
+      </div>
+
       <div class="settle-bar">
         <button class="del-checked" @click="removeChecked">
           <AppIcon name="trash" :size="14" /> 删除选中
@@ -154,7 +196,9 @@ async function checkout() {
           已选 <b>{{ cartStore.checkedItems.length }}</b> 件 · 合计
           <span class="price">{{ cartStore.checkedTotal }}</span>
         </div>
-        <button class="btn btn-primary btn-lg" @click="checkout">结算并支付</button>
+        <button class="btn btn-primary btn-lg" :disabled="!selectedAddressId" @click="checkout">
+          结算并支付
+        </button>
       </div>
     </template>
 
@@ -296,6 +340,53 @@ input[type='checkbox'] {
   box-shadow: var(--shadow-2);
   padding: 14px 22px;
   margin-top: 22px;
+}
+
+.shipping-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 16px 20px;
+  margin-top: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: #fff;
+}
+
+.shipping-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.shipping-main label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.shipping-main select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--text);
+  font-size: 13px;
+}
+
+.shipping-main p {
+  margin-top: 7px;
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+.shipping-box > a {
+  flex: none;
+  color: var(--primary);
+  font-size: 13px;
 }
 
 .del-checked {

@@ -17,8 +17,8 @@ export const useCartStore = defineStore('cart', {
   },
   actions: {
     /** 归一化后端返回：checked 兼容 0/1/'1'/布尔，金额数量转 number */
-    normalize(items: CartItem[]): CartItem[] {
-      return items.map((item) => ({
+    normalize(items: CartItem[] | null | undefined): CartItem[] {
+      return (items ?? []).map((item) => ({
         ...item,
         price: Number(item.price) || 0,
         qty: Number(item.qty) || 0,
@@ -82,7 +82,7 @@ export const useCartStore = defineStore('cart', {
       const res = await cartApi.remove(id)
       this.items = this.normalize(res.data)
     },
-    async checkout(): Promise<Order> {
+    async checkout(addressId: string): Promise<Order> {
       const ids = this.checkedItems.map((c) => c.id)
       const shops = [...new Set(this.checkedItems.map((c) => c.shop))]
       const amount = this.checkedTotal
@@ -95,6 +95,7 @@ export const useCartStore = defineStore('cart', {
         qty: this.checkedItems.reduce((n, c) => n + c.qty, 0),
         shop: shops[0] || '乌东集市',
         cartItemIds: ids,
+        addressId,
       })
       await this.load()
       return res.data

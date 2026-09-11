@@ -94,6 +94,34 @@ export class PostMapper {
     return qb.getRawMany<PostRow>();
   }
 
+  findByAuthor(userId: number): Promise<PostRow[]> {
+    return this.dataSource
+      .getRepository(PostEntity)
+      .createQueryBuilder('p')
+      .leftJoin(UserEntity, 'u', 'u.id = p.user_id AND u.deleted_at IS NULL')
+      .select('p.id', 'id')
+      .addSelect('p.user_id', 'userId')
+      .addSelect('p.title', 'title')
+      .addSelect('p.content', 'content')
+      .addSelect('p.images', 'images')
+      .addSelect('p.topic', 'topic')
+      .addSelect('p.place', 'place')
+      .addSelect('p.likes', 'likes')
+      .addSelect('p.collects', 'collects')
+      .addSelect('p.views', 'views')
+      .addSelect('p.status', 'status')
+      .addSelect('p.published_at', 'publishedAt')
+      .addSelect('u.name', 'authorName')
+      .addSelect('u.avatar', 'authorAvatar')
+      .addSelect('u.bio', 'authorBio')
+      .where('p.user_id = :userId', { userId })
+      .andWhere('p.status = :status', { status: 'PASSED' })
+      .andWhere('p.deleted_at IS NULL')
+      .orderBy('p.published_at', 'DESC')
+      .addOrderBy('p.id', 'DESC')
+      .getRawMany<PostRow>();
+  }
+
   /** 单条帖子（含作者），未删除即可（详情不限制状态，便于作者查看审核中帖子） */
   findPostById(id: number): Promise<PostRow | null> {
     return this.dataSource

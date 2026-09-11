@@ -35,6 +35,11 @@ interface OrderEntity {
   createdAt: string
   /** 购物车合并下单的商品明细，非购物车订单为空 */
   items?: OrderItemEntity[] | null
+  receiver?: {
+    name: string
+    phone: string
+    address: string
+  } | null
 }
 
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -76,6 +81,7 @@ export function toOrder(e: OrderEntity): Order {
     shop: e.shopName ?? '',
     date: toDateStr(e.createdAt),
     items: (e.items ?? []).map(toOrderItem),
+    receiver: e.receiver ?? undefined,
   }
 }
 

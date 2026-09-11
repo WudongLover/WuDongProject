@@ -33,12 +33,12 @@ export class OrderFacadeService {
       if (Array.isArray(body?.cartItemIds) && body.cartItemIds.length) {
         // 带上明细一起返回：收银弹窗要按商品逐项展示
         return this.orderService.withItems(
-          await this.cartCheckout.createFromCart(userId, body.cartItemIds),
+          await this.cartCheckout.createFromCart(userId, body.cartItemIds, body?.addressId),
         );
       }
       if (Array.isArray(body?.items) && body.items.length) {
         return this.orderService.withItems(
-          await this.cartCheckout.createDirect(userId, body.items),
+          await this.cartCheckout.createDirect(userId, body.items, body?.addressId),
         );
       }
       throw new ApiError(1004, '请先选择要购买的商品');

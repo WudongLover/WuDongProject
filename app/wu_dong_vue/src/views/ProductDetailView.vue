@@ -3,6 +3,7 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import * as api from '@/api'
 import { unwrapError } from '@/api'
+import { addressApi } from '@/api/address'
 import type { Product } from '@/types'
 import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
@@ -92,9 +93,17 @@ async function buyNow() {
   }
   buying.value = true
   try {
+    const addresses = await addressApi.list()
+    const address = addresses.data.find((item) => item.isDefault) || addresses.data[0]
+    if (!address) {
+      userStore.toast('请先添加收货地址')
+      router.push('/user')
+      return
+    }
     // 服务端按商品 + 规格 + 数量实时算价、扣库存，与购物车结算同一套逻辑
     const res = await api.createOrder({
       type: product.value!.module,
+      addressId: address.id,
       items: [
         {
           productId: String(product.value!.id),

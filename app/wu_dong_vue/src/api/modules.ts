@@ -8,7 +8,6 @@ import type {
   Restaurant,
   Scenic,
   TravelRoute,
-  UserProfile,
 } from '@/types'
 import * as S from '@/mock/server'
 import type { Envelope } from '@/mock/server'
@@ -40,7 +39,6 @@ export {
   getUserStats,
   refreshAccess as bootstrap,
 } from './auth'
-export const currentUser = S.currentUser
 
 /* 商品（衣 / 特产）：真实后端 m1-goods，路由前缀 /api/v1/m1 */
 export interface GoodsQuery {
@@ -170,7 +168,6 @@ export function checkFavorite(targetType: string, targetId: string | number): Pr
 export { cartApi } from './cart'
 
 /* 消息 / 地址 / 资料 */
-export const getMessages = S.getMessages
-export const markMessageRead = S.markMessageRead
-export const markAllMessagesRead = S.markAllMessagesRead
+export { messageApi } from './message'
 export { addressApi } from './address'
+export { userProfileApi } from './userProfile'

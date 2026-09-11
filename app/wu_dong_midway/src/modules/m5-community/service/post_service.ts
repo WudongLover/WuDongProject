@@ -2,11 +2,13 @@
  * 【m5-community 模块】帖子（wudong_m5_post）
  * service 层：业务逻辑 + VO 组装（VO 结构对齐前端 types.ts：Post / PostComment / PostAuthor）
  * 跨模块只经对方 Service（当前作者信息临时直读，见 entity/user_entity.ts 注释）
+ * 公开用户主页需要按作者查询游记，见 listByAuthor()。
  */
 import { Inject, Provide } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
 import { PostMapper, PostRow, CommentRow } from '../mapper/post_mapper';
 import { ApiError } from '../error/api_error';
+import { MessageService } from '../../user/service/message_service';
 
 /** PostAuthor（前端 types.ts，id 为字符串） */
 export interface PostAuthorVo {
@@ -74,6 +76,9 @@ export class PostService {
   @Inject()
   postMapper: PostMapper;
 
+  @Inject()
+  messageService: MessageService;
+
   /**
    * 可选身份：游客/未登录返回 0（列表/详情公开可浏览，liked 恒 false）。
    * 身份唯一来源：ctx.userId（AuthMiddleware 校验 Bearer token 后写入）。
@@ -105,6 +110,18 @@ export class PostService {
       rows.map((r) => r.id)
     );
     return rows.map((r) => this.toPostVo(r, likedSet.has(r.id)));
+  }
+
+  async listByAuthor(ctx: Context, authorId: number): Promise<PostVo[]> {
+    if (!Number.isFinite(authorId) || authorId <= 0) {
+      throw new ApiError(1004, '用户 ID 无效', 400);
+    }
+    const rows = await this.postMapper.findByAuthor(authorId);
+    const likedSet = await this.postMapper.findLikedPostIds(
+      this.currentUserId(ctx),
+      rows.map((row) => row.id)
+    );
+    return rows.map((row) => this.toPostVo(row, likedSet.has(row.id)));
   }
 
   /** 详情：阅读数原子 +1；评论按 parent_id 组装楼中楼 */
@@ -155,9 +172,20 @@ export class PostService {
   /** 点赞切换：返回最新 { liked, likes } */
   async toggleLike(ctx: Context, id: number): Promise<{ liked: boolean; likes: number }> {
     const userId = this.requireUserId(ctx);
-    const result = await this.postMapper.toggleLike(id, userId);
-    if (!result.postExists) {
+    const post = await this.postMapper.findActivePost(id);
+    if (!post) {
       throw new ApiError(1003, '资源不存在', 404);
+    }
+    const result = await this.postMapper.toggleLike(id, userId);
+    if (result.liked && Number(post.userId) !== userId) {
+      await this.messageService.send({
+        userId: String(post.userId),
+        type: 'INTERACT',
+        title: '收到新的点赞',
+        content: `有人赞了你的游记《${post.title}》。`,
+        relatedType: 'POST',
+        relatedId: String(post.id),
+      });
     }
     return { liked: result.liked, likes: result.likes };
   }
@@ -187,14 +215,33 @@ export class PostService {
       replyToUserId = parent.userId;
     }
 
+    const userId = this.requireUserId(ctx);
     await this.postMapper.createComment({
       postId,
-      userId: this.requireUserId(ctx),
+      userId,
       parentId,
       replyToUserId,
       content: body.content.trim(),
       publishedAt: new Date(),
     });
+    const notifyUserId =
+      replyToUserId && replyToUserId !== userId
+        ? replyToUserId
+        : Number(post.userId) !== userId
+          ? Number(post.userId)
+          : null;
+    if (notifyUserId) {
+      await this.messageService.send({
+        userId: String(notifyUserId),
+        type: 'INTERACT',
+        title: replyToUserId ? '收到新的回复' : '收到新的评论',
+        content: replyToUserId
+          ? `有人回复了你在《${post.title}》下的评论。`
+          : `有人评论了你的游记《${post.title}》。`,
+        relatedType: 'POST',
+        relatedId: String(post.id),
+      });
+    }
     return this.buildCommentTree(await this.postMapper.findCommentsByPost(postId));
   }
 

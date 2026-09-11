@@ -165,11 +165,13 @@ function isReplyingToRoot(c: PostComment): boolean {
         <article class="main">
           <h1>{{ post.title }}</h1>
           <div class="author-row">
-            <img :src="post.author.avatar" :alt="post.author.name" />
-            <div>
-              <b>{{ post.author.name }}</b>
-              <span>{{ post.author.bio }}</span>
-            </div>
+            <router-link class="author-link" :to="`/users/${post.author.id}`">
+              <img :src="post.author.avatar" :alt="post.author.name" />
+              <div>
+                <b>{{ post.author.name }}</b>
+                <span>{{ post.author.bio }}</span>
+              </div>
+            </router-link>
             <div class="head-actions">
               <button v-if="isPostAuthor" class="btn-del" @click="deletePost">删除帖子</button>
             </div>
@@ -315,6 +317,13 @@ function isReplyingToRoot(c: PostComment): boolean {
   margin: 18px 0 24px;
   padding-bottom: 18px;
   border-bottom: 1px solid var(--line);
+}
+
+.author-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
 }
 
 .author-row img {

@@ -49,6 +49,10 @@ export class FavoriteService {
   dataSource: DataSource;
 
   async toggle(userId: number, body: ToggleBody): Promise<{ favorited: boolean }> {
+    const target = await this.resolve(body.targetType, body.targetId);
+    if (!target) {
+      throw new ApiError(1003, '收藏目标不存在', 404);
+    }
     const result = await this.favoriteMapper.toggle(userId, body.targetType, body.targetId);
     // POST 类型同步维护 collects 计数
     if (body.targetType === 'POST' && result.changed) {
@@ -82,7 +86,7 @@ export class FavoriteService {
         case 'GOODS':
         case 'SPECIALTY': {
           const p = await this.productService.detail(String(targetId));
-          if (!p) return null;
+          if (!p || p.module !== targetType) return null;
           return {
             id: String(targetId),
             targetType,

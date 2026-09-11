@@ -10,6 +10,7 @@ import { SkuEntity } from '../modules/m1-goods/entity/sku_entity';
 import { CategoryEntity } from '../modules/m1-goods/entity/category_entity';
 import { ReviewEntity } from '../modules/m1-goods/entity/review_entity';
 import { CartItemEntity } from '../modules/m1-goods/entity/cart_item_entity';
+import { M1OrderExtEntity } from '../modules/m1-goods/entity/order_ext_entity';
 import { RestaurantEntity } from '../modules/m2-meal/entity/restaurant_entity';
 import { HomestayEntity } from '../modules/m3-lodging/entity/homestay_entity';
 import { RoomTypeEntity } from '../modules/m3-lodging/entity/room_type_entity';
@@ -20,6 +21,8 @@ import { RouteEntity } from '../modules/m4-ticket/entity/route_entity';
 import { RouteDayEntity } from '../modules/m4-ticket/entity/route_day_entity';
 import { RefreshTokenEntity } from '../modules/user/entity/refresh_token_entity';
 import { AddressEntity } from '../modules/user/entity/address_entity';
+import { MessageEntity } from '../modules/user/entity/message_entity';
+import { FollowEntity } from '../modules/user/entity/follow_entity';
 import { OrderEntity } from '../modules/order/entity/order_entity';
 import { OrderItemEntity } from '../modules/order/entity/order_item_entity';
 import { PaymentEntity } from '../modules/order/entity/payment_entity';
@@ -74,11 +77,14 @@ export default {
           CategoryEntity,
           ReviewEntity,
           CartItemEntity,
+          M1OrderExtEntity,
           RestaurantEntity,
           HomestayEntity, RoomTypeEntity, RoomCalendarEntity,
           TicketEntity, ScenicEntity, RouteEntity, RouteDayEntity,
           RefreshTokenEntity,
           AddressEntity,
+          MessageEntity,
+          FollowEntity,
           AuthUserEntity,
           ChatSessionEntity,
           ChatMessageEntity,

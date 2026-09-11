@@ -241,6 +241,11 @@ export interface Order {
   shop: string
   /** 购物车下单的商品明细（合并支付一张订单，逐项展示） */
   items?: OrderItem[]
+  receiver?: {
+    name: string
+    phone: string
+    address: string
+  }
 }
 
 /** 订单内单件商品（来源 wudong_common_order_item） */
@@ -262,6 +267,8 @@ export interface Message {
   content: string
   date: string
   read: boolean
+  relatedType: string | null
+  relatedId: string | null
 }
 
 export interface Address {
@@ -315,6 +322,27 @@ export interface UserStats {
   favorites: number
   unreadMessages: number
   likesReceived: number
+  following: number
+  followers: number
+}
+
+export interface PublicUserProfile {
+  id: string
+  name: string
+  avatar: string
+  bio: string
+  postCount: number
+  likesReceived: number
+  followingCount: number
+  followerCount: number
+  isFollowing: boolean
+}
+
+export interface FollowUser {
+  id: string
+  name: string
+  avatar: string
+  bio: string
 }
 
 /* ================= 文化导览（前端固定内容，不计划迁后端） ================= */
