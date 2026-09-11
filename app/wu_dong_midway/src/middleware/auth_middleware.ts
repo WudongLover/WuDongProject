@@ -8,6 +8,8 @@ const TOKEN_REQUIRED_PATHS = [
   '/api/user/profile',
   '/api/user/password',
   '/api/favorites',
+  // 图片上传（转存 OSS）必须登录，避免匿名写入对象存储
+  '/api/upload',
 ];
 /** m2/m3/m4 的写操作需要登录，公开查询放行 */
 const TOKEN_REQUIRED_WRITE_PREFIXES = ['/api/app/m2', '/api/app/m3', '/api/app/m4'];

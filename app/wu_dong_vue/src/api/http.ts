@@ -6,7 +6,10 @@ import { localizeImage } from '@/mock/image-map'
 
 const BASE = '/api'
 
-/** 深度遍历响应体，把已知的远程图片 URL 换成本地路径 */
+/**
+ * 过渡期兜底：把老数据里已知的文生图外链换成本地文件，避免 DB 迁移脚本执行前出现空图。
+ * OSS 地址不在映射表内，会原样透传（见 mock/image-map.ts 的 toOssUrl）。
+ */
 function localizeDeep(value: unknown): unknown {
   if (typeof value === 'string') return localizeImage(value)
   if (Array.isArray(value)) return value.map(localizeDeep)
@@ -25,14 +28,17 @@ function localizeDeep(value: unknown): unknown {
  * - 身份统一走 Authorization: Bearer（不再注入 X-User-Id 头）；
  * - 401/1001 时先用 refresh Cookie 续期并重放一次，仍失败则触发统一登出；
  * - code !== 0 时抛 ApiError（与前端已有的错误处理兼容）。
+ * - 图片等字段由后端直接返回 OSS 访问地址，OSS 地址原样透传。
  */
 async function request(path: string, init: RequestInit | undefined, retried: boolean): Promise<any> {
   const token = getAccessToken()
+  // FormData（文件上传）必须由浏览器自行带 boundary，不能覆盖 Content-Type
+  const isFormData = typeof FormData !== 'undefined' && init?.body instanceof FormData
   const res = await fetch(`${BASE}${path}`, {
     ...init,
     credentials: 'same-origin',
     headers: {
-      'content-type': 'application/json',
+      ...(isFormData ? {} : { 'content-type': 'application/json' }),
       ...(token ? { authorization: `Bearer ${token}` } : {}),
       ...((init?.headers as Record<string, string>) || {}),
     },

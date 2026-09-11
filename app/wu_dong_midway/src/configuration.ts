@@ -1,6 +1,7 @@
 import { Configuration, App } from '@midwayjs/core';
 import * as koa from '@midwayjs/koa';
 import * as orm from '@midwayjs/typeorm';
+import * as upload from '@midwayjs/upload';
 import * as validate from '@midwayjs/validate';
 import DefaultConfig from './config/config.default';
 import { ApiErrorFilter } from './filter/api_error_filter';
@@ -8,7 +9,7 @@ import { RequestLogMiddleware } from './middleware/request_log_middleware';
 import { AuthMiddleware } from './middleware/auth_middleware';
 
 @Configuration({
-  imports: [koa, orm, validate],
+  imports: [koa, orm, upload, validate],
   importConfigs: [{ default: DefaultConfig }],
 })
 export class MainConfiguration {

@@ -7,11 +7,108 @@ import { v1 as uuid } from 'uuid';
 import { CoolCommException } from '@cool-midway/core';
 import * as _ from 'lodash';
 import { pUploadPath } from '../../../../comm/path';
+import { getOssClient } from '../../../../comm/oss';
+
+/**
+ * 常见文件扩展名 → Content-Type（后台可上传图片/文档/视频等，非白名单场景退回二进制流）
+ */
+const EXT_MIME: Record<string, string> = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  webp: 'image/webp',
+  gif: 'image/gif',
+  bmp: 'image/bmp',
+  svg: 'image/svg+xml',
+  ico: 'image/x-icon',
+  mp4: 'video/mp4',
+  mov: 'video/quicktime',
+  mp3: 'audio/mpeg',
+  wav: 'audio/wav',
+  pdf: 'application/pdf',
+  doc: 'application/msword',
+  docx: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  xls: 'application/vnd.ms-excel',
+  xlsx: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  zip: 'application/zip',
+};
+
+/** 扩展名 → MIME */
+function mimeOfExt(ext: string): string {
+  return EXT_MIME[String(ext || '').toLowerCase()] || 'application/octet-stream';
+}
 
 /**
  * 文件上传
  */
 export class CoolPlugin extends BasePluginHook implements BaseUpload {
+  /**
+   * 生成 OSS 对象键：{OSS_PREFIX}/admin/{yyyyMM}/{uuid}.{ext}
+   * 后台管理端不限定文件类型，这里不套用图片专用的 buildKey
+   */
+  private buildOssKey(ext: string): string {
+    const prefix = getOssClient().config.prefix || 'wudong';
+    const safeExt = String(ext || 'bin').replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'bin';
+    return `${prefix}/admin/${moment().format('YYYYMM')}/${uuid().replace(/-/g, '')}.${safeExt}`;
+  }
+
+  /** 客户端传入的 key（云存储模式下的相对路径）→ OSS 对象键 */
+  private ossKeyOfClientPath(key: string): string {
+    const prefix = getOssClient().config.prefix || 'wudong';
+    return `${prefix}/admin/${this.sanitizePath(key)}`;
+  }
+
+  /**
+   * 上传到 OSS；未配置或上传失败返回 null，由调用方回退本地存储。
+   * @param file @midwayjs/upload 解析出的文件信息（data 为临时文件路径）
+   * @param clientKey 客户端传入的对象键（可选）
+   */
+  private async uploadToOss(file: any, clientKey?: string): Promise<string | null> {
+    const oss = getOssClient();
+    if (!oss.enabled) {
+      return null;
+    }
+    try {
+      const originalFileName = path.basename(file.filename || '');
+      const extension = (originalFileName.split('.').pop() || 'bin').toLowerCase();
+      const objectKey = clientKey
+        ? this.ossKeyOfClientPath(clientKey)
+        : this.buildOssKey(extension);
+      const res = await oss.putFile(file.data, objectKey, mimeOfExt(extension));
+      return res.url;
+    } catch (err: any) {
+      console.warn('[upload] OSS 上传失败，回退本地存储：', err?.message || err);
+      return null;
+    }
+  }
+
+  /** 远程文件转存 OSS；未配置或失败返回 null */
+  private async downAndUploadToOss(
+    url: string,
+    safeFileName: string
+  ): Promise<string | null> {
+    const oss = getOssClient();
+    if (!oss.enabled) {
+      return null;
+    }
+    try {
+      const extension = path.extname(safeFileName).replace(/^\./, '').toLowerCase();
+      const objectKey = this.buildOssKey(extension);
+      let data: Buffer;
+      if (url.includes('http')) {
+        const download = require('download');
+        data = await download(url);
+      } else {
+        data = fs.readFileSync(url);
+      }
+      const res = await oss.putBuffer(Buffer.from(data), objectKey, mimeOfExt(extension));
+      return res.url;
+    } catch (err: any) {
+      console.warn('[upload] OSS 转存失败，回退本地存储：', err?.message || err);
+      return null;
+    }
+  }
+
   /**
    * 验证路径安全性，防止路径遍历攻击
    * @param userInput 用户输入的文件名或路径
@@ -97,6 +194,12 @@ export class CoolPlugin extends BasePluginHook implements BaseUpload {
       safeFileName = uuid() + extend;
     }
 
+    // 已配置 OSS：直接转存到对象存储并返回公网 URL
+    const ossUrl = await this.downAndUploadToOss(url, safeFileName);
+    if (ossUrl) {
+      return ossUrl;
+    }
+
     const download = require('download');
     // 数据
     const data = url.includes('http')
@@ -129,6 +232,25 @@ export class CoolPlugin extends BasePluginHook implements BaseUpload {
 
     // 验证key安全性
     const safeKey = this.sanitizePath(key);
+
+    // 已配置 OSS：按指定 key 上传到对象存储
+    const oss = getOssClient();
+    if (oss.enabled) {
+      try {
+        const extension = path
+          .extname(safeKey)
+          .replace(/^\./, '')
+          .toLowerCase();
+        const res = await oss.putFile(
+          filePath,
+          this.ossKeyOfClientPath(safeKey),
+          mimeOfExt(extension)
+        );
+        return res.url;
+      } catch (err: any) {
+        console.warn('[upload] OSS 上传失败，回退本地存储：', err?.message || err);
+      }
+    }
 
     const data = fs.readFileSync(filePath);
 
@@ -171,6 +293,13 @@ export class CoolPlugin extends BasePluginHook implements BaseUpload {
       }
 
       const file = ctx.files[0];
+
+      // 已配置 OSS：服务端上传到对象存储并返回公网 URL（前端 cl-upload 无感）
+      const ossUrl = await this.uploadToOss(file, key);
+      if (ossUrl) {
+        return ossUrl;
+      }
+
       // 安全处理原始文件名
       const originalFileName = path.basename(file.filename);
       const extension = originalFileName.split('.').pop();
