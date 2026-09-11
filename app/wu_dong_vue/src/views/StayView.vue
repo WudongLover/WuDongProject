@@ -4,6 +4,10 @@ import * as api from '@/api'
 import type { Homestay } from '@/types'
 import HomestayCard from '@/components/HomestayCard.vue'
 import AppIcon from '@/components/AppIcon.vue'
+import CultureBand from '@/components/CultureBand.vue'
+
+/** 文化导览：先讲吊脚楼与云海，再看房型 */
+const culture = api.getCultureSection('ZHU')
 
 const homestays = ref<Homestay[]>([])
 const loading = ref(true)
@@ -27,6 +31,8 @@ onMounted(async () => {
       </div>
     </div>
 
+    <CultureBand v-if="culture" :section="culture" />
+
     <div class="container">
       <div class="filter-row">
         <div class="fr-group">
@@ -43,7 +49,7 @@ onMounted(async () => {
       </div>
 
       <div v-if="!loading && !homestays.length" class="empty-state">没有符合条件的民宿</div>
-      <div v-else class="stay-list">
+      <div v-else class="stay-list card-grid">
         <HomestayCard
           v-for="(h, i) in homestays.filter((x) => styleTag === '全部' || x.tags.includes(styleTag))"
           :key="h.id"
@@ -83,6 +89,11 @@ onMounted(async () => {
   margin-top: 8px;
   font-size: clamp(24px, 3.4vw, 36px);
   color: #fff;
+}
+
+/* hero 是无图纯色块，浅色文化区紧接深色块需要一道过渡 */
+.stay-page :deep(.culture-band) {
+  border-top: 1px solid var(--line);
 }
 
 .filter-row {

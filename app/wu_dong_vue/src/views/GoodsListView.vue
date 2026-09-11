@@ -4,7 +4,11 @@ import * as api from '@/api'
 import type { Product } from '@/types'
 import ProductCard from '@/components/ProductCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
+import CultureBand from '@/components/CultureBand.vue'
 import { img } from '@/mock/images'
+
+/** 文化导览：固定内容，先讲手艺再挑东西 */
+const culture = api.getCultureSection('YI')
 
 const sorts = [
   { key: 'default', label: '综合' },
@@ -28,6 +32,7 @@ const heroImg = img('Miao embroidery and silver jewelry flat lay on indigo cloth
 async function load() {
   loading.value = true
   const res = await api.getGoodsList({
+    module: 'GOODS',
     category_id: catId.value ?? undefined,
     sort: sort.value,
     max_price: maxPrice.value ?? undefined,
@@ -55,6 +60,9 @@ onMounted(async () => {
         <p>每一件都出自乌东村匠人之手，附传承人证书</p>
       </div>
     </div>
+
+    <!-- 放在 .container 之外：组件自带 container，避免双层收窄 -->
+    <CultureBand v-if="culture" :section="culture" />
 
     <div class="container layout">
       <aside class="filters">
@@ -114,7 +122,7 @@ onMounted(async () => {
 
         <div v-if="loading" class="grid"><div class="skeleton" v-for="i in 8" :key="i"></div></div>
         <EmptyState v-else-if="!items.length" text="没有符合条件的作品，换个筛选试试" />
-        <div v-else class="grid">
+        <div v-else class="grid card-grid">
           <ProductCard v-for="(g, i) in items" :key="g.id" :item="g" class="rise" :style="{ animationDelay: `${Math.min(i, 8) * 50}ms` }" />
         </div>
       </main>

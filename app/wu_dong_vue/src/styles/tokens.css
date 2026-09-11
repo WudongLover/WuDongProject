@@ -41,8 +41,12 @@
   --radius-lg: 10px;
   --shadow-1: 0 1px 2px rgba(22, 48, 77, 0.06), 0 4px 14px rgba(22, 48, 77, 0.07);
   --shadow-2: 0 6px 24px rgba(22, 48, 77, 0.14);
+  --shadow-3: 0 18px 44px rgba(22, 48, 77, 0.2), 0 5px 14px rgba(22, 48, 77, 0.1);
   --container: 1200px;
 
   /* 动效 */
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  /* 卡片悬停：抬升高度与放大倍率，各卡片可按体量单独覆盖 */
+  --card-lift: -6px;
+  --card-scale: 1.026;
 }

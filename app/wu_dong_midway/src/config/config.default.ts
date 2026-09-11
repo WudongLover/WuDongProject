@@ -3,11 +3,14 @@ import { MidwayConfig } from '@midwayjs/core';
 import { PostEntity } from '../modules/m5-community/entity/post_entity';
 import { CommentEntity } from '../modules/m5-community/entity/comment_entity';
 import { PostLikeEntity } from '../modules/m5-community/entity/post_like_entity';
+import { FavoriteEntity } from '../modules/m5-community/entity/favorite_entity';
 import { UserEntity } from '../modules/m5-community/entity/user_entity';
 import { ProductEntity } from '../modules/m1-goods/entity/product_entity';
 import { SkuEntity } from '../modules/m1-goods/entity/sku_entity';
 import { CategoryEntity } from '../modules/m1-goods/entity/category_entity';
 import { ReviewEntity } from '../modules/m1-goods/entity/review_entity';
+import { CartItemEntity } from '../modules/m1-goods/entity/cart_item_entity';
+import { RestaurantEntity } from '../modules/m2-meal/entity/restaurant_entity';
 import { HomestayEntity } from '../modules/m3-lodging/entity/homestay_entity';
 import { RoomTypeEntity } from '../modules/m3-lodging/entity/room_type_entity';
 import { RoomCalendarEntity } from '../modules/m3-lodging/entity/room_calendar_entity';
@@ -16,6 +19,15 @@ import { ScenicEntity } from '../modules/m4-ticket/entity/scenic_entity';
 import { RouteEntity } from '../modules/m4-ticket/entity/route_entity';
 import { RouteDayEntity } from '../modules/m4-ticket/entity/route_day_entity';
 import { RefreshTokenEntity } from '../modules/user/entity/refresh_token_entity';
+import { OrderEntity } from '../modules/order/entity/order_entity';
+import { PaymentEntity } from '../modules/order/entity/payment_entity';
+import { DishEntity } from '../modules/m2-meal/entity/dish_entity';
+import { TimeSlotEntity } from '../modules/m2-meal/entity/time_slot_entity';
+import { MealOrderExtEntity } from '../modules/m2-meal/entity/order_ext_entity';
+import { LodgingOrderExtEntity } from '../modules/m3-lodging/entity/order_ext_entity';
+// user 模块（C 端鉴权）实体：与 m5 的临时只读实体同表不同用途，二者都要注册，
+// 否则 AuthService 注入的 UserEntity 没有 metadata，登录接口直接 500
+import { UserEntity as AuthUserEntity } from '../modules/user/entity/user_entity';
 
 /**
  * 通用配置（本地开发与生产一致）
@@ -51,13 +63,23 @@ export default {
           CommentEntity,
           PostLikeEntity,
           UserEntity,
+          FavoriteEntity,
           ProductEntity,
           SkuEntity,
           CategoryEntity,
           ReviewEntity,
+          CartItemEntity,
+          RestaurantEntity,
           HomestayEntity, RoomTypeEntity, RoomCalendarEntity,
           TicketEntity, ScenicEntity, RouteEntity, RouteDayEntity,
           RefreshTokenEntity,
+          AuthUserEntity,
+          OrderEntity,
+          PaymentEntity,
+          DishEntity,
+          TimeSlotEntity,
+          MealOrderExtEntity,
+          LodgingOrderExtEntity,
         ],
       },
     },

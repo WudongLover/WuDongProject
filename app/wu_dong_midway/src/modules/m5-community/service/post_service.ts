@@ -16,14 +16,26 @@ export interface PostAuthorVo {
   bio?: string;
 }
 
-/** PostComment（前端 types.ts） */
-export interface PostCommentVo {
+/** 评论回复（扁平挂在根评论下） */
+export interface PostReplyVo {
   id: string;
+  userId: string;
   user: string;
   avatar: string;
   content: string;
   date: string;
-  replies?: { user: string; content: string; date: string }[];
+  replyToUser?: string;
+}
+
+/** PostComment（前端 types.ts） */
+export interface PostCommentVo {
+  id: string;
+  userId: string;
+  user: string;
+  avatar: string;
+  content: string;
+  date: string;
+  replies?: PostReplyVo[];
 }
 
 /** Post（前端 types.ts） */
@@ -63,19 +75,39 @@ export class PostService {
   postMapper: PostMapper;
 
   /**
-   * 当前用户 id：
-   * 请求头 X-User-Id 优先，缺省回退 env DEMO_USER_ID（默认 1）
-   * ❗待登录鉴权模块（src/modules/user）实现后，改为从 token/会话解析并移除兜底
+   * 可选身份：游客/未登录返回 0（列表/详情公开可浏览，liked 恒 false）。
+   * 优先级：
+   * 1. ctx.userId（AuthMiddleware 校验 Bearer token 后写入，真实身份）
+   * 2. X-User-Id 请求头（仅非生产环境，联调兜底）
+   * 3. DEMO_USER_ID 环境变量（仅非生产环境）
    */
   currentUserId(ctx: Context): number {
-    const raw = ctx.headers['x-user-id'];
-    const header = Array.isArray(raw) ? raw[0] : raw;
-    const headerId = Number(header);
-    if (Number.isFinite(headerId) && headerId > 0) {
-      return headerId;
+    const authedId = Number((ctx as any).userId);
+    if (Number.isFinite(authedId) && authedId > 0) {
+      return authedId;
     }
-    const fallback = Number(process.env.DEMO_USER_ID || 1);
-    return Number.isFinite(fallback) && fallback > 0 ? fallback : 1;
+    if (process.env.NODE_ENV !== 'production') {
+      const raw = ctx.headers['x-user-id'];
+      const header = Array.isArray(raw) ? raw[0] : raw;
+      const headerId = Number(header);
+      if (Number.isFinite(headerId) && headerId > 0) {
+        return headerId;
+      }
+      const fallback = Number(process.env.DEMO_USER_ID || 1);
+      if (Number.isFinite(fallback) && fallback > 0) {
+        return fallback;
+      }
+    }
+    return 0;
+  }
+
+  /** 必须身份：写操作（发布/点赞/评论/删除）调用，未登录抛 401 */
+  requireUserId(ctx: Context): number {
+    const id = this.currentUserId(ctx);
+    if (!id) {
+      throw new ApiError(1001, '未登录', 401);
+    }
+    return id;
   }
 
   /** 列表：status=PASSED 且未删除；comments 恒 []（契约），liked 按当前用户批量填充 */
@@ -118,7 +150,7 @@ export class PostService {
   async create(ctx: Context, body: PublishBody): Promise<PostVo> {
     const data = this.validatePublish(body);
     const id = await this.postMapper.createPost({
-      userId: this.currentUserId(ctx),
+      userId: this.requireUserId(ctx),
       title: data.title,
       content: data.content,
       images: data.images,
@@ -136,7 +168,7 @@ export class PostService {
 
   /** 点赞切换：返回最新 { liked, likes } */
   async toggleLike(ctx: Context, id: number): Promise<{ liked: boolean; likes: number }> {
-    const userId = this.currentUserId(ctx);
+    const userId = this.requireUserId(ctx);
     const result = await this.postMapper.toggleLike(id, userId);
     if (!result.postExists) {
       throw new ApiError(1003, '资源不存在', 404);
@@ -171,7 +203,7 @@ export class PostService {
 
     await this.postMapper.createComment({
       postId,
-      userId: this.currentUserId(ctx),
+      userId: this.requireUserId(ctx),
       parentId,
       replyToUserId,
       content: body.content.trim(),
@@ -182,7 +214,7 @@ export class PostService {
 
   /** 逻辑删除帖子（仅作者可删除） */
   async deletePost(ctx: Context, postId: number): Promise<boolean> {
-    const userId = this.currentUserId(ctx);
+    const userId = this.requireUserId(ctx);
     const post = await this.postMapper.findPostById(postId);
     if (!post) {
       throw new ApiError(1003, '资源不存在', 404);
@@ -195,7 +227,7 @@ export class PostService {
 
   /** 逻辑删除评论（评论作者或帖子作者可删除） */
   async deleteComment(ctx: Context, postId: number, commentId: number): Promise<boolean> {
-    const userId = this.currentUserId(ctx);
+    const userId = this.requireUserId(ctx);
     const post = await this.postMapper.findActivePost(postId);
     if (!post) {
       throw new ApiError(1003, '资源不存在', 404);
@@ -249,27 +281,55 @@ export class PostService {
     return { title, content, topic, place, images: images as string[] };
   }
 
-  /** 评论列表 → 楼中楼树（replies 挂在根评论下，回复人昵称取 reply_to_user） */
+  /** 评论列表 → 两级拍平（根评论 + 回复列表）
+  * 回复沿 parentId 链向上回溯到根，保证三级以上评论不丢失 */
   private buildCommentTree(rows: CommentRow[]): PostCommentVo[] {
+    if (!rows.length) {
+      return [];
+    }
+    // 全量索引，key 统一转 number（MySQL BIGINT 可能返回字符串）
+    const map = new Map<number, CommentRow>();
+    for (const r of rows) {
+      map.set(Number(r.id), r);
+    }
+    // 按发布时间升序排列
+    const sorted = [...rows].sort(
+      (a, b) =>
+        (a.publishedAt?.getTime() ?? 0) - (b.publishedAt?.getTime() ?? 0),
+    );
     const roots: PostCommentVo[] = [];
-    const children = new Map<number, { user: string; content: string; date: string }[]>();
-    for (const row of rows) {
+    const children = new Map<number, PostReplyVo[]>();
+
+    for (const row of sorted) {
       if (row.parentId == null) {
         roots.push(this.toCommentVo(row));
       } else {
-        const list = children.get(Number(row.parentId)) ?? [];
-        list.push({
-          user: row.replyUserName ?? '',
-          content: row.content,
-          date: this.fmtDate(row.publishedAt),
-        });
-        children.set(Number(row.parentId), list);
+        const rootId = this.backtrackRoot(Number(row.id), map, 10);
+        const list = children.get(rootId) ?? [];
+        list.push(this.toReplyVo(row));
+        children.set(rootId, list);
       }
     }
     return roots.map((root) => {
       const replies = children.get(Number(root.id));
-      return replies && replies.length ? { ...root, replies } : root;
+      return replies?.length ? { ...root, replies } : root;
     });
+  }
+
+  /** 沿 parentId 向上回溯到根评论（depth 上限防循环） */
+  private backtrackRoot(
+    id: number,
+    map: Map<number, CommentRow>,
+    depth: number,
+  ): number {
+    if (depth <= 0) {
+      return id;
+    }
+    const row = map.get(id);
+    if (!row || row.parentId == null) {
+      return id;
+    }
+    return this.backtrackRoot(Number(row.parentId), map, depth - 1);
   }
 
   private toPostVo(row: PostRow, liked: boolean): PostVo {
@@ -298,10 +358,23 @@ export class PostService {
   private toCommentVo(row: CommentRow): PostCommentVo {
     return {
       id: String(row.id),
+      userId: String(row.userId),
       user: row.authorName ?? '',
       avatar: row.authorAvatar ?? '',
       content: row.content,
       date: this.fmtDate(row.publishedAt),
+    };
+  }
+
+  private toReplyVo(row: CommentRow): PostReplyVo {
+    return {
+      id: String(row.id),
+      userId: String(row.userId),
+      user: row.authorName ?? '',
+      avatar: row.authorAvatar ?? '',
+      content: row.content,
+      date: this.fmtDate(row.publishedAt),
+      replyToUser: row.replyUserName ?? undefined,
     };
   }
 

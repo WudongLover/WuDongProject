@@ -51,12 +51,8 @@ const pubErr = ref('')
 
 async function load() {
   loading.value = true
-  const res = await api.getPosts()
-  let list = [...res.data]
-  if (activeTopic.value) list = list.filter((p) => p.topic === activeTopic.value)
-  if (sort.value === 'hot') list.sort((a, b) => b.likes - a.likes)
-  else list.sort((a, b) => b.date.localeCompare(a.date))
-  posts.value = list
+  const res = await api.getPosts(activeTopic.value || undefined, sort.value)
+  posts.value = res.data
   loading.value = false
 }
 
@@ -78,10 +74,17 @@ async function publish() {
     pubErr.value = '标题和正文不能为空'
     return
   }
+  if (!userStore.requireLogin()) return
   showPublish.value = false
-  userStore.toast('已提交，审核通过后将展示在社区（Mock）')
-  pubTitle.value = ''
-  pubContent.value = ''
+  try {
+    await api.publishPost({ title: pubTitle.value.trim(), content: pubContent.value.trim(), topic: pubTopic.value })
+    userStore.toast('发布成功')
+    pubTitle.value = ''
+    pubContent.value = ''
+    await load()
+  } catch (e: any) {
+    userStore.toast(e?.message || '发布失败')
+  }
 }
 </script>
 
@@ -124,7 +127,7 @@ async function publish() {
         </div>
 
         <EmptyState v-if="!loading && !posts.length" text="这个话题下还没有游记" />
-        <div v-else class="waterfall">
+        <div v-else class="waterfall card-grid">
           <PostCard v-for="(p, i) in posts" :key="p.id" :item="p" class="rise" :style="{ animationDelay: `${Math.min(i, 8) * 50}ms` }" />
         </div>
       </main>

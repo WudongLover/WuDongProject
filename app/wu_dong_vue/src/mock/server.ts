@@ -10,6 +10,7 @@ import type {
   OrderStatus,
   OrderType,
   LiveInfo,
+  LiveWeather,
   Post,
   Product,
   UserProfile,

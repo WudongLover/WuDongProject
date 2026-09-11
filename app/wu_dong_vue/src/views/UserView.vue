@@ -9,10 +9,12 @@ import AppIcon from '@/components/AppIcon.vue'
 
 const userStore = useUserStore()
 
-type Panel = 'profile' | 'favorites' | 'addresses' | 'messages'
+type Panel = 'profile' | 'security' | 'favorites' | 'addresses' | 'messages'
 const panel = ref<Panel>('profile')
 
 const profileForm = ref({ name: '', bio: '' })
+const pwdForm = ref({ oldPassword: '', newPassword: '', confirm: '' })
+const pwdSaving = ref(false)
 const favorites = ref<{ id: string; name: string; cover: string; type: string; price?: number; to?: string }[]>([])
 const messages = ref<Message[]>([])
 const addresses = ref<Address[]>([])
@@ -58,6 +60,30 @@ async function saveProfile() {
   }
 }
 
+/** 设置/修改登录密码 */
+async function savePassword() {
+  const { oldPassword, newPassword, confirm } = pwdForm.value
+  if (!newPassword || newPassword !== confirm) {
+    userStore.toast('两次输入的新密码不一致')
+    return
+  }
+  pwdSaving.value = true
+  try {
+    const res = await api.setPassword({
+      newPassword,
+      oldPassword: oldPassword ? oldPassword : undefined,
+    })
+    userStore.user = res.data as UserProfile
+    sessionStorage.setItem('wudong_user', JSON.stringify(userStore.user))
+    pwdForm.value = { oldPassword: '', newPassword: '', confirm: '' }
+    userStore.toast('密码已更新，可用手机号 + 密码登录')
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
+  } finally {
+    pwdSaving.value = false
+  }
+}
+
 async function readAll() {
   await api.markAllMessagesRead()
   await loadMessages()
@@ -68,8 +94,8 @@ async function readOne(m: Message) {
   await loadMessages()
 }
 
-async function unfav(id: string) {
-  await api.toggleFavorite(id)
+async function unfav(f: { targetType: string; targetId: string; id: string }) {
+  await api.toggleFavorite(f.targetType, f.targetId || f.id)
   userStore.toast('已取消收藏')
   await loadFavorites()
 }
@@ -97,6 +123,9 @@ async function unfav(id: string) {
         <aside class="u-menu">
           <button :class="{ on: panel === 'profile' }" @click="panel = 'profile'">
             <AppIcon name="user" :size="16" /> 我的资料
+          </button>
+          <button :class="{ on: panel === 'security' }" @click="panel = 'security'">
+            <AppIcon name="eye" :size="16" /> 账号安全
           </button>
           <button :class="{ on: panel === 'favorites' }" @click="panel = 'favorites'">
             <AppIcon name="heart" :size="16" /> 我的收藏
@@ -134,6 +163,49 @@ async function unfav(id: string) {
             <button class="btn btn-primary" @click="saveProfile">保存修改</button>
           </section>
 
+          <!-- 账号安全：设置 / 修改登录密码 -->
+          <section v-else-if="panel === 'security'" class="panel">
+            <h3>账号安全</h3>
+            <p class="sec-tip">
+              {{
+                userStore.user.hasPassword
+                  ? '修改登录密码：保存后旧密码立即失效。'
+                  : '你还没有设置密码，设置后即可用「手机号 + 密码」登录。'
+              }}
+            </p>
+            <div v-if="userStore.user.hasPassword" class="field">
+              <label>当前密码</label>
+              <input
+                v-model="pwdForm.oldPassword"
+                type="password"
+                autocomplete="current-password"
+                placeholder="请输入当前密码"
+              />
+            </div>
+            <div class="field">
+              <label>新密码</label>
+              <input
+                v-model="pwdForm.newPassword"
+                type="password"
+                autocomplete="new-password"
+                placeholder="8-20 位，需同时包含字母与数字"
+              />
+            </div>
+            <div class="field">
+              <label>确认新密码</label>
+              <input
+                v-model="pwdForm.confirm"
+                type="password"
+                autocomplete="new-password"
+                placeholder="再次输入新密码"
+                @keyup.enter="savePassword"
+              />
+            </div>
+            <button class="btn btn-primary" :disabled="pwdSaving" @click="savePassword">
+              {{ userStore.user.hasPassword ? '修改密码' : '设置密码' }}
+            </button>
+          </section>
+
           <!-- 我的收藏 -->
           <section v-else-if="panel === 'favorites'" class="panel">
             <div class="panel-head">
@@ -162,7 +234,7 @@ async function unfav(id: string) {
                   <span class="ft">{{ f.type }}</span>
                   <span v-if="f.price" class="price">{{ f.price }}</span>
                 </router-link>
-                <button class="unfav" aria-label="取消收藏" @click="unfav(f.id)">
+                <button class="unfav" aria-label="取消收藏" @click="unfav(f)">
                   <AppIcon name="heart" :size="14" />
                 </button>
               </div>
@@ -386,6 +458,13 @@ async function unfav(id: string) {
 .field {
   margin-bottom: 16px;
   max-width: 420px;
+}
+
+.sec-tip {
+  margin: -8px 0 18px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text-2);
 }
 
 .mini-tabs {
