@@ -1,9 +1,7 @@
-# 乌东文旅全套服务编排
-# app 下 4 个服务：
-#   midway = app/cool-admin-midway（管理端后端 Cool Admin）   API_PORT   默认 8001
-#   api    = app/wu_dong_midway（C 端业务后端，连 wudong 库） WUDONG_API_PORT 默认 8002
-#   admin  = app/cool_admin_vue（管理端前端）                 ADMIN_PORT  默认 9000
-#   web    = app/wu_dong_vue（C 端前端）                     WEB_PORT    默认 5173
+# 乌东文旅全套服务编排：4 个 app 模块 + MySQL + Redis
+#
+# 启动：docker compose --env-file .env up -d --build
+# 停止：docker compose down
 name: wudong
 
 services:
@@ -17,30 +15,84 @@ services:
     environment:
       TZ: Asia/Shanghai
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-cool}
+      MYSQL_ROOT_HOST: "%"
+      # Cool Admin 使用 cool 库；wudong 库由全量 SQL 脚本创建。
+      MYSQL_DATABASE: cool
     volumes:
       - ./data/mysql:/var/lib/mysql
-      # 首次启动自动建 wudong 库与 41 张表；若 ./data/mysql 已有数据则忽略，需手动导入 scripts/sql/wudong_schema.sql
-      - ../scripts/sql/wudong_schema.sql:/docker-entrypoint-initdb.d/10-wudong_schema.sql:ro
+      - ../scripts/sql/wudong_all_in_one.sql:/docker-entrypoint-initdb.d/10-wudong_all_in_one.sql:ro
     ports:
       - "${MYSQL_PORT:-3306}:3306"
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
       interval: 5s
       timeout: 5s
-      retries: 20
+      retries: 30
+      start_period: 20s
 
   redis:
     image: redis:7-alpine
     restart: unless-stopped
     environment:
       TZ: Asia/Shanghai
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+    command: >-
+      sh -c 'if [ -n "$$REDIS_PASSWORD" ]; then
+      exec redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD";
+      else exec redis-server --appendonly yes; fi'
     volumes:
       - ./data/redis:/data
     ports:
       - "${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: >-
+        sh -c 'if [ -n "$$REDIS_PASSWORD" ]; then
+        redis-cli -a "$$REDIS_PASSWORD" ping;
+        else redis-cli ping; fi'
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
-  # C 端业务后端（纯 Midway v3 + TypeORM，连 wudong 库）
+  # 管理端后端，连接 cool 库。
+  midway:
+    build:
+      context: ../app/cool-admin-midway
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      TZ: Asia/Shanghai
+      KOA_PORT: 8001
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
+      MYSQL_DATABASE: cool
+      MYSQL_SYNCHRONIZE: ${MYSQL_SYNCHRONIZE:-false}
+      COOL_INIT_DB: ${COOL_INIT_DB:-true}
+      COOL_INIT_MENU: ${COOL_INIT_MENU:-true}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      JWT_SECRET: ${JWT_SECRET:-}
+      OSS_REGION: ${OSS_REGION:-}
+      OSS_BUCKET: ${OSS_BUCKET:-}
+      OSS_ACCESS_KEY_ID: ${OSS_ACCESS_KEY_ID:-}
+      OSS_ACCESS_KEY_SECRET: ${OSS_ACCESS_KEY_SECRET:-}
+      OSS_ENDPOINT: ${OSS_ENDPOINT:-}
+      OSS_PUBLIC_BASE_URL: ${OSS_PUBLIC_BASE_URL:-}
+      OSS_PREFIX: ${OSS_PREFIX:-wudong}
+      OSS_STS_TOKEN: ${OSS_STS_TOKEN:-}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "${API_PORT:-8001}:8001"
+
+  # C 端业务后端，连接 wudong 库。
   api:
     build:
       context: ../app/wu_dong_midway
@@ -55,57 +107,69 @@ services:
       MYSQL_USERNAME: root
       MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
       MYSQL_DATABASE: wudong
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: ${REDIS_DB:-0}
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-}
+      REDIS_CACHE_TTL: ${REDIS_CACHE_TTL:-300}
+      JWT_SECRET: ${JWT_SECRET:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_MODEL_NAME: ${LLM_MODEL_NAME:-}
+      LLM_EMBEDDING_MODEL: ${LLM_EMBEDDING_MODEL:-}
+      LLM_EMBEDDING_API_KEY: ${LLM_EMBEDDING_API_KEY:-}
+      LLM_EMBEDDING_URL: ${LLM_EMBEDDING_URL:-}
+      OSS_REGION: ${OSS_REGION:-oss-cn-guangzhou}
+      OSS_BUCKET: ${OSS_BUCKET:-wudong1}
+      OSS_ACCESS_KEY_ID: ${OSS_ACCESS_KEY_ID:-}
+      OSS_ACCESS_KEY_SECRET: ${OSS_ACCESS_KEY_SECRET:-}
+      OSS_ENDPOINT: ${OSS_ENDPOINT:-https://oss-cn-guangzhou.aliyuncs.com}
+      OSS_PREFIX: ${OSS_PREFIX:-wudong}
+      OSS_PUBLIC_BASE_URL: ${OSS_PUBLIC_BASE_URL:-https://wudong1.oss-cn-guangzhou.aliyuncs.com}
+      OSS_STS_TOKEN: ${OSS_STS_TOKEN:-}
     depends_on:
       mysql:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     ports:
       - "${WUDONG_API_PORT:-8002}:8001"
 
-  # 管理端后端（Cool Admin，连 cool 库）
-  midway:
-    build:
-      context: ../app/cool-admin-midway
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    environment:
-      NODE_ENV: production
-      TZ: Asia/Shanghai
-      KOA_PORT: 8001
-      MYSQL_HOST: mysql
-      MYSQL_PORT: 3306
-      MYSQL_USERNAME: root
-      MYSQL_PASSWORD: ${MYSQL_ROOT_PASSWORD:-123456}
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-cool}
-    depends_on:
-      mysql:
-        condition: service_healthy
-    ports:
-      - "${API_PORT:-8001}:8001"
-
-  # 管理端前端
+  # 管理端前端，生产构建由 nginx 提供静态文件。
   admin:
     build:
       context: ../app/cool_admin_vue
       dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
-      - midway
+      midway:
+        condition: service_started
     ports:
       - "${ADMIN_PORT:-9000}:80"
 
-  # C 端前端（开发模式）
+  # C 端前端开发服务；生产部署可替换为独立 nginx 镜像。
   web:
     image: node:20-alpine
     working_dir: /app
     restart: unless-stopped
     environment:
       TZ: Asia/Shanghai
+      VITE_API_PROXY_TARGET: ${VITE_API_PROXY_TARGET:-http://api:8001}
+      VITE_OSS_BASE_URL: ${VITE_OSS_BASE_URL:-https://wudong1.oss-cn-guangzhou.aliyuncs.com}
+      VITE_OSS_PREFIX: ${VITE_OSS_PREFIX:-wudong}
     volumes:
       - ../app/wu_dong_vue:/app
       - web_node_modules:/app/node_modules
     command: sh -c "npm ci && npm run dev -- --host 0.0.0.0"
+    depends_on:
+      api:
+        condition: service_started
     ports:
-      - "${WEB_PORT:-3333}:5173"
+      - "${WEB_PORT:-5173}:5173"
+
+networks:
+  default:
+    name: ${COMPOSE_PROJECT_NAME:-wudong}_network
 
 volumes:
   web_node_modules:
