@@ -21,14 +21,14 @@ export const config = {
 			// 如需恢复“后端菜单 + RBAC”模式，将本数组置空即可。
 			list: [
 				{
-					name: '乌东文旅总览',
+					name: '总览',
 					router: '/',
 					viewPath: 'modules/wudong/views/scene/overview.vue',
 					type: 1,
 					icon: 'icon-monitor',
 					orderNum: 0,
 					keepAlive: false,
-					isShow: false
+					isShow: true
 				},
 				{
 					name: '衣·非遗',
