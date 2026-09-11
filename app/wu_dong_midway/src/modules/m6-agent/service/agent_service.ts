@@ -5,9 +5,16 @@
 import { Inject, Provide, Logger } from '@midwayjs/core';
 import { ILogger } from '@midwayjs/logger';
 import { ChatOpenAI } from '@langchain/openai';
-import { SystemMessage, HumanMessage, AIMessage } from '@langchain/core/messages';
+import {
+  SystemMessage,
+  HumanMessage,
+  AIMessage,
+  ToolMessage,
+  AIMessageChunk,
+} from '@langchain/core/messages';
 import { RagService } from './rag_service';
 import { SessionService } from './session_service';
+import { WeatherService } from './weather_service';
 import { SYSTEM_PROMPT } from '../prompts/system';
 
 /** 对话结果 */
@@ -17,6 +24,31 @@ export interface ChatResult {
   sources: string[];
 }
 
+/** 单次对话内最多的工具调用轮数，避免模型反复调用 */
+const MAX_TOOL_ROUNDS = 3;
+
+/** 暴露给 LLM 的工具定义（OpenAI function calling 格式） */
+const AGENT_TOOLS = [
+  {
+    type: 'function' as const,
+    function: {
+      name: 'get_wudong_weather',
+      description:
+        '查询乌东村（贵州省雷山县丹江镇）的当前天气和未来几天预报。当用户问到天气、气温、下雨、穿衣、出行天气等问题时调用。',
+      parameters: {
+        type: 'object',
+        properties: {
+          days: {
+            type: 'integer',
+            description: '需要预报的天数，1-7，默认 3。只问当前天气或今天天气时传 1。',
+          },
+        },
+        required: [],
+      },
+    },
+  },
+];
+
 @Provide()
 export class AgentService {
   @Inject()
@@ -24,6 +56,9 @@ export class AgentService {
 
   @Inject()
   sessionService: SessionService;
+
+  @Inject()
+  weatherService: WeatherService;
 
   @Logger()
   logger: ILogger;
@@ -34,22 +69,14 @@ export class AgentService {
   }
 
   /**
-   * 发送消息并获取回复
-   * @param content 用户输入
-   * @param sessionId 会话 id（不传则新建）
-   * @param userId 登录用户 id
-   * @param deviceId 设备 id
+   * 公共准备：会话创建/校验、用户消息落库、RAG 检索与 LLM 消息列表拼装
    */
-  async chat(
+  private async prepare(
     content: string,
     sessionId: number | null,
     userId: number | null,
     deviceId: string
-  ): Promise<ChatResult> {
-    if (!this.isAvailable()) {
-      throw new Error('智能体未启用，请在 .env 中配置 LLM_API_KEY 和 LLM_MODEL_NAME');
-    }
-
+  ): Promise<{ sid: number; sources: string[]; messages: (SystemMessage | HumanMessage | AIMessage)[] }> {
     // 1. 创建或验证会话
     let sid = sessionId;
     if (!sid) {
@@ -99,8 +126,15 @@ export class AgentService {
     // 加入当前用户消息
     messages.push(new HumanMessage(content));
 
-    // 7. 调用 LLM
-    const llm = new ChatOpenAI({
+    return { sid, sources, messages };
+  }
+
+  /**
+   * 构建 LLM 客户端
+   * streamUsage 关闭：部分 OpenAI 兼容端点不认 stream_options 参数，会导致流式请求失败
+   */
+  private buildLLM(): ChatOpenAI {
+    return new ChatOpenAI({
       apiKey: process.env.LLM_API_KEY,
       configuration: {
         baseURL: process.env.LLM_BASE_URL || undefined,
@@ -108,29 +142,134 @@ export class AgentService {
       model: process.env.LLM_MODEL_NAME,
       temperature: 0.7,
       maxTokens: 1024,
+      streamUsage: false,
     });
+  }
 
+  private logLLMCall(mode: string) {
     this.logger.info(
-      '[m6-agent] calling LLM, baseURL=%s, model=%s, apiKey=%s...',
+      '[m6-agent] calling LLM (%s), baseURL=%s, model=%s, apiKey=%s...',
+      mode,
       process.env.LLM_BASE_URL || '(default)',
       process.env.LLM_MODEL_NAME,
       (process.env.LLM_API_KEY || '').slice(0, 6)
     );
+  }
 
-    const response = await llm.invoke(messages);
-    const reply = typeof response.content === 'string' ? response.content : String(response.content);
+  /**
+   * 带工具调用的生成循环：逐段产出回复文本。
+   * 模型要求调用工具时，先执行工具并把结果回灌，再继续生成。
+   */
+  private async *streamReply(
+    messages: (SystemMessage | HumanMessage | AIMessage)[]
+  ): AsyncGenerator<string> {
+    const llm = this.buildLLM().bindTools(AGENT_TOOLS);
+    const conversation: (SystemMessage | HumanMessage | AIMessage | ToolMessage)[] = [...messages];
 
-    // 8. 保存助手回复
-    const usage = response.usage_metadata as { input_tokens?: number; output_tokens?: number; total_tokens?: number } | undefined;
-    await this.sessionService.saveAssistantMessage(
-      sid,
-      reply,
-      usage?.input_tokens || 0,
-      usage?.output_tokens || 0
-    );
+    for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+      const chunkStream = await llm.stream(conversation);
 
-    this.logger.info('[m6-agent] reply generated, session=%s, tokens=%d', sid, (usage?.total_tokens || 0));
+      // 边下发增量文本，边拼接完整消息（tool_calls 分片需要 concat 后才能还原）
+      let acc: AIMessageChunk | null = null;
+      for await (const chunk of chunkStream) {
+        acc = acc ? acc.concat(chunk) : chunk;
+        const text = typeof chunk.content === 'string' ? chunk.content : '';
+        if (text) yield text;
+      }
+
+      const toolCalls = acc?.tool_calls ?? [];
+      if (!toolCalls.length) return;
+
+      conversation.push(new AIMessage({ content: acc?.content ?? '', tool_calls: toolCalls }));
+      for (const call of toolCalls) {
+        this.logger.info('[m6-agent] tool call: %s(%j)', call.name, call.args);
+        const result = await this.runTool(call);
+        conversation.push(
+          new ToolMessage({ content: result, tool_call_id: call.id ?? '', name: call.name })
+        );
+      }
+    }
+
+    this.logger.warn('[m6-agent] 达到工具调用轮数上限 %d，停止继续调用', MAX_TOOL_ROUNDS);
+  }
+
+  /** 执行单个工具调用；工具异常时把错误信息交回模型，不中断对话 */
+  private async runTool(call: { name: string; args: Record<string, any> }): Promise<string> {
+    if (call.name === 'get_wudong_weather') {
+      const days = Number(call.args?.days) || 3;
+      try {
+        return await this.weatherService.getWudongWeather(days);
+      } catch (err: any) {
+        this.logger.error('[m6-agent] get_wudong_weather failed: %s', err?.message || err);
+        return `天气查询失败：${err?.message || err}`;
+      }
+    }
+    return `未知工具：${call.name}`;
+  }
+
+  /**
+   * 发送消息并获取回复（非流式：内部同样走工具调用循环，攒齐后一次返回）
+   * @param content 用户输入
+   * @param sessionId 会话 id（不传则新建）
+   * @param userId 登录用户 id
+   * @param deviceId 设备 id
+   */
+  async chat(
+    content: string,
+    sessionId: number | null,
+    userId: number | null,
+    deviceId: string
+  ): Promise<ChatResult> {
+    if (!this.isAvailable()) {
+      throw new Error('智能体未启用，请在 .env 中配置 LLM_API_KEY 和 LLM_MODEL_NAME');
+    }
+
+    const { sid, sources, messages } = await this.prepare(content, sessionId, userId, deviceId);
+
+    this.logLLMCall('non-stream');
+    let reply = '';
+    for await (const text of this.streamReply(messages)) {
+      reply += text;
+    }
+
+    await this.sessionService.saveAssistantMessage(sid, reply);
+    this.logger.info('[m6-agent] reply generated, session=%s, length=%d', sid, reply.length);
 
     return { sessionId: sid, reply, sources };
+  }
+
+  /**
+   * 流式对话：逐段产出回复，SSE 事件序列 meta → delta* → end
+   * @param content 用户输入
+   * @param sessionId 会话 id（不传则新建）
+   * @param userId 登录用户 id
+   * @param deviceId 设备 id
+   */
+  async *chatStream(
+    content: string,
+    sessionId: number | null,
+    userId: number | null,
+    deviceId: string
+  ): AsyncGenerator<{ event: string; data: any }> {
+    if (!this.isAvailable()) {
+      throw new Error('智能体未启用，请在 .env 中配置 LLM_API_KEY 和 LLM_MODEL_NAME');
+    }
+
+    const { sid, sources, messages } = await this.prepare(content, sessionId, userId, deviceId);
+
+    // 先把会话 id 和引用来源发给前端
+    yield { event: 'meta', data: { sessionId: sid, sources } };
+
+    this.logLLMCall('stream');
+    let full = '';
+    for await (const text of this.streamReply(messages)) {
+      full += text;
+      yield { event: 'delta', data: { text } };
+    }
+
+    // 保存完整回复
+    await this.sessionService.saveAssistantMessage(sid, full);
+    this.logger.info('[m6-agent] stream reply generated, session=%s, length=%d', sid, full.length);
+    yield { event: 'end', data: {} };
   }
 }

@@ -1741,6 +1741,27 @@ VALUES
  JSON_ARRAY(JSON_OBJECT('label', '一日漫游路线', 'to', '/trip')),
  3, 'PUBLISHED', '2026-08-16 09:00:00');
 
+-- ---------------------------------------------------------------------
+-- 推文正文扩写：每篇正文补充背景、体验与实用细节，整体约 500 字。
+-- 使用 JSON_SET 追加至第三段，保持原有段落结构与前端接口兼容。
+-- ---------------------------------------------------------------------
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 到炉边看银之前，师傅会先让客人洗手、戴上护目镜，并讲清炭火温度和锤子的落点。真正动手时，锤面不能只落在一个位置，要随着银片的厚薄不断换角度；声音清脆，说明火候正好，声音发闷就要重新退火。学徒最先练的是把废银敲成均匀的薄片，反复几百次才能开始拉丝。每件作品都会留下轻微不同的锤痕，正是这些差异让它有了人的温度。买回家后若出现氧化，只需用软布顺着纹理擦拭，不要用力刮掉表面的细纹。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'yi-silver-hammer';
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 染坊里最忙的是换缸和晾晒的日子，院墙上挂满不同深浅的布，远看像一面会呼吸的蓝色风景。阿榜姐会把每块布的下缸次数、日期和天气写在竹牌上，方便判断颜色是否稳定。阴天时氧化速度慢，她会延长晾晒时间；太阳太烈，又要先收进廊下，避免颜色被晒花。体验者可以从小方巾开始，先用蜡刀画简单线条，再亲手完成一次浸染。回家清洗时用冷水和中性洗剂，前几次单独洗涤，颜色会在岁月里由亮蓝慢慢沉成柔和的黛色。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'yi-batik-seven';
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 绣娘通常在清晨做家务后开始落针，午后光线最好的时候绣复杂的眼睛和鳞片，晚上则整理线团、检查背面走线。她们不用尺子，却能让两边的翅膀保持近乎对称，靠的是多年形成的手感和记忆。不同支系的苗绣在配色上各有偏好：有的爱用朱红和明黄，有的偏爱靛蓝与银白，纹样还会记录婚嫁、迁徙和祝福。参观时可以请绣娘讲一讲图案的来处，也可以试着完成一小段锁边。针脚不必完美，重要的是理解一块布如何承载一个家庭的故事。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'yi-embroidery-mother';
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 工坊里的课程不追求把游客变成工匠，而是让人理解一件东西为何值得等待。银片书签会刻上当天的日期，蜡染方巾则可以选择自己喜欢的铜鼓、鸟和水波纹。老师傅会把失败的样品留下，告诉你边缘开裂、焊点发黑分别是什么原因。年轻设计师参与后，传统纹样有了更多轻便的载体，但他们仍会先征得绣娘和银匠同意，确认图案没有被误读。带走作品时，工坊会附上作者姓名、工序说明和保养方法。多年以后再看到它，你仍能想起那天炉火的温度与手上沾到的靛蓝。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'yi-craft-today';
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 长桌宴的准备从清晨就开始，掌勺人先去溪边挑水，再根据到客人数调整锅灶。鱼要现杀现煮，腊肉切得薄厚适中，糯米饭则分成几种颜色，摆在桌上像一条彩带。敬酒歌并不是表演环节，歌词里有祝福远道而来的客人、感谢山水和提醒大家彼此照应的意思。不会喝酒也可以提前告诉主人，用茶水或米汤代替，重要的是回应歌声。吃到一半若想添菜，只要把空碗放在桌边，邻座的人自然会帮你传过去。散席后别急着离开，和主人道谢、说一句吃得很开心，是乌东人最看重的礼数。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'shi-long-table';
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 毛辣果入坛前要挑掉碰伤的果子，否则整坛汤会变浑。老人凭气味判断发酵进度，打开坛盖时先闻到清亮的果酸，再是谷物和香草的回甘。每家酸汤都有自己的老坛引子，坛壁上留下多年的菌群，因此同样的配方在不同人家会呈现不同风味。煮鱼时先把酸汤烧透，再放入姜、木姜子和新鲜辣椒，鱼肉才不会有腥味。第一次来可以从清淡版本开始，喜欢酸辣再请老板加料。瓶装酸汤带回家后要冷藏，开封后尽快食用，配面条、豆腐或蔬菜都很合适。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'shi-sour-soup';
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 火塘边的位置也有讲究，长辈坐在靠墙处，客人坐在火光正面的矮凳上，添柴时要从侧面放入，不能把火拨得太散。腊肉滴下的油落在炭火上，烟气会改变肉的香味，所以主人会不时调整竹竿高度。糍粑烤到表皮鼓起时最适合入口，蘸黄豆面或蜂蜜都可以。夜话通常从天气开始，慢慢聊到谁家的孩子、今年的收成和山里的传说。若想拍照，先征得主人同意，避免直对炉火使用闪光灯。离开前把自己坐过的柴灰轻轻拢好，留下一句晚安，才算完整地结束一晚火塘时光。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'shi-firepit';
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 采茶要赶在露水未干时进行，嫩芽太湿会影响揉捻，太晚又容易失去清香。茶球在杯中慢慢展开时，可以先闻香再入口，前两泡清甜，第三泡会出现淡淡的栗香。米酒发酵期间每天要观察酒曲的状态，温度高时缩短时间，天气凉则延长，成酒后还要过滤两次。糍粑捶打看似简单，其实需要两个人配合节奏，木槌落下时另一人必须迅速翻面。游客若参加体验，建议穿方便活动的衣服并提前预约。茶、酒和糍粑都可以少量试吃，真正的味道往往来自一家人围坐时的聊天与笑声。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'shi-tea-rice-wine';
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 吊脚楼的每根柱子都经过挑选，向阳面和背阴面的木材用途不同，先在屋檐下阴干数年，再由木匠按榫卯编号组装。下层架空不仅能防潮，也让山风穿过，牲口和柴火不容易受湿。雨季走楼梯时要踩在木板中间，避免边缘打滑；夜里听见木头轻响，是温度变化造成的正常伸缩。参观老宅请先询问主人，不要触摸供桌和祖先牌位。住进改造后的吊脚楼，可以留意窗框、梁柱和栏杆上的手工痕迹，那些不规则的接缝正是木楼适应山势的证据。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'zhu-stilt-house';
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 看云海需要一点耐心，前一晚下过雨、清晨风又不大时最容易遇到。管家敲门后，记得带外套和一双防滑鞋，露台木板会有水汽。云层翻过山脊的速度很慢，十分钟里景色可能变化三次：先是梯田被遮住，再是屋顶露出，最后阳光把雾边照成金色。若当天没有云海，也不必失望，雾中的木楼、鸡鸣和屋檐滴水是另一种安静体验。民宿会准备热茶和简单早餐，观景结束后可以沿石阶走到老井，听主人讲以前挑水上山的路线。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'zhu-cloud-sea';
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 老银匠家接待住客有固定的作息，上午炉火最旺，适合看锻打；午后光线柔和，适合听老人讲家族故事。堂屋里的旧银器并非装饰品，每一件都对应一次婚礼、一次远行或一位已经离世的亲人，拍摄时应避免移动位置。体验课程会根据年龄和手力调整工具，孩子可以先做压纹，大人再尝试拉丝和焊接。作品完成后师傅会用小锉刀修边，确保没有毛刺。夜里若听见锤声，不必敲门打扰，第二天早餐时再请他介绍昨晚赶制的物件，往往能看到刚刚出炉的温热银片。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'zhu-courtyard';
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 美人靠的靠背高度和倾角因人家而异，有的适合坐着绣花，有的更适合半躺着看山。农忙时这里是晒谷场的一部分，谷粒铺开后要每隔一小时翻动，防止受潮；收起谷子后，孩子们会在栏杆边写作业，老人则在傍晚择菜聊天。入住时可以向主人借一只小竹垫，坐久了更舒服。山里日落比城市早，五点左右就会有凉风，带件薄外套很有必要。没有电视并不意味着无聊，听雨、看云、数屋檐下的灯亮起来，往往比安排满满的行程更能让人记住乌东。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'zhu-meirenkao';
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 芦笙场迎宾前，主人会先确认客人的来处和人数，再决定敬茶、拦门酒或芦笙曲目的次序。游客不熟悉礼节时，跟着领队微笑、点头即可，不必勉强饮酒。鼓藏头家保存的旧物每年都会重新整理，某些节庆用品只在特定日子展示，普通参观时看到的是复制品或照片。沿梯田步道行走时不要踩进田埂里的秧苗，遇到劳作的村民可先问候再拍照。三百级石阶看似不长，雨后青苔会让路面变滑，建议穿抓地力好的鞋，并把饮水放在随手可取的位置。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'xing-entry-ritual';
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 苗年期间各寨芦笙队会提前排练，曲调既有迎宾也有送别，领队抬手的方向决定队形变化。观赛时不要站到队伍行进线上，尤其是孩子要由大人牵好。斗牛观礼强调安全和距离，牛角相碰后不要追着牛群拍摄。篝火夜歌则更适合参与，学不会完整舞步也可以跟着节拍走两圈。节庆市集里常见新绣片、银饰、米酒和腊味，购买时可以询问制作人和保存方式。苗年日期每年略有变化，计划出行前先查看寨里的公告，住宿和返程车票最好提前预留余量。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'xing-lusheng-festival';
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 徒步前可在山门领取路线图，沿途有几处木亭和水源点，但手机信号并不连续。秃杉林下温度比村里低，夏天也建议带一件长袖；冬季遇到霜冻，木栈道会结滑冰层，要放慢脚步。向导辨认鸟鸣时会停下来示范，游客不要大声播放音乐，以免惊扰林中的动物。山脊草甸风力变化快，拍照时不要靠近悬崖边缘，也不要采摘不认识的植物。佛光出现需要特定角度和湿度，没遇上也很正常，真正值得的是在林间走完八公里后，听见自己的呼吸重新变得平稳。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'xing-leigongshan';
+UPDATE `wudong_common_story` SET `paragraphs` = JSON_SET(`paragraphs`, '$[2]', CONCAT(JSON_UNQUOTE(JSON_EXTRACT(`paragraphs`, '$[2]')), ' 这条路线适合把脚步放慢，银匠巷的每家铺子都有不同的敲击声，清脆的、低沉的，像一段没有谱子的音乐。进店前先看门口是否挂着体验牌，正在赶工时不要伸手触碰半成品。蓝染坊通常会准备围裙，靛泥沾到衣服后要及时用清水冲洗。晒谷场是村民的生活空间，遇到晾晒的粮食请绕行，不要为了取景踩进谷堆。傍晚从西坡返回时，石阶会变暗，建议提前打开手机手电。半日走完后，可以在芦笙场附近喝一碗米酒甜汤，把看到的纹样、听到的故事记在小本子上，下一次再来时会发现巷子里又多了新的作品。')), `updated_at` = CURRENT_TIMESTAMP WHERE `slug` = 'xing-silver-lane';
+
 
 -- =====================================================================
 -- 来源文件：wudong_post_images.sql
@@ -1922,3 +1943,98 @@ UNION ALL
 SELECT 'wudong.wudong_m4_scenic.cover' AS field, COUNT(*) AS remain FROM `wudong`.`wudong_m4_scenic` WHERE (`cover` LIKE '%/images/%' AND `cover` NOT LIKE 'https://wudong1.oss-cn-guangzhou.aliyuncs.com/%' OR `cover` LIKE '%trae-api-cn%')
 UNION ALL
 SELECT 'wudong.wudong_m5_post.images' AS field, COUNT(*) AS remain FROM `wudong`.`wudong_m5_post` WHERE (CAST(`images` AS CHAR) LIKE '%"/images/%' OR CAST(`images` AS CHAR) LIKE '%trae-api-cn%');
+
+
+-- ===== m1 衣模块本地图片同步（exp/local-images） =====
+-- 已上传至 OSS；可重复执行。
+UPDATE `wudong`.`wudong_m1_product` SET `cover` = 'https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/m1/products/product-1-3.jpg', `images` = CAST('["https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/m1/products/product-1-3.jpg","https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/m1/products/product-1-2.jpg"]' AS JSON) WHERE `id` = 1;
+UPDATE `wudong`.`wudong_m1_product` SET `cover` = 'https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/m1/products/product-2-2.jpg', `images` = CAST('["https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/m1/products/product-2-2.jpg","https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/m1/products/product-2-3.jpg"]' AS JSON) WHERE `id` = 2;
+UPDATE `wudong`.`wudong_m1_product` SET `cover` = 'https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/m1/products/product-3-2.jpg', `images` = CAST('["https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/m1/products/product-3-2.jpg"]' AS JSON) WHERE `id` = 3;
+UPDATE `wudong`.`wudong_m1_product` SET `cover` = 'https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/m1/products/product-4-2.jpg', `images` = CAST('["https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/m1/products/product-4-2.jpg"]' AS JSON) WHERE `id` = 4;
+UPDATE `wudong`.`wudong_m1_product` SET `artisan` = JSON_SET(COALESCE(`artisan`, JSON_OBJECT()), '$.avatar', 'https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/common/merchants/merchant-1-logo.jpg') WHERE `id` = 1;
+UPDATE `wudong`.`wudong_m1_product` SET `artisan` = JSON_SET(COALESCE(`artisan`, JSON_OBJECT()), '$.avatar', 'https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/common/merchants/merchant-2-logo.jpg') WHERE `id` = 2;
+UPDATE `wudong`.`wudong_m1_product` SET `artisan` = JSON_SET(COALESCE(`artisan`, JSON_OBJECT()), '$.avatar', 'https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/common/merchants/merchant-3-logo.jpg') WHERE `id` = 3;
+-- 百鸟衣改良礼服指定主图（OSS）
+UPDATE `wudong`.`wudong_m1_product` SET `cover` = 'https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/019_modern-fashion-dress-with-miao-embroidery-_1958710e.jpg', `images` = CAST('["https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/019_modern-fashion-dress-with-miao-embroidery-_1958710e.jpg"]' AS JSON) WHERE `id` = 4;
+
+-- =====================================================================
+-- 乌东文旅 · m2/m3 补充图片改写到阿里云 OSS
+--
+-- 前置：先执行 node scripts/oss/upload-m2m3-images.mjs 把图片传到
+--       https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/<文件名>
+-- 作用：把 wudong 库里残留的文生图 prompt 外链换成对应 OSS 地址。
+-- 库：  wudong（运行中后端 app/wu_dong_midway 的 MYSQL_DATABASE=wudong）
+-- 执行：mysql -h127.0.0.1 -P13306 -uroot -p123456 wudong < scripts/sql/wudong_m2m3_images_to_oss.sql
+-- 说明：按主键定位，幂等，可重复执行。
+-- =====================================================================
+SET NAMES utf8mb4;
+
+use wudong;
+SET @oss = 'https://wudong1.oss-cn-guangzhou.aliyuncs.com/wudong/images/';
+START TRANSACTION;
+
+-- =====================================================================
+-- 1. 菜品图 wudong_m2_dish.img
+--    id1/id2/id8 无专属图，复用最接近的 dish-12/dish-9/dish-4
+-- =====================================================================
+UPDATE `wudong_m2_dish` SET `img` = CONCAT(@oss, 'dish-12.jpg') WHERE `id` = 1;
+UPDATE `wudong_m2_dish` SET `img` = CONCAT(@oss, 'dish-9.jpg')  WHERE `id` = 2;
+UPDATE `wudong_m2_dish` SET `img` = CONCAT(@oss, 'dish-3.jpg')  WHERE `id` = 3;
+UPDATE `wudong_m2_dish` SET `img` = CONCAT(@oss, 'dish-4.jpg')  WHERE `id` = 4;
+UPDATE `wudong_m2_dish` SET `img` = CONCAT(@oss, 'dish-5.jpg')  WHERE `id` = 5;
+UPDATE `wudong_m2_dish` SET `img` = CONCAT(@oss, 'dish-6.jpg')  WHERE `id` = 6;
+UPDATE `wudong_m2_dish` SET `img` = CONCAT(@oss, 'dish-7.jpg')  WHERE `id` = 7;
+UPDATE `wudong_m2_dish` SET `img` = CONCAT(@oss, 'dish-4.jpg')  WHERE `id` = 8;
+UPDATE `wudong_m2_dish` SET `img` = CONCAT(@oss, 'dish-9.jpg')  WHERE `id` = 9;
+UPDATE `wudong_m2_dish` SET `img` = CONCAT(@oss, 'dish-10.jpg') WHERE `id` = 10;
+UPDATE `wudong_m2_dish` SET `img` = CONCAT(@oss, 'dish-11.jpg') WHERE `id` = 11;
+UPDATE `wudong_m2_dish` SET `img` = CONCAT(@oss, 'dish-12.jpg') WHERE `id` = 12;
+UPDATE `wudong_m2_dish` SET `img` = CONCAT(@oss, 'dish-13.jpg') WHERE `id` = 13;
+UPDATE `wudong_m2_dish` SET `img` = CONCAT(@oss, 'dish-14.jpg') WHERE `id` = 14;
+
+-- =====================================================================
+-- 2. 餐厅图集 wudong_m2_restaurant.images（id=1 云雾长桌宴）
+-- =====================================================================
+UPDATE `wudong_m2_restaurant` SET `images` = REPLACE(CAST(`images` AS CHAR),
+  'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=Guizhou%20sour%20soup%20fish%20hotpot%20red%20broth%20steam&image_size=landscape_4_3',
+  CONCAT(@oss, 'restarunt1.jpg'))
+WHERE `id` = 1;
+
+UPDATE `wudong_m2_restaurant` SET `images` = REPLACE(CAST(`images` AS CHAR),
+  'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=glutinous%20rice%20wine%20bowls%20on%20wooden%20table&image_size=landscape_4_3',
+  CONCAT(@oss, 'restarunt2.jpg'))
+WHERE `id` = 1;
+
+-- =====================================================================
+-- 3. 民宿图集 wudong_m3_homestay.images（id=1 枕云山舍）
+-- =====================================================================
+UPDATE `wudong_m3_homestay` SET `images` = REPLACE(CAST(`images` AS CHAR),
+  'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=cozy%20wooden%20guesthouse%20room%20with%20indigo%20textiles%20warm%20lamp&image_size=landscape_4_3',
+  CONCAT(@oss, 'homestay-1-gallery-2.jpg'))
+WHERE `id` = 1;
+
+UPDATE `wudong_m3_homestay` SET `images` = REPLACE(CAST(`images` AS CHAR),
+  'https://trae-api-cn.mchost.guru/api/ide/v1/text_to_image?prompt=guesthouse%20balcony%20overlooking%20mountain%20valley%20morning&image_size=landscape_4_3',
+  CONCAT(@oss, 'homestay-1-gallery-3.jpg'))
+WHERE `id` = 1;
+
+-- =====================================================================
+-- 4. 房型封面 wudong_m3_room_type.cover（id 1~7）
+-- =====================================================================
+UPDATE `wudong_m3_room_type` SET `cover` = CONCAT(@oss, 'room-1-cover.jpg') WHERE `id` = 1;
+UPDATE `wudong_m3_room_type` SET `cover` = CONCAT(@oss, 'room-2-cover.jpg') WHERE `id` = 2;
+UPDATE `wudong_m3_room_type` SET `cover` = CONCAT(@oss, 'room-3-cover.jpg') WHERE `id` = 3;
+UPDATE `wudong_m3_room_type` SET `cover` = CONCAT(@oss, 'room-4-cover.jpg') WHERE `id` = 4;
+UPDATE `wudong_m3_room_type` SET `cover` = CONCAT(@oss, 'room-5-cover.jpg') WHERE `id` = 5;
+UPDATE `wudong_m3_room_type` SET `cover` = CONCAT(@oss, 'room-6-cover.jpg') WHERE `id` = 6;
+UPDATE `wudong_m3_room_type` SET `cover` = CONCAT(@oss, 'room-7-cover.jpg') WHERE `id` = 7;
+
+COMMIT;
+
+-- =====================================================================
+-- 执行后校验：下面各 remain 应全为 0
+-- =====================================================================
+SELECT 'wudong_m2_dish.img' AS field, COUNT(*) AS remain FROM `wudong_m2_dish` WHERE `img` LIKE '%trae-api-cn%'
+UNION ALL SELECT 'wudong_m2_restaurant.images', COUNT(*) FROM `wudong_m2_restaurant` WHERE CAST(`images` AS CHAR) LIKE '%trae-api-cn%'
+UNION ALL SELECT 'wudong_m3_homestay.images', COUNT(*) FROM `wudong_m3_homestay` WHERE CAST(`images` AS CHAR) LIKE '%trae-api-cn%'
+UNION ALL SELECT 'wudong_m3_room_type.cover', COUNT(*) FROM `wudong_m3_room_type` WHERE `cover` LIKE '%trae-api-cn%';
