@@ -2,8 +2,6 @@
 node_modules/
 .pnp
 .pnp.js
-pnpm-lock.yaml
-yarn.lock
 
 # Build outputs
 dist/
@@ -33,8 +31,6 @@ pnpm-debug.log*
 # IDE files
 .idea/
 .vscode/
-.cursor/
-.cursorrules
 *.swp
 *.swo
 *~
