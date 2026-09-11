@@ -1,31 +1,38 @@
 /**
  * 【m2-食模块】真实 API 层
- * - 餐厅：后端 /api/v1/m2/restaurant（表 wudong_m2_restaurant）
- * - 特产：复用 m1 商品接口（表 wudong_m1_product，module=SPECIALTY），后端无独立 m2 特产表
- *
- * 统一走 apiFetch：注入 x-user-id、解包 { code, message, data } 信封、
- * 并把响应里的远程图片 URL 换成本地路径。
+ * 对接后端 /api/v1/m2/restaurant （经 vite /api 代理到 6666）
+ * 返回格式与 mock 保持一致：{ code, message, data }
  */
-import type { Product, Restaurant } from '@/types'
+import type { Dish, Product, Restaurant, TimeSlot } from '@/types'
 import type { Envelope } from './contracts'
+import type { GoodsPage } from './modules'
 import { apiFetch } from './http'
 
 // ==================== 餐厅 ====================
 
-/** m2 餐厅分页响应（对齐 restaurant_service.page 的返回结构） */
-interface RestaurantPage {
-  list: Record<string, any>[]
-  total: number
+/** 后端菜品 → 前端 Dish（signature 由后端 is_signature 转好，这里只兜底） */
+function toDish(d: any): Dish {
+  return {
+    id: String(d.id),
+    name: d.name || '',
+    price: Number(d.price) || 0,
+    img: d.img || '',
+    signature: !!d.signature,
+  }
 }
 
-/** m1 商品分页响应（对齐 m1 dto/result.ts 的 PageData） */
-interface GoodsPage {
-  items: Product[]
-  total: number
+/** 后端时段 → 前端 TimeSlot（余量降级：left 缺省取 capacity） */
+function toSlot(s: any): TimeSlot {
+  return {
+    id: String(s.id),
+    name: s.name || '',
+    capacity: Number(s.capacity) || 0,
+    left: Number(s.left ?? s.capacity) || 0,
+  }
 }
 
-/** 后端实体 → 前端 Restaurant 类型 */
-function toRestaurant(entity: Record<string, any>): Restaurant {
+/** 后端实体 → 前端 Restaurant 类型；列表接口不带 dishes/slots，详情接口才带 */
+function toRestaurant(entity: any): Restaurant {
   return {
     id: String(entity.id),
     name: entity.name || '',
@@ -38,27 +45,27 @@ function toRestaurant(entity: Record<string, any>): Restaurant {
     capacity: Number(entity.capacity) || 0,
     tags: entity.tags || [],
     intro: entity.intro || '',
-    // 菜品 / 餐位 / 评价后端尚未开口，先留空（见 docx/TODO.md：餐位预订改为展示页）
-    dishes: [],
-    slots: [],
-    reviews: [],
+    dishes: Array.isArray(entity.dishes) ? entity.dishes.map(toDish) : [],
+    slots: Array.isArray(entity.slots) ? entity.slots.map(toSlot) : [],
+    reviews: Array.isArray(entity.reviews) ? entity.reviews : [],
   }
 }
 
 /** 餐厅列表 */
-export async function getRestaurants(): Promise<Envelope<Restaurant[]>> {
-  const res = await apiFetch<Envelope<RestaurantPage>>(
+export async function getRestaurants() {
+  const res = await apiFetch<Envelope<{ list: any[]; total: number }>>(
     '/v1/m2/restaurant/page?page=1&pageSize=100',
   )
-  return { ...res, data: (res.data?.list || []).map(toRestaurant) }
+  const list = (res.data.list || []).map(toRestaurant)
+  return { code: 0, message: 'ok', data: list }
 }
 
-/** 餐厅详情 */
-export async function getRestaurantDetail(id: string): Promise<Envelope<Restaurant>> {
-  const res = await apiFetch<Envelope<Record<string, any>>>(
-    `/v1/m2/restaurant/info/${id}`,
+/** 餐厅详情：含菜品与预订时段 */
+export async function getRestaurantDetail(id: string) {
+  const res = await apiFetch<Envelope<any>>(
+    `/v1/m2/restaurant/info/${encodeURIComponent(id)}`,
   )
-  return { ...res, data: toRestaurant(res.data) }
+  return { code: 0, message: 'ok', data: toRestaurant(res.data) }
 }
 
 // ==================== 特产 ====================

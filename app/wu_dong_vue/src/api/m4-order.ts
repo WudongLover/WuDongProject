@@ -1,7 +1,12 @@
-import type { Order, OrderStatus, OrderType } from '@/types'
+import type { Order, OrderType } from '@/types'
 import type { Envelope } from './contracts'
 import { apiFetch } from './http'
 
+/**
+ * 购物车结算 / 门票路线下单入参。
+ * 餐位、民宿预订已改为各自模块入口（见 order.ts 的 createMealBooking / createLodgingBooking），
+ * 本函数保留给实物商品购物车与门票/路线结算。
+ */
 export interface CreateOrderPayload {
   type: OrderType
   title: string
@@ -24,31 +29,4 @@ export function createOrder(payload: CreateOrderPayload): Promise<Envelope<Order
     method: 'POST',
     body: JSON.stringify(payload),
   })
-}
-
-export function getOrders(filter?: { type?: OrderType | 'ALL'; status?: OrderStatus | 'ALL' }): Promise<Envelope<Order[]>> {
-  const params = new URLSearchParams()
-  if (filter?.type && filter.type !== 'ALL') params.set('type', filter.type)
-  if (filter?.status && filter.status !== 'ALL') params.set('status', filter.status)
-  const query = params.toString()
-  return apiFetch<Envelope<Order[]>>(`/app/m4/order/list${query ? `?${query}` : ''}`)
-}
-
-function orderAction(action: 'pay' | 'cancel' | 'refund', orderNo: string): Promise<Envelope<Order>> {
-  return apiFetch<Envelope<Order>>(`/app/m4/order/${action}`, {
-    method: 'POST',
-    body: JSON.stringify({ orderNo }),
-  })
-}
-
-export function payOrder(orderNo: string): Promise<Envelope<Order>> {
-  return orderAction('pay', orderNo)
-}
-
-export function cancelOrder(orderNo: string): Promise<Envelope<Order>> {
-  return orderAction('cancel', orderNo)
-}
-
-export function refundOrder(orderNo: string): Promise<Envelope<Order>> {
-  return orderAction('refund', orderNo)
 }

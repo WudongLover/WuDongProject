@@ -28,7 +28,8 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   const res = await fetch(`${BASE}${path}`, {
     headers: {
       'content-type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      'x-user-id': getMockUserId(),
+      ...(token ? { authorization: `Bearer ${token}` } : {}),
       ...init?.headers,
     },
     ...init,
@@ -41,4 +42,20 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   }
   // 返回完整信封，调用方按模块解包 data。
   return body as T
+}
+
+/**
+ * X-User-Id 联调兜底值：m1 购物车、m5 社区在未携带合法 token 时按此头识别身份
+ * （后端仅非生产环境读取，见 cart_controller.userId / post_service.currentUserId）。
+ * 已登录取 sessionStorage 里的当前用户，未登录回落 '1'（与后端 DEMO_USER_ID 一致）。
+ */
+function getMockUserId(): string {
+  try {
+    const raw = sessionStorage.getItem('wudong_user')
+    if (raw) {
+      const id = JSON.parse(raw)?.id
+      if (id) return String(id)
+    }
+  } catch {}
+  return '1'
 }
