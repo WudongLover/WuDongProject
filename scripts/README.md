@@ -10,6 +10,15 @@
 node scripts/oss/migrate-images-to-oss.mjs --dry-run
 # 3. 正式执行
 node scripts/oss/migrate-images-to-oss.mjs
+
+# 只上传图片，或只改数据库
+node scripts/oss/migrate-images-to-oss.mjs --only=upload
+node scripts/oss/migrate-images-to-oss.mjs --only=db
+
+# 只生成改写 SQL（不执行、不改库）：默认写到 scripts/sql/wudong_images_to_oss.sql
+node scripts/oss/migrate-images-to-oss.mjs --sql
+# 生成后可自行执行（文件内含 83 条 UPDATE + 执行后校验查询）
+mysql -h127.0.0.1 -P13306 -uroot -p < scripts/sql/wudong_images_to_oss.sql
 ```
 
 说明：

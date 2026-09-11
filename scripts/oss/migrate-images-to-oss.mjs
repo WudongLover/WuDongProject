@@ -14,6 +14,8 @@
  *   node scripts/oss/migrate-images-to-oss.mjs               # 正式执行
  *   node scripts/oss/migrate-images-to-oss.mjs --force       # 已存在的对象也重新上传
  *   node scripts/oss/migrate-images-to-oss.mjs --only=db     # 只改库（或 --only=upload 只传图）
+ *   node scripts/oss/migrate-images-to-oss.mjs --sql         # 只生成改写 SQL（不执行），默认输出 scripts/sql/wudong_images_to_oss.sql
+ *   node scripts/oss/migrate-images-to-oss.mjs --sql=xxx.sql # 指定 SQL 输出路径
  *
  * 依赖与配置来源：
  *   - 依赖（mysql2 / ali-oss / dotenv）从 app/cool-admin-midway 的 node_modules 解析；
@@ -105,6 +107,11 @@ const flagValue = (name) => {
 const DRY_RUN = hasFlag('dry-run');
 const FORCE = hasFlag('force');
 const ONLY = flagValue('only'); // upload | db | ''
+/** 只生成 SQL 不执行：--sql 或 --sql=路径 */
+const SQL_MODE = hasFlag('sql');
+const SQL_FILE = path.isAbsolute(flagValue('sql'))
+  ? flagValue('sql')
+  : path.join(ROOT, flagValue('sql') || path.join('scripts', 'sql', 'wudong_images_to_oss.sql'));
 
 const log = (...rest) => console.log(...rest);
 const warn = (...rest) => console.warn(...rest);
@@ -318,6 +325,48 @@ function rewriteColumn(value, shape, imageMap, stats) {
   return undefined;
 }
 
+/** MySQL 字符串字面量（转义反斜杠与单引号） */
+function sqlLiteral(value) {
+  return `'${String(value).replace(/\\/g, '\\\\').replace(/'/g, "''")}'`;
+}
+
+/** 生成单行 UPDATE：JSON 列用 CAST(... AS JSON)，普通列直接赋字符串 */
+function toUpdateSql(schema, table, target, updates, id) {
+  const sets = Object.entries(updates).map(([col, value]) => {
+    const shape = (target.columns.find(([name]) => name === col) || [])[1] || 'text';
+    const literal = sqlLiteral(value);
+    return `\`${col}\` = ${shape === 'text' ? literal : `CAST(${literal} AS JSON)`}`;
+  });
+  return `UPDATE \`${schema}\`.\`${table}\` SET ${sets.join(', ')} WHERE \`id\` = ${id};`;
+}
+
+/**
+ * 生成执行后校验语句：统计各图片字段中残留的老值。
+ * 注意 OSS 地址本身也含 `/images/`，所以要排除已迁移到本 bucket 的值：
+ * - 普通列：值不是 `{OSS 前缀}/...` 且仍含 `/images/` 或文生图外链；
+ * - JSON 列：文本里仍有文生图外链，或仍有以 `"/images/` 开头的本地路径元素。
+ */
+function buildVerifySql(existing) {
+  const parts = [];
+  for (const { schema, table } of existing) {
+    const target = TARGETS.find((t) => t.table === table);
+    if (!target) continue;
+    for (const [name, shape] of target.columns) {
+      const expr = shape === 'text' ? `\`${name}\`` : `CAST(\`${name}\` AS CHAR)`;
+      const condition =
+        shape === 'text'
+          ? `${expr} LIKE '%/images/%' AND ${expr} NOT LIKE '${publicBase}/%' `
+          : `${expr} LIKE '%"/images/%' `;
+      parts.push(
+        `SELECT '${schema}.${table}.${name}' AS field, COUNT(*) AS remain ` +
+          `FROM \`${schema}\`.\`${table}\` ` +
+          `WHERE (${condition}OR ${expr} LIKE '%trae-api-cn%')`
+      );
+    }
+  }
+  return parts.length ? `${parts.join('\nUNION ALL\n')};` : '-- 无命中字段';
+}
+
 /**
  * 找出含有目标表的库（cool / wudong 等），只返回实际存在的 (库, 表) 组合，
  * 避免对不存在的表产生噪音告警。
@@ -363,6 +412,25 @@ async function migrateDatabase() {
 
   let scanned = 0;
   let updated = 0;
+  /** --sql 模式：收集 UPDATE 语句，最后落盘 */
+  const sqlStatements = [];
+  const sqlHeader = [
+    '-- =====================================================================',
+    '-- 乌东文旅 · 数据库图片字段改写为阿里云 OSS 地址（增量脚本，可重复执行）',
+    `-- 生成时间：${new Date().toLocaleString('zh-CN', { hour12: false })}`,
+    `-- 目标：${publicBase}/${ossPrefix}/images/<文件名>`,
+    '-- 覆盖：用户头像、Banner、推文封面、评价晒图、购物车/订单快照封面、',
+    '--       商品/餐厅/民宿/门票/路线/社区配图（含 JSON 数组与 artisan.avatar）',
+    '-- 来源：scripts/oss/migrate-images-to-oss.mjs --sql（由 image-map.ts 与本地图片推导，勿手改）',
+    '-- 前置：先用同脚本上传图片（--only=upload）；本脚本对老值幂等，重跑无副作用',
+    '-- 注意：未命中 image-map.ts 的外链（若干种子用户头像）不在此文件中，需补图后重新生成',
+    '-- 执行：mysql -h127.0.0.1 -P13306 -uroot -p < scripts/sql/wudong_images_to_oss.sql',
+    '-- =====================================================================',
+    '',
+    'SET NAMES utf8mb4;',
+    'START TRANSACTION;',
+    '',
+  ];
 
   try {
     for (const { schema, table } of existing) {
@@ -391,6 +459,10 @@ async function migrateDatabase() {
           }
           continue;
         }
+        if (SQL_MODE) {
+          sqlStatements.push(toUpdateSql(schema, target.table, target, updates, row.id));
+          continue;
+        }
         await conn.query(`UPDATE \`${schema}\`.\`${target.table}\` SET ? WHERE \`id\` = ?`, [
           updates,
           row.id,
@@ -401,9 +473,25 @@ async function migrateDatabase() {
     await conn.end();
   }
 
+  if (SQL_MODE) {
+    const sqlFooter = [
+      '',
+      'COMMIT;',
+      '',
+      '-- ---------------- 执行后校验：下列 remain 应全为 0 ----------------',
+      buildVerifySql(existing),
+      '',
+    ];
+    fs.writeFileSync(SQL_FILE, [...sqlHeader, ...sqlStatements, ...sqlFooter].join('\n'), 'utf8');
+    log(`  SQL 已生成：${path.relative(ROOT, SQL_FILE)}（${sqlStatements.length} 条 UPDATE）`);
+    log('  执行方式：mysql -h127.0.0.1 -P13306 -uroot -p < ' + path.relative(ROOT, SQL_FILE));
+  }
+
   log(
     DRY_RUN
       ? `  [dry-run] 扫描 ${scanned} 行，待改写 ${updated} 行`
+      : SQL_MODE
+        ? `  扫描 ${scanned} 行，生成改写语句 ${updated} 行`
       : `  完成：扫描 ${scanned} 行，改写 ${updated} 行`
   );
   if (stats.missing.size) {
@@ -426,21 +514,25 @@ async function migrateDatabase() {
 
 async function main() {
   log('=== 乌东文旅 · 存量照片迁移到阿里云 OSS ===');
-  log(`运行模式：${DRY_RUN ? 'dry-run（不写数据）' : '正式执行'}${FORCE ? ' · force' : ''}`);
+  log(
+    `运行模式：${
+      SQL_MODE ? '仅生成 SQL（不写 OSS、不改库）' : DRY_RUN ? 'dry-run（不写数据）' : '正式执行'
+    }${FORCE ? ' · force' : ''}`
+  );
 
   if (!canBuildUrl) {
     throw new Error(
       'OSS 未配置：请在 app/cool-admin-midway/.env（或 wu_dong_midway/.env）至少填写 OSS_REGION + OSS_BUCKET（或 OSS_PUBLIC_BASE_URL）'
     );
   }
-  if (!DRY_RUN && !ossEnabled) {
+  if (!DRY_RUN && !SQL_MODE && !ossEnabled) {
     throw new Error(
       'OSS 凭据缺失：正式执行需要 OSS_ACCESS_KEY_ID / OSS_ACCESS_KEY_SECRET（dry-run 可省略）'
     );
   }
   log(`Bucket：${bucket} · Endpoint：${endpoint} · 访问前缀：${publicBase}/${ossPrefix}`);
 
-  if (ONLY !== 'db') {
+  if (!SQL_MODE && ONLY !== 'db') {
     await uploadImages();
   }
   if (ONLY !== 'upload') {
