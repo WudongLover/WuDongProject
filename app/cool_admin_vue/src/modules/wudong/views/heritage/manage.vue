@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<cl-crud ref="Crud">
 		<cl-row>
 			<cl-refresh-btn />
@@ -47,28 +47,28 @@
 				<!-- 数据概览 -->
 				<div class="detail-stats">
 					<div class="detail-stats__item">
-						<div class="detail-stats__icon detail-stats__icon--orange">🔥</div>
+						<div class="detail-stats__icon detail-stats__icon--orange"><el-icon><Opportunity /></el-icon></div>
 						<div class="detail-stats__info">
 							<span class="detail-stats__value">{{ detailItem.sales }}</span>
 							<span class="detail-stats__label">累计销量</span>
 						</div>
 					</div>
 					<div class="detail-stats__item">
-						<div class="detail-stats__icon detail-stats__icon--yellow">⭐</div>
+						<div class="detail-stats__icon detail-stats__icon--yellow"><el-icon><Star /></el-icon></div>
 						<div class="detail-stats__info">
 							<span class="detail-stats__value">{{ detailItem.rating }}</span>
 							<span class="detail-stats__label">用户评分</span>
 						</div>
 					</div>
 					<div class="detail-stats__item">
-						<div class="detail-stats__icon detail-stats__icon--blue">📦</div>
+						<div class="detail-stats__icon detail-stats__icon--blue"><el-icon><Box /></el-icon></div>
 						<div class="detail-stats__info">
 							<span class="detail-stats__value">{{ detailItem.stock }}</span>
 							<span class="detail-stats__label">库存数量</span>
 						</div>
 					</div>
 					<div class="detail-stats__item">
-						<div class="detail-stats__icon detail-stats__icon--green">🏷️</div>
+						<div class="detail-stats__icon detail-stats__icon--green"><el-icon><PriceTag /></el-icon></div>
 						<div class="detail-stats__info">
 							<span class="detail-stats__value">{{ categoryLabel }}</span>
 							<span class="detail-stats__label">所属分类</span>
@@ -92,7 +92,7 @@
 				<div class="detail-content">
 					<div v-if="detailItem.craft" class="detail-card">
 						<div class="detail-card__header">
-							<span class="detail-card__icon">🎨</span>
+							<span class="detail-card__icon"><el-icon><Brush /></el-icon></span>
 							<span class="detail-card__title">非遗工艺</span>
 						</div>
 						<div class="detail-card__body">
@@ -102,7 +102,7 @@
 
 					<div v-if="detailItem.artisan" class="detail-card">
 						<div class="detail-card__header">
-							<span class="detail-card__icon">👨‍🎨</span>
+							<span class="detail-card__icon"><el-icon><User /></el-icon></span>
 							<span class="detail-card__title">匠人信息</span>
 						</div>
 						<div class="detail-card__body">
@@ -121,7 +121,7 @@
 
 					<div v-if="detailItem.detail" class="detail-card">
 						<div class="detail-card__header">
-							<span class="detail-card__icon">📝</span>
+							<span class="detail-card__icon"><el-icon><Document /></el-icon></span>
 							<span class="detail-card__title">图文详情</span>
 						</div>
 						<div class="detail-card__body detail-card__body--html" v-html="detailItem.detail"></div>
@@ -148,7 +148,7 @@ defineOptions({
 
 import { reactive, ref, computed } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Search as SearchIcon, Edit } from '@element-plus/icons-vue';
+import { Search as SearchIcon, Edit, Opportunity, Star, Box, PriceTag, Brush, User, Document } from '@element-plus/icons-vue';
 import { useCrud, useSearch, useTable, useUpsert } from '@cool-vue/crud';
 
 // ==================== 类型定义 ====================

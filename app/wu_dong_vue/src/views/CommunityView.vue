@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import * as api from '@/api'
 import type { Post } from '@/types'
 import { useUserStore } from '@/stores/user'
+import { toOssUrl } from '@/mock/image-map'
 import PostCard from '@/components/PostCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
@@ -41,13 +42,62 @@ const hotUsers = computed(() => {
 })
 
 /** 发布弹窗装饰图（固定 URL，非 mock 生成） */
-const publishImg = '/images/community-publish.jpg'
+const publishImg = toOssUrl('/images/community-publish.jpg')
 
 const showPublish = ref(false)
 const pubTitle = ref('')
 const pubContent = ref('')
 const pubTopic = ref('#云海时刻')
 const pubErr = ref('')
+
+/** 发帖配图：先上传到 OSS 拿到 URL，再随帖子一起提交 */
+const MAX_IMAGES = 9
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024
+const ACCEPT_MIME = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
+
+const pubImages = ref<string[]>([])
+const uploading = ref(false)
+const fileInput = ref<HTMLInputElement | null>(null)
+
+function pickImages() {
+  fileInput.value?.click()
+}
+
+async function onFilesPicked(e: Event) {
+  const input = e.target as HTMLInputElement
+  const files = Array.from(input.files || [])
+  input.value = ''
+  if (!files.length) return
+
+  pubErr.value = ''
+  for (const file of files) {
+    if (pubImages.value.length >= MAX_IMAGES) {
+      userStore.toast(`最多上传 ${MAX_IMAGES} 张配图`)
+      break
+    }
+    if (!ACCEPT_MIME.includes(file.type)) {
+      userStore.toast(`${file.name} 不是支持的图片格式（jpg/png/webp/gif）`)
+      continue
+    }
+    if (file.size > MAX_IMAGE_SIZE) {
+      userStore.toast(`${file.name} 超过 10MB，请压缩后再上传`)
+      continue
+    }
+    uploading.value = true
+    try {
+      const res = await api.uploadImage(file, 'post')
+      pubImages.value.push(res.data.url)
+    } catch (err: any) {
+      userStore.toast(err?.message || '图片上传失败')
+    } finally {
+      uploading.value = false
+    }
+  }
+}
+
+function removeImage(index: number) {
+  pubImages.value.splice(index, 1)
+}
 
 async function load() {
   loading.value = true
@@ -74,13 +124,23 @@ async function publish() {
     pubErr.value = '标题和正文不能为空'
     return
   }
+  if (uploading.value) {
+    pubErr.value = '图片上传中，请稍候'
+    return
+  }
   if (!userStore.requireLogin()) return
   showPublish.value = false
   try {
-    await api.publishPost({ title: pubTitle.value.trim(), content: pubContent.value.trim(), topic: pubTopic.value })
+    await api.publishPost({
+      title: pubTitle.value.trim(),
+      content: pubContent.value.trim(),
+      topic: pubTopic.value,
+      images: pubImages.value.slice(),
+    })
     userStore.toast('发布成功')
     pubTitle.value = ''
     pubContent.value = ''
+    pubImages.value = []
     await load()
   } catch (e: any) {
     userStore.toast(e?.message || '发布失败')
@@ -173,11 +233,47 @@ async function publish() {
           </div>
           <div class="field">
             <label>正文</label>
-            <textarea v-model="pubContent" rows="5" maxlength="5000" placeholder="文字会记录下照片装不下的部分…（图片上传功能待后端就绪）"></textarea>
+            <textarea v-model="pubContent" rows="5" maxlength="5000" placeholder="文字会记录下照片装不下的部分…"></textarea>
+          </div>
+          <div class="field">
+            <label>配图（{{ pubImages.length }}/{{ MAX_IMAGES }}）</label>
+            <div class="img-grid">
+              <div v-for="(img, i) in pubImages" :key="img" class="img-item">
+                <img :src="img" alt="" />
+                <button type="button" class="img-del" title="移除" @click="removeImage(i)">
+                  <AppIcon name="close" :size="12" />
+                </button>
+              </div>
+              <button
+                v-if="pubImages.length < MAX_IMAGES"
+                type="button"
+                class="img-add"
+                :disabled="uploading"
+                @click="pickImages"
+              >
+                <AppIcon name="camera" :size="18" />
+                <span>{{ uploading ? '上传中…' : '添加图片' }}</span>
+              </button>
+            </div>
+            <input
+              ref="fileInput"
+              class="img-input"
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              multiple
+              @change="onFilesPicked"
+            />
           </div>
           <p v-if="pubErr" class="err">{{ pubErr }}</p>
           <p class="hint">发布内容将经过内容安全审核（机审 + 人工复审）</p>
-          <button class="btn btn-primary btn-lg" style="width: 100%" @click="publish">提交发布</button>
+          <button
+            class="btn btn-primary btn-lg"
+            style="width: 100%"
+            :disabled="uploading"
+            @click="publish"
+          >
+            提交发布
+          </button>
         </div>
       </div>
     </transition>
@@ -387,6 +483,69 @@ async function publish() {
 
 .field {
   margin-bottom: 14px;
+}
+
+.img-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.img-item {
+  position: relative;
+  aspect-ratio: 1;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.img-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.img-del {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(15, 35, 56, 0.66);
+  color: #fff;
+}
+
+.img-add {
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius);
+  color: var(--text-3);
+  font-size: 11.5px;
+  background: #fff;
+  transition: all 0.2s;
+}
+
+.img-add:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.img-add:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+/* 隐藏原生文件选择框，由「添加图片」按钮触发 */
+.img-input {
+  display: none;
 }
 
 .err {

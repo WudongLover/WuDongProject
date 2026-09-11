@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<el-scrollbar>
 		<div class="wd-dashboard">
 			<wd-page-head title="用户数据看板" desc="C 端游客注册、活跃、来源与账号安全监控">
@@ -11,7 +11,7 @@
 						label="累计注册用户"
 						:value="12648"
 						icon="icon-user"
-						color="#4165d7"
+						color="#23456b"
 						trend="+4.2%"
 						desc="本月新增 486 人"
 					/>
@@ -42,7 +42,7 @@
 						:value="46.2"
 						unit="%"
 						icon="icon-time"
-						color="#9b59b6"
+						color="#b5442e"
 						trend="+3.4%"
 						desc="留存表现良好"
 					/>

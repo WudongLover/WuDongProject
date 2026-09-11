@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<el-scrollbar>
 		<div class="wd-dashboard">
 			<wd-page-head title="住·山居数据看板" desc="苗寨特色民宿、房态日历与入住经营监控">
@@ -12,7 +12,7 @@
 						:value="8"
 						unit="家"
 						icon="icon-home"
-						color="#4165d7"
+						color="#23456b"
 						trend="+1"
 						desc="本月新开业 1 家"
 					/>
@@ -45,7 +45,7 @@
 						:value="82"
 						unit="%"
 						icon="icon-rank"
-						color="#9b59b6"
+						color="#b5442e"
 						trend="+6.4%"
 						desc="较上周同期"
 					/>
@@ -113,7 +113,7 @@ const trendSeries = computed<WdTrendSeries[]>(() => [
 		name: '预订间夜(间)',
 		data: genTrend(51, 14, 38, 96),
 		type: 'bar',
-		color: '#4165d7'
+		color: '#23456b'
 	},
 	{
 		name: '平均房价(元)',

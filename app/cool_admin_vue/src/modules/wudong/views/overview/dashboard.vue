@@ -1,4 +1,4 @@
-<template>
+﻿<template>
 	<el-scrollbar>
 		<div class="wd-dashboard">
 			<wd-page-head
@@ -16,7 +16,7 @@
 						unit="元"
 						money
 						icon="icon-amount"
-						color="#4165d7"
+						color="#23456b"
 						trend="+18.6%"
 						desc="较昨日"
 					/>
@@ -46,7 +46,7 @@
 						label="今日活跃游客"
 						:value="2364"
 						icon="icon-activity"
-						color="#9b59b6"
+						color="#b5442e"
 						trend="+15.2%"
 						desc="近 7 日平均 1,982"
 					/>

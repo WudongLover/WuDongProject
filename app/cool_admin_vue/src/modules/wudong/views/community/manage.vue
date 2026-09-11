@@ -29,65 +29,68 @@
 		<cl-upsert ref="Upsert" />
 
 		<!-- 帖子详情弹窗 -->
-		<el-dialog v-model="detailVisible" width="820px" destroy-on-close :show-close="false" class="detail-dialog">
+		<el-dialog v-model="detailVisible" width="min(1040px, calc(100vw - 32px))" destroy-on-close :show-close="false" class="detail-dialog" align-center>
 			<template v-if="detailPost">
-				<!-- 顶部 Banner -->
 				<div class="detail-banner detail-banner--community">
 					<div class="detail-banner__main">
-						<div class="detail-banner__tag">
+						<div class="detail-banner__eyebrow">
 							<el-tag size="small" effect="dark" :type="detailPost.status === 'PASSED' ? 'success' : detailPost.status === 'REJECTED' ? 'danger' : 'warning'">
 								{{ detailPost.status === 'PASSED' ? '已通过' : detailPost.status === 'REJECTED' ? '已拒绝' : '待审核' }}
 							</el-tag>
-							<el-tag v-if="detailPost.topic" size="small" effect="plain">{{ detailPost.topic }}</el-tag>
+							<span>社区内容详情 · #{{ detailPost.id }}</span>
 						</div>
 						<h2 class="detail-banner__title">{{ detailPost.title }}</h2>
-						<p class="detail-banner__subtitle">
+						<div class="detail-banner__meta">
 							<span class="detail-banner__author">
 								<span class="detail-banner__avatar">{{ detailPost.authorName.charAt(0) }}</span>
 								{{ detailPost.authorName }}
 							</span>
+							<el-tag v-if="detailPost.topic" size="small" effect="plain" class="detail-banner__topic">{{ detailPost.topic }}</el-tag>
 							<span v-if="detailPost.place" class="detail-banner__place">
 								<el-icon><Location /></el-icon> {{ detailPost.place }}
 							</span>
 							<span>发布于 {{ formatTime(detailPost.publishedAt) }}</span>
-						</p>
+						</div>
+					</div>
+					<div class="detail-banner__status-panel">
+						<span>审核状态</span>
+						<strong>{{ detailPost.status === 'PASSED' ? '内容已发布' : detailPost.status === 'REJECTED' ? '内容已拦截' : '等待审核决策' }}</strong>
 					</div>
 				</div>
 
-				<!-- 数据概览 -->
 				<div class="detail-stats">
 					<div class="detail-stats__item">
-						<div class="detail-stats__icon detail-stats__icon--red">👍</div>
+						<div class="detail-stats__icon detail-stats__icon--red"><el-icon><Pointer /></el-icon></div>
 						<div class="detail-stats__info">
 							<span class="detail-stats__value">{{ detailPost.likes }}</span>
 							<span class="detail-stats__label">点赞数</span>
 						</div>
 					</div>
 					<div class="detail-stats__item">
-						<div class="detail-stats__icon detail-stats__icon--yellow">⭐</div>
+						<div class="detail-stats__icon detail-stats__icon--yellow"><el-icon><Star /></el-icon></div>
 						<div class="detail-stats__info">
 							<span class="detail-stats__value">{{ detailPost.collects }}</span>
 							<span class="detail-stats__label">收藏数</span>
 						</div>
 					</div>
 					<div class="detail-stats__item">
-						<div class="detail-stats__icon detail-stats__icon--blue">👁</div>
+						<div class="detail-stats__icon detail-stats__icon--blue"><el-icon><View /></el-icon></div>
 						<div class="detail-stats__info">
 							<span class="detail-stats__value">{{ detailPost.views }}</span>
 							<span class="detail-stats__label">浏览量</span>
 						</div>
 					</div>
-					<div class="detail-stats__item">
-						<div class="detail-stats__icon detail-stats__icon--green">📝</div>
-						<div class="detail-stats__info">
-							<span class="detail-stats__value">#{{ detailPost.id }}</span>
-							<span class="detail-stats__label">帖子编号</span>
-						</div>
+					<div class="detail-stats__item detail-stats__item--engagement">
+						<div class="detail-stats__icon detail-stats__icon--green"><el-icon><ChatDotRound /></el-icon></div>
+						<div class="detail-stats__info"><span class="detail-stats__value">{{ engagementRate(detailPost) }}</span><span class="detail-stats__label">互动率</span></div>
 					</div>
 				</div>
 
-				<!-- 图片展示 -->
+				<div class="detail-layout">
+				<div class="detail-main">
 				<div v-if="detailPost.images && detailPost.images.length" class="detail-images">
+					<div class="detail-section-title"><span>内容媒体</span><small>{{ detailPost.images.length }} 张图片</small></div>
+					<div class="detail-images__grid">
 					<el-image
 						v-for="(img, i) in detailPost.images"
 						:key="i"
@@ -96,19 +99,32 @@
 						fit="cover"
 						class="detail-images__item"
 					/>
+					</div>
 				</div>
 
-				<!-- 内容卡片区域 -->
 				<div class="detail-content">
 					<div class="detail-card">
 						<div class="detail-card__header">
-							<span class="detail-card__icon">📖</span>
+							<span class="detail-card__icon"><el-icon><Reading /></el-icon></span>
 							<span class="detail-card__title">帖子正文</span>
 						</div>
 						<div class="detail-card__body detail-card__body--content">
 							{{ detailPost.content }}
 						</div>
 					</div>
+				</div>
+				</div>
+				<aside class="detail-aside">
+					<div class="detail-aside__section">
+						<div class="detail-section-title"><span>发布信息</span></div>
+						<div class="detail-facts">
+							<div><span>内容编号</span><strong>#{{ detailPost.id }}</strong></div>
+							<div><span>作者编号</span><strong>#{{ detailPost.userId }}</strong></div>
+							<div><span>创建时间</span><strong>{{ formatTime(detailPost.createdAt) }}</strong></div>
+						</div>
+					</div>
+					<div class="detail-aside__hint"><el-icon><InfoFilled /></el-icon><span>审核通过后，内容会在社区广场对游客可见。</span></div>
+				</aside>
 				</div>
 			</template>
 			<template #footer>
@@ -143,7 +159,7 @@ defineOptions({
 
 import { reactive, ref } from 'vue';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { Search as SearchIcon, Location } from '@element-plus/icons-vue';
+import { Search as SearchIcon, Location, Pointer, Star, View, Reading, ChatDotRound, InfoFilled, Edit, Delete, CircleCheck, CircleClose } from '@element-plus/icons-vue';
 import { useCrud, useSearch, useTable, useUpsert } from '@cool-vue/crud';
 import { useCool } from '/@/cool';
 
@@ -306,6 +322,11 @@ function formatTime(iso: string) {
 	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 }
 
+function engagementRate(post: PostItem) {
+	if (!post.views) return '0.0%';
+	return `${(((post.likes + post.collects) / post.views) * 100).toFixed(1)}%`;
+}
+
 async function viewDetail(id: number) {
 	const post = await mockService.info({ id });
 	detailPost.value = post;
@@ -435,32 +456,38 @@ const Table = useTable({
 		{
 			label: '操作',
 			type: 'op',
-			width: 220,
+			width: 196,
 			buttons: [
 				{
-					label: '详情',
+					label: '',
 					type: 'primary',
-					text: true,
+					props: { icon: View, size: 'small', title: '查看详情', 'aria-label': '查看详情' },
 					onClick: ({ scope }: { scope: { row: PostItem } }) => viewDetail(scope.row.id)
 				},
 				{
-					label: '通过',
+					label: '',
+					type: 'primary',
+					props: { icon: Edit, size: 'small', title: '编辑内容', 'aria-label': '编辑内容' },
+					onClick: ({ scope }: { scope: { row: PostItem } }) => Crud.value?.rowEdit(scope.row)
+				},
+				{
+					label: '',
 					type: 'success',
-					text: true,
+					props: { icon: CircleCheck, size: 'small', title: '审核通过', 'aria-label': '审核通过' },
 					show: ({ scope }: { scope: { row: PostItem } }) => scope.row.status === 'PENDING',
 					onClick: ({ scope }: { scope: { row: PostItem } }) => auditPost(scope.row.id, 'PASSED')
 				},
 				{
-					label: '拒绝',
+					label: '',
 					type: 'danger',
-					text: true,
+					props: { icon: CircleClose, size: 'small', title: '审核拒绝', 'aria-label': '审核拒绝' },
 					show: ({ scope }: { scope: { row: PostItem } }) => scope.row.status === 'PENDING',
 					onClick: ({ scope }: { scope: { row: PostItem } }) => auditPost(scope.row.id, 'REJECTED')
 				},
 				{
-					label: '删除',
+					label: '',
 					type: 'danger',
-					text: true,
+					props: { icon: Delete, size: 'small', title: '删除内容', 'aria-label': '删除内容' },
 					confirm: '确认删除该帖子？删除后不可恢复。'
 				}
 			]
@@ -470,16 +497,28 @@ const Table = useTable({
 
 // ==================== cl-upsert（管理员编辑帖子） ====================
 const Upsert = useUpsert({
+	dialog: {
+		width: '760px',
+		class: 'community-upsert-dialog'
+	},
+	op: {
+		saveButtonText: '保存内容',
+		closeButtonText: '暂不保存'
+	},
 	items: [
 		{
 			prop: 'title',
-			label: '标题',
-			component: { name: 'el-input' },
+			label: '内容标题',
+			group: '内容编辑',
+			span: 24,
+			component: { name: 'el-input', props: { maxlength: 60, showWordLimit: true, placeholder: '用清晰的标题概括本条内容' } },
 			required: true
 		},
 		{
 			prop: 'topic',
-			label: '话题',
+			label: '关联话题',
+			group: '内容编辑',
+			span: 12,
 			component: {
 				name: 'el-select',
 				options: topicOptions,
@@ -491,24 +530,33 @@ const Upsert = useUpsert({
 		},
 		{
 			prop: 'place',
-			label: '地点',
-			component: { name: 'el-input' }
+			label: '发布地点',
+			group: '内容编辑',
+			span: 12,
+			component: { name: 'el-input', props: { placeholder: '例如：苗寨中心' } }
 		},
 		{
 			prop: 'content',
-			label: '内容',
+			label: '正文内容',
+			group: '内容编辑',
+			span: 24,
 			component: {
 				name: 'el-input',
 				props: {
 					type: 'textarea',
-					rows: 5
+					rows: 8,
+					maxlength: 1000,
+					showWordLimit: true,
+					placeholder: '填写游记、体验或社区动态正文...'
 				}
 			},
 			required: true
 		},
 		{
 			prop: 'status',
-			label: '状态',
+			label: '审核状态',
+			group: '内容分发',
+			span: 24,
 			value: 'PASSED',
 			component: {
 				name: 'el-radio-group',
@@ -572,38 +620,55 @@ const Crud = useCrud(
 
 <style scoped lang="scss">
 :deep(.detail-dialog) {
-	.el-dialog__body { padding: 0; }
-	.el-dialog__footer { padding: 0; border-top: 1px solid #ebeef5; }
+	.el-dialog { overflow: hidden; border-radius: 12px; }
+	.el-dialog__body { padding: 0; background: #f7f8f5; }
+	.el-dialog__footer { padding: 0; border-top: 1px solid #dce1da; background: #fff; }
+}
+
+:deep(.community-upsert-dialog) {
+	.el-dialog { border-radius: 12px; overflow: hidden; }
+	.el-dialog__header { margin-right: 0; padding: 22px 28px; border-bottom: 1px solid #e3e7e0; background: #fbfcf9; }
+	.el-dialog__title { color: #19362d; font-size: 18px; font-weight: 700; }
+	.el-dialog__body { padding: 26px 28px 8px; }
+	.el-form-item__label { color: #53645d; font-weight: 600; }
+	.el-textarea__inner, .el-input__wrapper { box-shadow: 0 0 0 1px #d9e1d8 inset; }
+	.el-textarea__inner:focus, .el-input__wrapper.is-focus { box-shadow: 0 0 0 1px #287a5a inset; }
+	.el-dialog__footer { border-top: 1px solid #e3e7e0; padding: 16px 28px; }
 }
 
 .detail-banner {
-	padding: 28px 32px 24px;
+	display: flex;
+	align-items: end;
+	justify-content: space-between;
+	gap: 24px;
+	padding: 34px 40px 30px;
 	color: #fff;
 	position: relative;
 	overflow: hidden;
 
 	&--community {
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		background: #173d32;
+		background-image: linear-gradient(120deg, rgba(22, 57, 47, 0.96), rgba(42, 100, 75, 0.91)), repeating-linear-gradient(90deg, transparent 0, transparent 24px, rgba(255, 255, 255, 0.035) 25px);
 	}
 
 	&::after {
 		content: '';
 		position: absolute;
-		right: -40px;
-		top: -40px;
-		width: 180px;
-		height: 180px;
+		right: 12%;
+		top: -92px;
+		width: 280px;
+		height: 280px;
 		border-radius: 50%;
-		background: rgba(255, 255, 255, 0.08);
+		background: rgba(235, 190, 101, 0.12);
 	}
 
 	&__main { position: relative; z-index: 1; }
-	&__tag { display: flex; gap: 8px; margin-bottom: 12px; }
-	&__title { margin: 0 0 10px; font-size: 22px; font-weight: 600; line-height: 1.4; }
-	&__subtitle {
+	&__eyebrow { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; color: rgba(255, 255, 255, 0.72); font-size: 12px; letter-spacing: 0; }
+	&__title { max-width: 720px; margin: 0 0 14px; font-size: clamp(23px, 3vw, 32px); font-weight: 700; line-height: 1.35; letter-spacing: 0; }
+	&__meta {
 		margin: 0;
 		font-size: 13px;
-		opacity: 0.9;
+		color: rgba(255, 255, 255, 0.82);
 		display: flex;
 		align-items: center;
 		gap: 16px;
@@ -620,7 +685,8 @@ const Crud = useCrud(
 		width: 24px;
 		height: 24px;
 		border-radius: 50%;
-		background: rgba(255, 255, 255, 0.25);
+		background: #e8bb63;
+		color: #1d3b31;
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -633,90 +699,108 @@ const Crud = useCrud(
 		align-items: center;
 		gap: 2px;
 	}
+
+	&__topic { --el-tag-border-color: rgba(255,255,255,.35); --el-tag-text-color: #fff; --el-tag-bg-color: rgba(255,255,255,.1); }
+	&__status-panel { position: relative; z-index: 1; min-width: 154px; padding: 14px 16px; border: 1px solid rgba(255,255,255,.2); background: rgba(11, 35, 27, .3); }
+	&__status-panel span { display: block; margin-bottom: 7px; color: rgba(255,255,255,.62); font-size: 12px; }
+	&__status-panel strong { display: block; font-size: 15px; line-height: 1.35; }
 }
 
 .detail-stats {
-	display: flex;
-	gap: 12px;
-	padding: 20px 32px;
-	background: #fafafa;
-	border-bottom: 1px solid #ebeef5;
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 0;
+	padding: 0 40px;
+	background: #fff;
+	border-bottom: 1px solid #e2e7df;
 
 	&__item {
-		flex: 1;
 		display: flex;
 		align-items: center;
 		gap: 12px;
-		background: #fff;
-		border-radius: 10px;
-		padding: 14px 16px;
-		box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+		padding: 19px 16px;
+		border-right: 1px solid #e7ebe5;
+		&:last-child { border-right: 0; }
 	}
 
 	&__icon {
 		width: 40px;
 		height: 40px;
-		border-radius: 10px;
+		border-radius: 6px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		font-size: 20px;
-		&--red { background: #ffebee; }
-		&--yellow { background: #fffde7; }
-		&--blue { background: #e3f2fd; }
-		&--green { background: #e8f5e9; }
+		&--red { background: #fcebe5; color: #b8492d; }
+		&--yellow { background: #f9efd7; color: #a76e0a; }
+		&--blue { background: #e5eff1; color: #216272; }
+		&--green { background: #e6f0e8; color: #287a5a; }
 	}
 
 	&__info { display: flex; flex-direction: column; }
-	&__value { font-size: 20px; font-weight: 600; color: #303133; line-height: 1.2; }
-	&__label { font-size: 12px; color: #909399; margin-top: 2px; }
+	&__value { font-size: 20px; font-weight: 700; color: #1e332b; line-height: 1.2; }
+	&__label { font-size: 12px; color: #728078; margin-top: 3px; }
 }
 
+.detail-layout { display: grid; grid-template-columns: minmax(0, 1fr) 235px; gap: 0; }
+.detail-main { min-width: 0; padding: 28px 32px 32px 40px; background: #fff; }
+.detail-aside { padding: 28px 24px; border-left: 1px solid #e2e7df; background: #f7f8f5; }
+.detail-aside__section { padding-bottom: 24px; }
+.detail-aside__hint { display: flex; align-items: flex-start; gap: 8px; padding: 13px; color: #56665d; font-size: 12px; line-height: 1.65; border-left: 3px solid #d6a947; background: #fffdf6; }
+.detail-aside__hint .el-icon { margin-top: 3px; color: #a76e0a; }
+.detail-section-title { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; color: #25473b; font-size: 14px; font-weight: 700; }
+.detail-section-title small { color: #89948e; font-size: 12px; font-weight: 400; }
+.detail-facts { display: grid; gap: 15px; }
+.detail-facts div { display: grid; gap: 4px; }
+.detail-facts span { color: #829087; font-size: 12px; }
+.detail-facts strong { color: #30463b; font-size: 12px; font-weight: 600; line-height: 1.45; word-break: break-word; }
+
 .detail-images {
-	display: flex;
-	gap: 10px;
-	padding: 16px 32px 0;
-	flex-wrap: wrap;
+	margin-bottom: 26px;
+	&__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(144px, 1fr)); grid-auto-flow: dense; gap: 8px; }
 
 	&__item {
-		width: 140px;
-		height: 105px;
-		border-radius: 8px;
+		width: 100%;
+		height: 130px;
+		border-radius: 6px;
 		cursor: pointer;
+		overflow: hidden;
+		transition: transform .28s ease, filter .28s ease;
+		&:hover { transform: translateY(-3px); filter: saturate(1.1) contrast(1.05); }
 	}
 }
 
 .detail-content {
-	padding: 20px 32px 24px;
+	padding: 0;
 }
 
 .detail-card {
 	background: #fff;
-	border: 1px solid #ebeef5;
-	border-radius: 12px;
+	border: 1px solid #dfe6dc;
+	border-radius: 6px;
 	overflow: hidden;
 
 	&__header {
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		padding: 14px 20px;
-		background: #fafbfc;
-		border-bottom: 1px solid #f0f2f5;
+		padding: 13px 17px;
+		background: #f7f9f5;
+		border-bottom: 1px solid #e3e8e1;
 	}
 
 	&__icon { font-size: 18px; }
-	&__title { font-size: 15px; font-weight: 600; color: #303133; }
+	&__title { font-size: 14px; font-weight: 700; color: #25473b; }
 
 	&__body {
 		padding: 20px;
 		line-height: 1.8;
-		color: #606266;
+		color: #506158;
 		font-size: 14px;
 
 		&--content {
 			white-space: pre-wrap;
-			color: #303133;
+			color: #30453b;
 			font-size: 15px;
 			line-height: 2;
 		}
@@ -727,6 +811,26 @@ const Crud = useCrud(
 	display: flex;
 	justify-content: flex-end;
 	gap: 12px;
-	padding: 16px 32px;
+	padding: 16px 40px;
+
+	:deep(.el-button--success) { --el-button-bg-color: #287a5a; --el-button-border-color: #287a5a; --el-button-hover-bg-color: #21684d; }
+}
+
+:deep(.cl-table .cl-table__op) { display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; margin-bottom: 0; }
+:deep(.cl-table .cl-table__op .el-button) { margin-bottom: 0; }
+:deep(.cl-table .cl-table__op .el-button + .el-button) { margin-left: 0; }
+
+@media (max-width: 720px) {
+	.detail-banner { display: block; padding: 27px 24px 24px; }
+	.detail-banner__status-panel { margin-top: 20px; width: fit-content; }
+	.detail-banner__title { font-size: 23px; }
+	.detail-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 0 16px; }
+	.detail-stats__item { border-bottom: 1px solid #e7ebe5; }
+	.detail-stats__item:nth-child(2n) { border-right: 0; }
+	.detail-layout { grid-template-columns: 1fr; }
+	.detail-main { padding: 24px 20px; }
+	.detail-aside { padding: 20px; border-left: 0; border-top: 1px solid #e2e7df; }
+	.detail-facts { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+	.detail-footer { padding: 14px 20px; }
 }
 </style>
