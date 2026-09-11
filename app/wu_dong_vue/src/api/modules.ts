@@ -165,12 +165,8 @@ export function checkFavorite(targetType: string, targetId: string | number): Pr
   return apiFetch<Envelope<{ favorited: boolean }>>(`/favorites/${targetType}/${targetId}`)
 }
 
-/* 购物车 */
-export const getCart = S.getCart
-export const addToCart = S.addToCart
-export const updateCartItem = S.updateCartItem
-export const removeCartItem = S.removeCartItem
-export const checkCart = S.checkCart
+/* 购物车：真实后端 /api/cart，见 @/api/cart（页面通过 stores/cart 调用） */
+export { cartApi } from './cart'
 
 /* 消息 / 地址 / 资料 */
 export const getMessages = S.getMessages

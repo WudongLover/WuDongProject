@@ -76,27 +76,13 @@ export class PostService {
 
   /**
    * 可选身份：游客/未登录返回 0（列表/详情公开可浏览，liked 恒 false）。
-   * 优先级：
-   * 1. ctx.userId（AuthMiddleware 校验 Bearer token 后写入，真实身份）
-   * 2. X-User-Id 请求头（仅非生产环境，联调兜底）
-   * 3. DEMO_USER_ID 环境变量（仅非生产环境）
+   * 身份唯一来源：ctx.userId（AuthMiddleware 校验 Bearer token 后写入）。
+   * 已移除 X-User-Id 头与 DEMO_USER_ID 兜底，避免未登录也可写社区内容。
    */
   currentUserId(ctx: Context): number {
     const authedId = Number((ctx as any).userId);
     if (Number.isFinite(authedId) && authedId > 0) {
       return authedId;
-    }
-    if (process.env.NODE_ENV !== 'production') {
-      const raw = ctx.headers['x-user-id'];
-      const header = Array.isArray(raw) ? raw[0] : raw;
-      const headerId = Number(header);
-      if (Number.isFinite(headerId) && headerId > 0) {
-        return headerId;
-      }
-      const fallback = Number(process.env.DEMO_USER_ID || 1);
-      if (Number.isFinite(fallback) && fallback > 0) {
-        return fallback;
-      }
     }
     return 0;
   }

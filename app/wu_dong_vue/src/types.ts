@@ -239,6 +239,20 @@ export interface Order {
   qty: number
   date: string
   shop: string
+  /** 购物车下单的商品明细（合并支付一张订单，逐项展示） */
+  items?: OrderItem[]
+}
+
+/** 订单内单件商品（来源 wudong_common_order_item） */
+export interface OrderItem {
+  id: string
+  title: string
+  cover: string
+  sku: string
+  price: number
+  qty: number
+  /** 该行小计 = 单价 × 数量 */
+  amount: number
 }
 
 export interface Message {

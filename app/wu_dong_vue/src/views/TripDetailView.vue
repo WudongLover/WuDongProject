@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import * as api from '@/api'
 import { unwrapError } from '@/api'
 import type { TravelRoute } from '@/types'
 import { useUserStore } from '@/stores/user'
+import { useMockPay } from '@/composables/useMockPay'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
+import PayDialog from '@/components/PayDialog.vue'
 
 const route = useRoute()
-const router = useRouter()
 const userStore = useUserStore()
+// 路线下单后立即弹虚拟支付
+const { pendingOrder, askPay, onPaid, onDismiss } = useMockPay()
 
 const routeData = ref<TravelRoute | null>(null)
 const notFound = ref(false)
@@ -56,7 +59,7 @@ async function book() {
       contactName: visitorName.value.trim(),
       contactPhone: visitorPhone.value,
     })
-    router.push({ path: '/orders', query: { highlight: order.data.orderNo, pay: '1' } })
+    askPay(order.data)
   } catch (e) {
     errText.value = unwrapError(e).message
   } finally {
@@ -169,6 +172,9 @@ async function book() {
         </aside>
       </div>
     </template>
+
+    <!-- 路线下单后立即弹虚拟支付 -->
+    <PayDialog :order="pendingOrder" @paid="onPaid" @dismiss="onDismiss" />
   </div>
 </template>
 

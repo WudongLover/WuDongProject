@@ -7,15 +7,19 @@ import type { Product } from '@/types'
 import { useUserStore } from '@/stores/user'
 import { useCartStore } from '@/stores/cart'
 import { useFavoriteStore } from '@/stores/favorite'
+import { useMockPay } from '@/composables/useMockPay'
 import QtyStepper from '@/components/QtyStepper.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
+import PayDialog from '@/components/PayDialog.vue'
 
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 const cartStore = useCartStore()
 const favStore = useFavoriteStore()
+// 立即购买：下单后直接弹虚拟支付，不经过购物车
+const { pendingOrder, askPay, onPaid, onDismiss } = useMockPay()
 
 const product = ref<Product | null>(null)
 const notFound = ref(false)
@@ -88,8 +92,20 @@ async function buyNow() {
   }
   buying.value = true
   try {
-    await addToCart()
-    router.push('/cart')
+    // 服务端按商品 + 规格 + 数量实时算价、扣库存，与购物车结算同一套逻辑
+    const res = await api.createOrder({
+      type: product.value!.module,
+      items: [
+        {
+          productId: String(product.value!.id),
+          skuId: skuId.value || undefined,
+          qty: qty.value,
+        },
+      ],
+    })
+    askPay(res.data)
+  } catch (e) {
+    userStore.toast(unwrapError(e).message)
   } finally {
     buying.value = false
   }
@@ -244,6 +260,9 @@ async function buyNow() {
       <div class="sk" style="height: 420px"></div>
       <div class="sk" style="height: 420px"></div>
     </div>
+
+    <!-- 立即购买：下单后弹虚拟支付 -->
+    <PayDialog :order="pendingOrder" @paid="onPaid" @dismiss="onDismiss" />
   </div>
 </template>
 

@@ -6,12 +6,22 @@
  * - 通用订单查询/支付/取消在 order 模块；住宿取消需回补房态，走 m3 入口
  * - createOrder（购物车/门票路线结算）仍保留在 m4-order.ts，不在本文件
  */
-import type { Order, OrderStatus, OrderType } from '@/types'
+import type { Order, OrderItem, OrderStatus, OrderType } from '@/types'
 import type { Envelope } from './contracts'
 import { ApiError } from './contracts'
 import { apiFetch } from './http'
 
 /** 后端订单实体（camelCase），仅取前端需要的列 */
+interface OrderItemEntity {
+  id: string
+  title: string
+  cover: string
+  skuName: string
+  price: number | string
+  qty: number | string
+  amount: number | string
+}
+
 interface OrderEntity {
   orderNo: string
   type: OrderType
@@ -23,6 +33,8 @@ interface OrderEntity {
   qty: number | string
   shopName: string
   createdAt: string
+  /** 购物车合并下单的商品明细，非购物车订单为空 */
+  items?: OrderItemEntity[] | null
 }
 
 const pad = (n: number) => String(n).padStart(2, '0')
@@ -33,6 +45,21 @@ function toDateStr(s: string): string {
   const d = new Date(s)
   if (Number.isNaN(d.getTime())) return String(s).slice(0, 10)
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+}
+
+/** 订单明细 → 前端 OrderItem（skuName→sku，金额数量转 number） */
+function toOrderItem(e: OrderItemEntity, index: number): OrderItem {
+  const price = Number(e.price) || 0
+  const qty = Number(e.qty) || 1
+  return {
+    id: String(e.id ?? index),
+    title: e.title ?? '',
+    cover: e.cover ?? '',
+    sku: e.skuName ?? '',
+    price,
+    qty,
+    amount: Number(e.amount) || price * qty,
+  }
 }
 
 /** 订单实体 → 前端 Order（shopName→shop，createdAt→date，金额/数量转 number） */
@@ -48,6 +75,7 @@ export function toOrder(e: OrderEntity): Order {
     qty: Number(e.qty) || 1,
     shop: e.shopName ?? '',
     date: toDateStr(e.createdAt),
+    items: (e.items ?? []).map(toOrderItem),
   }
 }
 

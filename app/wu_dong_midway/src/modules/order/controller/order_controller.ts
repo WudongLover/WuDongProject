@@ -5,6 +5,7 @@
  */
 import { Body, Controller, Get, Inject, Param, Post, Query } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
+import { OrderFacadeService } from '../service/order_facade_service';
 import { OrderService } from '../service/order_service';
 
 @Controller('/api/app/order')
@@ -14,6 +15,9 @@ export class OrderController {
 
   @Inject()
   service!: OrderService;
+
+  @Inject()
+  facade!: OrderFacadeService;
 
   private ok<T>(data: T) {
     return { code: 0, message: 'ok', data };
@@ -29,6 +33,15 @@ export class OrderController {
     return this.ok(await this.service.list(this.userId(), { type, status }));
   }
 
+  /**
+   * 创建订单：购物车结算（GOODS/SPECIALTY）与门票/路线下单（TICKET/ROUTE）。
+   * 金额与库存一律服务端重算，前端传入的 amount/title 等展示字段被忽略。
+   */
+  @Post('/create')
+  async create(@Body() body: any) {
+    return this.ok(await this.facade.create(this.userId(), body ?? {}));
+  }
+
   /** 订单详情：主表 + 支付记录 */
   @Get('/detail/:orderNo')
   async detail(@Param('orderNo') orderNo: string) {
@@ -41,9 +54,9 @@ export class OrderController {
     return this.ok(await this.service.pay(orderNo, this.userId()));
   }
 
-  /** 取消订单：状态置 CANCELLED（库存回补由业务模块方入口负责） */
+  /** 取消订单：实物回补 SKU 库存、门票回补票档库存，其余仅状态流转 */
   @Post('/cancel')
   async cancel(@Body('orderNo') orderNo: string) {
-    return this.ok(await this.service.cancelOrder(orderNo, this.userId()));
+    return this.ok(await this.facade.cancel(orderNo, this.userId()));
   }
 }
