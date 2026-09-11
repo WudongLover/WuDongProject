@@ -4,6 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import * as api from '@/api'
 import { unwrapError } from '@/api'
 import { useUserStore } from '@/stores/user'
+import { toOssUrl } from '@/mock/image-map'
 import AppIcon from '@/components/AppIcon.vue'
 
 const route = useRoute()
@@ -22,7 +23,7 @@ const countdown = ref(0)
 const errText = ref('')
 const loading = ref(false)
 
-const sideImg = '/images/login.jpg'
+const sideImg = toOssUrl('/images/login.jpg')
 
 async function sendCode() {
   errText.value = ''

@@ -1,6 +1,10 @@
 /**
- * 图片本地化映射：远程 URL -> public/images 下的本地路径
+ * 图片映射：远程 URL -> public/images 下的本地文件名路径
  * 由下载脚本生成，勿手改。新增图片请重新生成。
+ *
+ * 运行时取值统一走 toOssUrl()：
+ * - 配置了 VITE_OSS_BASE_URL：返回 OSS 访问地址（照片存 OSS，见后端 src/comm/oss.ts）；
+ * - 未配置：回退仓库内 public/images 本地文件，保证前端不依赖 OSS 也能跑。
  */
 export const IMAGE_MAP: Record<string, string> = {
   "https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=600&q=80": "/images/community-publish.jpg",
@@ -98,4 +102,28 @@ export const IMAGE_MAP: Record<string, string> = {
 export function localizeImage(url: unknown): unknown {
   if (typeof url !== 'string') return url
   return IMAGE_MAP[url] ?? url
+}
+
+/** 本地静态图前缀（public/images/**，仓库内保留作为兜底） */
+const LOCAL_IMAGE_PREFIX = '/images/'
+
+/** OSS 访问基地址，如 https://bucket.oss-cn-guizhou.aliyuncs.com 或自定义域名；留空表示未接入 OSS */
+const OSS_BASE_URL = (import.meta.env.VITE_OSS_BASE_URL || '').trim().replace(/\/+$/, '')
+
+/** OSS 对象键前缀，与后端 .env 的 OSS_PREFIX 保持一致 */
+const OSS_PREFIX = (import.meta.env.VITE_OSS_PREFIX || 'wudong').trim().replace(/^\/+|\/+$/g, '')
+
+/** 是否已接入 OSS（决定静态配图走 OSS 还是本地文件） */
+export function isOssImageEnabled(): boolean {
+  return !!OSS_BASE_URL
+}
+
+/**
+ * 本地图片路径 → OSS 访问地址。
+ * 非白名单路径（外链、data: 等）或未配置 OSS 时原样返回。
+ */
+export function toOssUrl(pathOrUrl: string): string {
+  if (!OSS_BASE_URL || !pathOrUrl.startsWith(LOCAL_IMAGE_PREFIX)) return pathOrUrl
+  const file = pathOrUrl.slice(LOCAL_IMAGE_PREFIX.length)
+  return `${OSS_BASE_URL}/${[OSS_PREFIX, 'images', file].filter(Boolean).join('/')}`
 }

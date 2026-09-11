@@ -48,6 +48,15 @@ export default {
     // 端口由 .env 的 KOA_PORT 控制，默认 6666
     port: Number(process.env.KOA_PORT) || 6666,
   },
+  // 图片上传（@midwayjs/upload）：mode=file 先落临时文件，再由 UploadService 校验类型/大小并转存 OSS。
+  // 业务上限 10MB 在代码里校验（返回业务信封 400）；这里放宽到 20MB，仅作为传输层硬上限。
+  upload: {
+    mode: 'file' as const,
+    // whitelist=null 表示不做框架级后缀过滤，改由 UploadService 校验（这样才能返回项目统一信封）
+    whitelist: null,
+    fileSize: '20mb',
+    cleanTimeout: 60 * 1000,
+  },
   typeorm: {
     dataSource: {
       default: {
