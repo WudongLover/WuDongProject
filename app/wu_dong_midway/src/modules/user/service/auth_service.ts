@@ -293,7 +293,7 @@ export class AuthService {
     return this.profile(u);
   }
 
-  async updateProfile(id: string, name?: string, bio?: string) {
+  async updateProfile(id: string, name?: string, bio?: string, avatar?: string) {
     const u = await this.users.findOneBy({ id });
     if (!u || u.status !== 'ENABLED') {
       throw new ApiError(1001, '登录失效，请重新登录', 401);
@@ -301,6 +301,7 @@ export class AuthService {
     const next: any = {};
     if (name !== undefined) next.name = String(name).trim().slice(0, 64);
     if (bio !== undefined) next.bio = String(bio).trim().slice(0, 255);
+    if (avatar !== undefined) next.avatar = String(avatar).trim().slice(0, 500);
     if (Object.keys(next).length) {
       await this.users.update({ id: u.id }, next);
     }
