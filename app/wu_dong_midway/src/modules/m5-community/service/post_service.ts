@@ -7,6 +7,7 @@ import { Inject, Provide } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
 import { PostMapper, PostRow, CommentRow } from '../mapper/post_mapper';
 import { ApiError } from '../error/api_error';
+import { MessageService } from '../../user/service/message_service';
 
 /** PostAuthor（前端 types.ts，id 为字符串） */
 export interface PostAuthorVo {
@@ -73,6 +74,9 @@ export interface CommentBody {
 export class PostService {
   @Inject()
   postMapper: PostMapper;
+
+  @Inject()
+  messageService: MessageService;
 
   /**
    * 可选身份：游客/未登录返回 0（列表/详情公开可浏览，liked 恒 false）。
@@ -155,9 +159,20 @@ export class PostService {
   /** 点赞切换：返回最新 { liked, likes } */
   async toggleLike(ctx: Context, id: number): Promise<{ liked: boolean; likes: number }> {
     const userId = this.requireUserId(ctx);
-    const result = await this.postMapper.toggleLike(id, userId);
-    if (!result.postExists) {
+    const post = await this.postMapper.findActivePost(id);
+    if (!post) {
       throw new ApiError(1003, '资源不存在', 404);
+    }
+    const result = await this.postMapper.toggleLike(id, userId);
+    if (result.liked && Number(post.userId) !== userId) {
+      await this.messageService.send({
+        userId: String(post.userId),
+        type: 'INTERACT',
+        title: '收到新的点赞',
+        content: `有人赞了你的游记《${post.title}》。`,
+        relatedType: 'POST',
+        relatedId: String(post.id),
+      });
     }
     return { liked: result.liked, likes: result.likes };
   }
@@ -187,14 +202,33 @@ export class PostService {
       replyToUserId = parent.userId;
     }
 
+    const userId = this.requireUserId(ctx);
     await this.postMapper.createComment({
       postId,
-      userId: this.requireUserId(ctx),
+      userId,
       parentId,
       replyToUserId,
       content: body.content.trim(),
       publishedAt: new Date(),
     });
+    const notifyUserId =
+      replyToUserId && replyToUserId !== userId
+        ? replyToUserId
+        : Number(post.userId) !== userId
+          ? Number(post.userId)
+          : null;
+    if (notifyUserId) {
+      await this.messageService.send({
+        userId: String(notifyUserId),
+        type: 'INTERACT',
+        title: replyToUserId ? '收到新的回复' : '收到新的评论',
+        content: replyToUserId
+          ? `有人回复了你在《${post.title}》下的评论。`
+          : `有人评论了你的游记《${post.title}》。`,
+        relatedType: 'POST',
+        relatedId: String(post.id),
+      });
+    }
     return this.buildCommentTree(await this.postMapper.findCommentsByPost(postId));
   }
 

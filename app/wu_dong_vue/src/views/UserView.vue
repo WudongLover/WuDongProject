@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import * as api from '@/api'
 import { unwrapError } from '@/api'
 import type { Address, Message, UserProfile, UserStats } from '@/types'
@@ -8,6 +9,7 @@ import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
 
 const userStore = useUserStore()
+const router = useRouter()
 
 type Panel = 'profile' | 'security' | 'favorites' | 'addresses' | 'messages'
 const panel = ref<Panel>('profile')
@@ -131,9 +133,21 @@ async function readOne(m: Message) {
   try {
     await api.messageApi.markRead(m.id)
     await Promise.all([loadMessages(), loadStats()])
+    const target = messageTarget(m)
+    if (target) await router.push(target)
   } catch (e) {
     userStore.toast(unwrapError(e).message)
   }
+}
+
+function messageTarget(message: Message): string | null {
+  if (!message.relatedType || !message.relatedId) return null
+  const id = encodeURIComponent(message.relatedId)
+  if (message.relatedType === 'ORDER') return `/order/result/${id}`
+  if (message.relatedType === 'POST') return `/posts/${id}`
+  if (message.relatedType === 'ROUTE') return `/routes/${id}`
+  if (message.relatedType === 'RESTAURANT') return `/restaurants/${id}`
+  return null
 }
 
 async function unfav(f: { targetType: string; targetId: string; id: string }) {

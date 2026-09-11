@@ -1,7 +1,8 @@
 import { Inject, Provide } from '@midwayjs/core';
+import { EntityManager } from 'typeorm';
 import { ApiError } from '../../m5-community/error/api_error';
 import { MessageEntity, MessageType } from '../entity/message_entity';
-import { MessageMapper } from '../mapper/message_mapper';
+import { CreateMessageInput, MessageMapper } from '../mapper/message_mapper';
 
 export interface MessageVo {
   id: string;
@@ -37,6 +38,10 @@ export class MessageService {
 
   async unreadCount(userId: string): Promise<{ count: number }> {
     return { count: await this.messageMapper.countUnread(userId) };
+  }
+
+  async send(input: CreateMessageInput, em?: EntityManager): Promise<MessageEntity> {
+    return this.messageMapper.create(input, em);
   }
 
   private toVo(item: MessageEntity): MessageVo {

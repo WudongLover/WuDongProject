@@ -1,7 +1,16 @@
 import { Provide } from '@midwayjs/core';
 import { InjectEntityModel } from '@midwayjs/typeorm';
-import { Repository } from 'typeorm';
-import { MessageEntity } from '../entity/message_entity';
+import { EntityManager, Repository } from 'typeorm';
+import { MessageEntity, MessageType } from '../entity/message_entity';
+
+export interface CreateMessageInput {
+  userId: string;
+  type: MessageType;
+  title: string;
+  content: string;
+  relatedType?: string | null;
+  relatedId?: string | null;
+}
 
 @Provide()
 export class MessageMapper {
@@ -34,5 +43,20 @@ export class MessageMapper {
 
   countUnread(userId: string): Promise<number> {
     return this.messageRepo.countBy({ userId, isRead: 0 });
+  }
+
+  async create(input: CreateMessageInput, em?: EntityManager): Promise<MessageEntity> {
+    const repo = em ? em.getRepository(MessageEntity) : this.messageRepo;
+    return repo.save(
+      repo.create({
+        userId: input.userId,
+        type: input.type,
+        title: input.title,
+        content: input.content,
+        isRead: 0,
+        relatedType: input.relatedType ?? null,
+        relatedId: input.relatedId ?? null,
+      })
+    );
   }
 }

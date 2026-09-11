@@ -15,6 +15,7 @@ import { OrderEntity, OrderStatus, OrderType } from '../entity/order_entity';
 import { OrderItemEntity } from '../entity/order_item_entity';
 import { PaymentEntity } from '../entity/payment_entity';
 import { M1OrderExtEntity } from '../../m1-goods/entity/order_ext_entity';
+import { MessageService } from '../../user/service/message_service';
 
 /** 建单入参：字段与 wudong_common_order 列对齐，业务模块负责组装展示快照 */
 export interface CreateOrderInput {
@@ -49,6 +50,9 @@ export class OrderService {
 
   @InjectEntityModel(M1OrderExtEntity)
   m1OrderExtRepo: Repository<M1OrderExtEntity>;
+
+  @Inject()
+  messageService: MessageService;
 
   /** 单号：WD + yymmdd + 6 位随机 */
   private genNo(prefix: string) {
@@ -88,7 +92,19 @@ export class OrderService {
       shopName: input.shopName ?? '',
       expireAt: input.expireAt ?? null,
     });
-    return repo.save(order);
+    const saved = await repo.save(order);
+    await this.messageService.send(
+      {
+        userId: input.userId,
+        type: 'ORDER',
+        title: '订单已创建',
+        content: `订单 ${saved.orderNo} 已创建，请及时处理。`,
+        relatedType: 'ORDER',
+        relatedId: saved.orderNo,
+      },
+      em
+    );
+    return saved;
   }
 
   /** 订单列表（当前用户，可选 type/status 过滤） */
@@ -207,7 +223,19 @@ export class OrderService {
 
       order.status = 'PAID';
       order.paidAt = new Date();
-      return orderRepo.save(order);
+      const paid = await orderRepo.save(order);
+      await this.messageService.send(
+        {
+          userId,
+          type: 'ORDER',
+          title: '支付成功',
+          content: `订单 ${order.orderNo} 已支付成功。`,
+          relatedType: 'ORDER',
+          relatedId: order.orderNo,
+        },
+        em
+      );
+      return paid;
     });
   }
 
@@ -228,6 +256,18 @@ export class OrderService {
     order.status = 'CANCELLED';
     order.cancelledAt = new Date();
     order.cancelReason = order.cancelReason || '用户取消';
-    return repo.save(order);
+    const saved = await repo.save(order);
+    await this.messageService.send(
+      {
+        userId,
+        type: 'ORDER',
+        title: '订单已取消',
+        content: `订单 ${saved.orderNo} 已取消。`,
+        relatedType: 'ORDER',
+        relatedId: saved.orderNo,
+      },
+      em
+    );
+    return saved;
   }
 }
