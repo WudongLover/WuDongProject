@@ -3,6 +3,7 @@ import { onMounted } from 'vue'
 import SiteHeader from './components/SiteHeader.vue'
 import SiteFooter from './components/SiteFooter.vue'
 import ToastHost from './components/ToastHost.vue'
+import AgentChatPanel from './components/AgentChatPanel.vue'
 import { useUserStore } from './stores/user'
 
 const userStore = useUserStore()
@@ -25,6 +26,7 @@ onMounted(() => {
     </main>
     <SiteFooter />
     <ToastHost />
+    <AgentChatPanel />
   </div>
 </template>
 

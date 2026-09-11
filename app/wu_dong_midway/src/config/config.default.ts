@@ -22,6 +22,8 @@ import { RefreshTokenEntity } from '../modules/user/entity/refresh_token_entity'
 // user 模块（C 端鉴权）实体：与 m5 的临时只读实体同表不同用途，二者都要注册，
 // 否则 AuthService 注入的 UserEntity 没有 metadata，登录接口直接 500
 import { UserEntity as AuthUserEntity } from '../modules/user/entity/user_entity';
+import { ChatSessionEntity } from '../modules/m6-agent/entity/chat_session_entity';
+import { ChatMessageEntity } from '../modules/m6-agent/entity/chat_message_entity';
 
 /**
  * 通用配置（本地开发与生产一致）
@@ -68,6 +70,8 @@ export default {
           TicketEntity, ScenicEntity, RouteEntity, RouteDayEntity,
           RefreshTokenEntity,
           AuthUserEntity,
+          ChatSessionEntity,
+          ChatMessageEntity,
         ],
       },
     },
