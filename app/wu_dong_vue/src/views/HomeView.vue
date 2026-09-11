@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 import * as api from '@/api'
-import type { Banner, LiveInfo, Post } from '@/types'
+import type { Banner, CultureSection, LiveInfo, Post } from '@/types'
 import SectionTitle from '@/components/SectionTitle.vue'
 import PostCard from '@/components/PostCard.vue'
 import AppIcon from '@/components/AppIcon.vue'
@@ -12,10 +12,11 @@ import { scene } from '@/mock/images'
  * 首页只做文旅介绍，不做商品陈列：卡片、价格、销量一概不上。
  * 想买东西的人从导航或每个模块的「查看全部」进列表页。
  */
-const yi = api.getCultureSection('YI')
-const shi = api.getCultureSection('SHI')
-const zhu = api.getCultureSection('ZHU')
-const xing = api.getCultureSection('XING')
+/** 文化推文：后端接口异步加载（四个模块共用一次请求，见 api 层缓存） */
+const yi = ref<CultureSection>()
+const shi = ref<CultureSection>()
+const zhu = ref<CultureSection>()
+const xing = ref<CultureSection>()
 
 /** 词条跳文化内容：文案对上就跳对应段落，对不上退回该模块列表页 */
 function entryTo(kw: string, fallback: string) {
@@ -47,6 +48,12 @@ async function loadLive() {
 }
 
 onMounted(async () => {
+  // 文化推文：四个模块版式 + 后端推文
+  api.getCultureSection('YI').then((v) => (yi.value = v))
+  api.getCultureSection('SHI').then((v) => (shi.value = v))
+  api.getCultureSection('ZHU').then((v) => (zhu.value = v))
+  api.getCultureSection('XING').then((v) => (xing.value = v))
+
   // 首页不再拉商品/餐厅/民宿/路线列表，只取导览与社区内容
   const res = await api.getHomeData()
   banners.value = res.data.banners

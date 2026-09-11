@@ -606,7 +606,8 @@ export class DashboardStatsService {
               END name, COUNT(*) v
          FROM wudong.wudong_m3_room_type
         WHERE deleted_at IS NULL
-        GROUP BY name`
+        -- 表内已有 name 列，GROUP BY name 会命中真实列而非 CASE 别名，故按第 1 列分组
+        GROUP BY 1`
     );
     const hot = await this.query(
       `SELECT h.name name, h.rating rating, COUNT(e.id) c

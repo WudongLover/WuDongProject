@@ -1,17 +1,33 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
-import { cultureSections, findCultureStory, relatedCultureStories } from '@/api'
-import type { CultureModule } from '@/types'
+import { getCultureSection, findCultureStory, relatedCultureStories } from '@/api'
+import type { CultureModule, CultureSection, CultureStory } from '@/types'
 import CultureCard from '@/components/CultureCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
 
 const route = useRoute()
 
-const story = computed(() => findCultureStory(String(route.params.id)))
-const section = computed(() => cultureSections.find((s) => s.module === story.value?.module))
-const siblings = computed(() => section.value?.stories.filter((s) => s.id !== story.value?.id) ?? [])
-const related = computed(() => (story.value ? relatedCultureStories(story.value, 3) : []))
+const story = ref<CultureStory | null>(null)
+const section = ref<CultureSection>()
+const siblings = ref<CultureStory[]>([])
+const related = ref<CultureStory[]>([])
+
+/** 推文来自后端：路由参数变化（详情页互跳）都重新取数 */
+watch(
+  () => String(route.params.id),
+  async (id) => {
+    section.value = undefined
+    siblings.value = []
+    related.value = []
+    story.value = (await findCultureStory(id)) ?? null
+    if (!story.value) return
+    section.value = await getCultureSection(story.value.module)
+    siblings.value = (section.value?.stories ?? []).filter((s) => s.id !== story.value?.id)
+    related.value = await relatedCultureStories(story.value, 3)
+  },
+  { immediate: true },
+)
 
 /** 模块 → 中文单字 / 列表页路由 */
 const moduleGlyph: Record<CultureModule, string> = { YI: '衣', SHI: '食', ZHU: '住', XING: '行' }

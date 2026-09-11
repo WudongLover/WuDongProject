@@ -1,5 +1,8 @@
 /** API 模块：每个函数对应一个后端接口或本地尚未迁移的能力 */
 import type {
+  CultureModule,
+  CultureSection,
+  CultureStory,
   Homestay,
   Post,
   PostComment,
@@ -19,14 +22,54 @@ export const getHomeData = S.getHomeData
 export const getLiveInfo = S.getLiveInfo
 export const searchAll = S.searchAll
 
-/* 文化导览：前端固定内容，不计划迁后端；页面仍统一从 @/api 取，守住"页面不直接访问 mock" */
-export {
-  cultureSections,
-  cultureEntries,
-  getCultureSection,
-  findCultureStory,
-  relatedCultureStories,
-} from '@/mock/culture'
+/* 文化导览推文：真实后端 /v1/common/stories（wu_dong_midway common 模块，管理端编写维护）。
+   模块导语/词条等版面文案仍在前端 mock/culture.ts 配置；页面统一从 @/api 取，守住「页面不直接访问 mock」 */
+import { cultureSections as cultureSectionMeta, cultureEntries } from '@/mock/culture'
+
+export { cultureEntries }
+
+/** 后端 StoryVo（common 模块 story_service，id 即 slug） */
+interface StoryVo {
+  id: string
+  module: CultureModule
+  eyebrow: string
+  title: string
+  summary: string
+  paragraphs: string[]
+  cover: string
+  quote?: string
+  links?: { label: string; to: string }[]
+}
+
+/** 已发布推文列表（会话级缓存：首页 4 个区块 + 各详情页共用一次请求；失败不缓存） */
+let cultureStoriesReq: Promise<CultureStory[]> | null = null
+function fetchCultureStories(): Promise<CultureStory[]> {
+  cultureStoriesReq ??= apiFetch<Envelope<StoryVo[]>>('/v1/common/stories').then((res) => res.data)
+  cultureStoriesReq.catch(() => {
+    cultureStoriesReq = null
+  })
+  return cultureStoriesReq
+}
+
+/** 模块导览区 = 前端版式配置 + 后端推文列表 */
+export async function getCultureSection(module: CultureModule): Promise<CultureSection | undefined> {
+  const meta = cultureSectionMeta.find((s) => s.module === module)
+  if (!meta) return undefined
+  const stories = (await fetchCultureStories()).filter((s) => s.module === module)
+  return { ...meta, stories }
+}
+
+/** 按 id（slug）取单条推文 */
+export async function findCultureStory(id: string): Promise<CultureStory | undefined> {
+  return (await fetchCultureStories()).find((s) => s.id === id)
+}
+
+/** 相关推荐：同模块剔除自身，最多 limit 条 */
+export async function relatedCultureStories(story: CultureStory, limit = 3): Promise<CultureStory[]> {
+  return (await fetchCultureStories())
+    .filter((x) => x.module === story.module && x.id !== story.id)
+    .slice(0, limit)
+}
 
 /* 认证 */
 export {

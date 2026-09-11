@@ -351,6 +351,93 @@ declare namespace Eps {
 		[key: string]: any;
 	}
 
+	interface StoryEntity {
+		/**
+		 * ID
+		 */
+		id?: BigInt;
+
+		/**
+		 * 所属模块：YI 衣 / SHI 食 / ZHU 住 / XING 行
+		 */
+		module?: string;
+
+		/**
+		 * 路由 id，全站唯一（C 端详情页 /culture/:id）
+		 */
+		slug?: string;
+
+		/**
+		 * 英文小标（如 YI · SILVER）
+		 */
+		eyebrow?: string;
+
+		/**
+		 * 标题
+		 */
+		title?: string;
+
+		/**
+		 * 导语（列表卡片与详情页共用）
+		 */
+		summary?: string;
+
+		/**
+		 * 封面图 URL
+		 */
+		cover?: string;
+
+		/**
+		 * 一句话引文
+		 */
+		quote?: string;
+
+		/**
+		 * 正文段落数组
+		 */
+		paragraphs?: any;
+
+		/**
+		 * 尾部导流 [{label,to}]
+		 */
+		links?: any;
+
+		/**
+		 * 模块内展示顺序，小者在前
+		 */
+		sort?: number;
+
+		/**
+		 * DRAFT 草稿 / PUBLISHED 已发布 / OFFLINE 下线
+		 */
+		status?: string;
+
+		/**
+		 * 发布时间
+		 */
+		publishedAt?: Date;
+
+		/**
+		 * undefined
+		 */
+		createdAt?: Date;
+
+		/**
+		 * undefined
+		 */
+		updatedAt?: Date;
+
+		/**
+		 * 删除时间
+		 */
+		deletedAt?: Date;
+
+		/**
+		 * 任意键值
+		 */
+		[key: string]: any;
+	}
+
 	interface DemoGoodsEntity {
 		/**
 		 * ID
@@ -1224,6 +1311,11 @@ declare namespace Eps {
 		list: BaseSysUserEntity[];
 	}
 
+	interface CommonStoryPageResponse {
+		pagination: PagePagination;
+		list: StoryEntity[];
+	}
+
 	interface DemoGoodsPageResponse {
 		pagination: PagePagination;
 		list: DemoGoodsEntity[];
@@ -1766,6 +1858,64 @@ declare namespace Eps {
 			delete: boolean;
 			update: boolean;
 			move: boolean;
+			info: boolean;
+			list: boolean;
+			page: boolean;
+			add: boolean;
+		};
+
+		request: Request;
+	}
+
+	interface CommonStory {
+		/**
+		 * 删除
+		 */
+		delete(data?: any): Promise<any>;
+
+		/**
+		 * 修改
+		 */
+		update(data?: any): Promise<any>;
+
+		/**
+		 * 单个信息
+		 */
+		info(data?: any): Promise<StoryEntity>;
+
+		/**
+		 * 列表查询
+		 */
+		list(data?: any): Promise<StoryEntity[]>;
+
+		/**
+		 * 分页查询
+		 */
+		page(data?: any): Promise<CommonStoryPageResponse>;
+
+		/**
+		 * 新增
+		 */
+		add(data?: any): Promise<any>;
+
+		/**
+		 * 权限标识
+		 */
+		permission: {
+			delete: string;
+			update: string;
+			info: string;
+			list: string;
+			page: string;
+			add: string;
+		};
+
+		/**
+		 * 权限状态
+		 */
+		_permission: {
+			delete: boolean;
+			update: boolean;
 			info: boolean;
 			list: boolean;
 			page: boolean;
@@ -2664,6 +2814,7 @@ declare namespace Eps {
 				user: BaseSysUser;
 			};
 		};
+		common: { story: CommonStory };
 		dashboard: { stats: DashboardStats };
 		demo: { goods: DemoGoods; tenant: DemoTenant };
 		dict: { info: DictInfo; type: DictType };
