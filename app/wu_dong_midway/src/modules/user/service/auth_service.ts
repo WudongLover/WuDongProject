@@ -24,6 +24,8 @@ import { ApiError } from '../../m5-community/error/api_error';
 const PHONE_RE = /^1\d{10}$/;
 /** 密码：8-20 位，同时包含字母与数字（与前端表单提示一致） */
 const PASSWORD_RE = /^(?=.*[a-zA-Z])(?=.*\d).{8,20}$/;
+const NAME_MAX_LENGTH = 12;
+const BIO_MAX_LENGTH = 60;
 const ACCESS_EXPIRE_SEC = 7200;
 const REFRESH_EXPIRE_MS = 30 * 86400000;
 
@@ -122,6 +124,23 @@ export class AuthService {
     if (!PASSWORD_RE.test(pwd || '')) {
       throw new ApiError(1004, '密码需 8-20 位，且同时包含字母与数字');
     }
+  }
+
+  private normalizeName(value: unknown, fallback = ''): string {
+    const name = String(value ?? '').trim();
+    if (!name) return fallback;
+    if (name.length > NAME_MAX_LENGTH) {
+      throw new ApiError(1004, `昵称不能超过 ${NAME_MAX_LENGTH} 个字符`);
+    }
+    return name;
+  }
+
+  private normalizeBio(value: unknown): string {
+    const bio = String(value ?? '').trim();
+    if (bio.length > BIO_MAX_LENGTH) {
+      throw new ApiError(1004, `个人简介不能超过 ${BIO_MAX_LENGTH} 个字符`);
+    }
+    return bio;
   }
 
   /**
@@ -231,7 +250,7 @@ export class AuthService {
     const user =
       u ||
       this.users.create({ phone, avatar: '', bio: '', status: 'ENABLED' });
-    user.name = name || phone;
+    user.name = this.normalizeName(name, phone);
     user.passwordHash = this.hash(password);
     await this.users.save(user);
     return this.login(phone, password);
@@ -299,8 +318,11 @@ export class AuthService {
       throw new ApiError(1001, '登录失效，请重新登录', 401);
     }
     const next: any = {};
-    if (name !== undefined) next.name = String(name).trim().slice(0, 64);
-    if (bio !== undefined) next.bio = String(bio).trim().slice(0, 255);
+    if (name !== undefined) {
+      next.name = this.normalizeName(name);
+      if (!next.name) throw new ApiError(1004, '昵称不能为空');
+    }
+    if (bio !== undefined) next.bio = this.normalizeBio(bio);
     if (Object.keys(next).length) {
       await this.users.update({ id: u.id }, next);
     }

@@ -29,6 +29,7 @@ import {
   initialOrders,
   initialMessages,
   initialAddresses,
+  initialFavoriteIds,
   defaultUser,
   hotKeywords,
 } from './data'
@@ -61,7 +62,7 @@ const db = {
   orders: [...initialOrders] as Order[],
   messages: [...initialMessages] as Message[],
   addresses: [...initialAddresses] as Address[],
-  favorites: new Set(defaultUser.favorites),
+  favorites: new Set(initialFavoriteIds),
   likedPosts: new Set<string>(),
   smsCode: '123456' as string, // 对齐后端 Mock：验证码固定 123456
   seq: 100,

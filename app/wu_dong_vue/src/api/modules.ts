@@ -37,6 +37,7 @@ export {
   logout,
   updateProfile,
   setPassword,
+  getUserStats,
   refreshAccess as bootstrap,
 } from './auth'
 export const currentUser = S.currentUser

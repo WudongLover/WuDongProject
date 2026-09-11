@@ -7,6 +7,7 @@ const TOKEN_REQUIRED_PATHS = [
   '/api/user/me',
   '/api/user/profile',
   '/api/user/password',
+  '/api/user/stats',
   '/api/favorites',
 ];
 /** m2/m3/m4 的写操作需要登录，公开查询放行 */

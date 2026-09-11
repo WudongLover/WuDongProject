@@ -1212,13 +1212,16 @@ export const initialAddresses: Address[] = [
   { id: 'ad2', name: '刘一', phone: '138****1234', region: '贵州省 黔东南州 雷山县', detail: '乌东村三组 24 号（假期收货）', isDefault: false },
 ]
 
+export const initialFavoriteIds = ['g1', 'h1', 'f1', 'rt1', 'p1', 'p3']
+
 export const defaultUser: UserProfile = {
   id: 'u0',
   name: '山间旅人',
   phone: '138****1234',
   avatar: img('chinese traveler avatar illustration minimal backpack', 'square'),
   bio: '想去有云的地方',
-  favorites: ['g1', 'h1', 'f1', 'rt1', 'p1', 'p3'],
+  status: 'ENABLED',
+  hasPassword: false,
 }
 
 /** 首页「逛一逛」词条，点击落到对应文化内容（culture.ts 的 cultureEntries 按 label 匹配） */

@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import * as api from '@/api'
 import { unwrapError } from '@/api'
-import type { Address, Message, UserProfile } from '@/types'
+import type { Address, Message, UserProfile, UserStats } from '@/types'
 import { useUserStore } from '@/stores/user'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
@@ -18,6 +18,7 @@ const pwdSaving = ref(false)
 const favorites = ref<{ id: string; name: string; cover: string; type: string; price?: number; to?: string }[]>([])
 const messages = ref<Message[]>([])
 const addresses = ref<Address[]>([])
+const stats = ref<UserStats>({ favorites: 0, unreadMessages: 0, likesReceived: 0 })
 
 const favType = ref('全部')
 const favTypes = ['全部', '非遗商品', '特产', '民宿', '餐厅', '路线', '游记']
@@ -40,13 +41,23 @@ async function loadMessages() {
   messages.value = res.data
 }
 
+async function loadStats() {
+  const res = await api.getUserStats()
+  stats.value = res.data
+}
+
 onMounted(async () => {
   if (!userStore.isLoggedIn) {
     userStore.toast('请先登录')
     return
   }
   profileForm.value = { name: userStore.user!.name, bio: userStore.user!.bio }
-  await Promise.all([loadFavorites(), loadMessages(), api.getAddresses().then((r) => (addresses.value = r.data))])
+  await Promise.all([
+    loadFavorites(),
+    loadMessages(),
+    loadStats(),
+    api.getAddresses().then((r) => (addresses.value = r.data)),
+  ])
 })
 
 async function saveProfile() {
@@ -86,18 +97,18 @@ async function savePassword() {
 
 async function readAll() {
   await api.markAllMessagesRead()
-  await loadMessages()
+  await Promise.all([loadMessages(), loadStats()])
 }
 
 async function readOne(m: Message) {
   await api.markMessageRead(m.id)
-  await loadMessages()
+  await Promise.all([loadMessages(), loadStats()])
 }
 
 async function unfav(f: { targetType: string; targetId: string; id: string }) {
   await api.toggleFavorite(f.targetType, f.targetId || f.id)
   userStore.toast('已取消收藏')
-  await loadFavorites()
+  await Promise.all([loadFavorites(), loadStats()])
 }
 </script>
 
@@ -113,9 +124,9 @@ async function unfav(f: { targetType: string; targetId: string; id: string }) {
           <span class="phone">{{ userStore.user.phone }}</span>
         </div>
         <div class="u-stats">
-          <div><b>{{ favorites.length }}</b><span>收藏</span></div>
-          <div><b>{{ messages.filter((m) => !m.read).length }}</b><span>未读消息</span></div>
-          <div><b>12</b><span>获赞</span></div>
+          <div><b>{{ stats.favorites }}</b><span>收藏</span></div>
+          <div><b>{{ stats.unreadMessages }}</b><span>未读消息</span></div>
+          <div><b>{{ stats.likesReceived }}</b><span>获赞</span></div>
         </div>
       </div>
 

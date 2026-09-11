@@ -306,9 +306,15 @@ export interface UserProfile {
   phone: string
   avatar: string
   bio: string
-  favorites: string[]
+  status: 'ENABLED' | 'DISABLED'
   /** 是否已设置登录密码（未设置时个人中心显示「设置密码」） */
-  hasPassword?: boolean
+  hasPassword: boolean
+}
+
+export interface UserStats {
+  favorites: number
+  unreadMessages: number
+  likesReceived: number
 }
 
 /* ================= 文化导览（前端固定内容，不计划迁后端） ================= */
