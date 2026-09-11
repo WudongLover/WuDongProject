@@ -1,13 +1,16 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import * as api from '@/api'
-import type { Homestay } from '@/types'
+import type { CultureSection, Homestay } from '@/types'
 import HomestayCard from '@/components/HomestayCard.vue'
 import AppIcon from '@/components/AppIcon.vue'
 import CultureBand from '@/components/CultureBand.vue'
 
-/** 文化导览：先讲吊脚楼与云海，再看房型 */
-const culture = api.getCultureSection('ZHU')
+/** 文化导览推文：后端接口异步加载，先讲吊脚楼与云海，再看房型 */
+const culture = ref<CultureSection | null>(null)
+onMounted(async () => {
+  culture.value = (await api.getCultureSection('ZHU')) ?? null
+})
 
 const homestays = ref<Homestay[]>([])
 const loading = ref(true)

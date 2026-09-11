@@ -4,7 +4,6 @@ import { useRoute, useRouter } from 'vue-router'
 import * as api from '@/api'
 import { unwrapError } from '@/api'
 import { useUserStore } from '@/stores/user'
-import { scene } from '@/mock/images'
 import AppIcon from '@/components/AppIcon.vue'
 
 const route = useRoute()
@@ -23,7 +22,7 @@ const countdown = ref(0)
 const errText = ref('')
 const loading = ref(false)
 
-const sideImg = scene('Miao village wooden stilt houses in morning mist, indigo tone', 'portrait_16_9')
+const sideImg = '/images/login.jpg'
 
 let countdownTimer: ReturnType<typeof setInterval> | null = null
 
@@ -163,7 +162,7 @@ const submitText = computed(() =>
 <style scoped>
 .auth-page {
   display: grid;
-  grid-template-columns: minmax(320px, 46%) 1fr;
+  grid-template-columns: minmax(300px, 38%) 1fr;
   min-height: calc(100vh - 64px);
 }
 
@@ -176,12 +175,14 @@ const submitText = computed(() =>
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center;
+  filter: grayscale(6%) brightness(0.96) contrast(1.1) saturate(1.12);
 }
 
 .side-mask {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(15, 35, 56, 0.1) 30%, rgba(15, 35, 56, 0.72));
+  background: linear-gradient(180deg, rgba(60, 60, 66, 0.08) 0%, rgba(60, 60, 66, 0.42) 100%);
 }
 
 .side-quote {

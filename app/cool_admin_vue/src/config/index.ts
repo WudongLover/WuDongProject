@@ -46,6 +46,16 @@ export const config = {
 							orderNum: 1,
 							keepAlive: true,
 							isShow: true
+						},
+						{
+							name: '商品管理',
+							router: '/wudong/heritage/manage',
+							viewPath: 'modules/wudong/views/heritage/manage.vue',
+							type: 1,
+							icon: 'icon-list',
+							orderNum: 2,
+							keepAlive: true,
+							isShow: true
 						}
 					]
 				},
@@ -63,6 +73,16 @@ export const config = {
 							type: 1,
 							icon: 'icon-monitor',
 							orderNum: 1,
+							keepAlive: true,
+							isShow: true
+						},
+						{
+							name: '餐厅管理',
+							router: '/wudong/meal/manage',
+							viewPath: 'modules/wudong/views/meal/manage.vue',
+							type: 1,
+							icon: 'icon-list',
+							orderNum: 2,
 							keepAlive: true,
 							isShow: true
 						}
@@ -84,6 +104,16 @@ export const config = {
 							orderNum: 1,
 							keepAlive: true,
 							isShow: true
+						},
+						{
+							name: '民宿管理',
+							router: '/wudong/lodging/manage',
+							viewPath: 'modules/wudong/views/lodging/manage.vue',
+							type: 1,
+							icon: 'icon-list',
+							orderNum: 2,
+							keepAlive: true,
+							isShow: true
 						}
 					]
 				},
@@ -103,6 +133,16 @@ export const config = {
 							orderNum: 1,
 							keepAlive: true,
 							isShow: true
+						},
+						{
+							name: '景点管理',
+							router: '/wudong/travel/manage',
+							viewPath: 'modules/wudong/views/travel/manage.vue',
+							type: 1,
+							icon: 'icon-list',
+							orderNum: 2,
+							keepAlive: true,
+							isShow: true
 						}
 					]
 				},
@@ -120,6 +160,16 @@ export const config = {
 							type: 1,
 							icon: 'icon-monitor',
 							orderNum: 1,
+							keepAlive: true,
+							isShow: true
+						},
+						{
+							name: '内容管理',
+							router: '/wudong/community/manage',
+							viewPath: 'modules/wudong/views/community/manage.vue',
+							type: 1,
+							icon: 'icon-list',
+							orderNum: 2,
 							keepAlive: true,
 							isShow: true
 						}
@@ -149,6 +199,25 @@ export const config = {
 							type: 1,
 							icon: 'icon-list',
 							orderNum: 2,
+							keepAlive: true,
+							isShow: true
+						}
+					]
+				},
+				{
+					name: '内容运营',
+					type: 0,
+					icon: 'icon-news',
+					orderNum: 7,
+					isShow: true,
+					children: [
+						{
+							name: '文化推文',
+							router: '/wudong/content/story',
+							viewPath: 'modules/wudong/views/content/story.vue',
+							type: 1,
+							icon: 'icon-doc',
+							orderNum: 1,
 							keepAlive: true,
 							isShow: true
 						}

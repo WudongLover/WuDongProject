@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import * as api from '@/api'
 import { unwrapError } from '@/api'
-import type { Scenic, TravelRoute } from '@/types'
+import type { CultureSection, Scenic, TravelRoute } from '@/types'
 import { useUserStore } from '@/stores/user'
 import { useMockPay } from '@/composables/useMockPay'
 import RouteCard from '@/components/RouteCard.vue'
@@ -12,7 +12,11 @@ import CultureBand from '@/components/CultureBand.vue'
 import PayDialog from '@/components/PayDialog.vue'
 import { img } from '@/mock/images'
 
-const culture = api.getCultureSection('XING')
+/** 文化导览推文：后端接口异步加载，先讲山水与节庆的来路，票种价格往后放 */
+const culture = ref<CultureSection | null>(null)
+onMounted(async () => {
+  culture.value = (await api.getCultureSection('XING')) ?? null
+})
 
 const userStore = useUserStore()
 // 门票下单后立即弹虚拟支付

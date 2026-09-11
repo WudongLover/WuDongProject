@@ -3,15 +3,18 @@ import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { getRestaurants, getSpecialties } from '@/api/food'
 import * as api from '@/api'
-import type { Product, Restaurant } from '@/types'
+import type { CultureSection, Product, Restaurant } from '@/types'
 import RestaurantCard from '@/components/RestaurantCard.vue'
 import ProductCard from '@/components/ProductCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import CultureBand from '@/components/CultureBand.vue'
 import { img } from '@/mock/images'
 
-/** 文化导览：长桌宴、火塘、酸汤的来路跨「宴 / 产」两个 tab，故放在 tab 之上做全局导览 */
-const culture = api.getCultureSection('SHI')
+/** 文化导览推文：后端接口异步加载；长桌宴、火塘、酸汤的来路跨「宴 / 产」两个 tab，故放在 tab 之上做全局导览 */
+const culture = ref<CultureSection | null>(null)
+onMounted(async () => {
+  culture.value = (await api.getCultureSection('SHI')) ?? null
+})
 
 const route = useRoute()
 const tab = ref<'restaurant' | 'specialty'>((route.query.tab as 'specialty') === 'specialty' ? 'specialty' : 'restaurant')
