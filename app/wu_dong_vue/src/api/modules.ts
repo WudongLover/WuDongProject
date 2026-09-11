@@ -178,8 +178,36 @@ export function addComment(postId: string, content: string, parentCommentId?: st
 }
 
 /** 发布游记 */
-export function publishPost(data: { title: string; content: string; topic?: string; place?: string }): Promise<Envelope<Post>> {
+export function publishPost(data: {
+  title: string
+  content: string
+  topic?: string
+  place?: string
+  /** 配图：OSS 访问地址数组（先调用 uploadImage 逐张上传） */
+  images?: string[]
+}): Promise<Envelope<Post>> {
   return apiFetch<Envelope<Post>>('/posts', { method: 'POST', body: JSON.stringify(data) })
+}
+
+/** 上传结果（后端 common 模块 UploadService） */
+export interface UploadedImage {
+  url: string
+  key: string
+  size: number
+  mime: string
+}
+
+/**
+ * 上传单张照片到 OSS（POST /api/upload，需登录）。
+ * 多图请循环调用；scene 决定对象键目录，如 post / avatar。
+ */
+export function uploadImage(file: File, scene = 'post'): Promise<Envelope<UploadedImage>> {
+  const form = new FormData()
+  form.append('file', file)
+  return apiFetch<Envelope<UploadedImage>>(`/upload?scene=${encodeURIComponent(scene)}`, {
+    method: 'POST',
+    body: form,
+  })
 }
 
 /** 逻辑删除帖子 */
