@@ -365,6 +365,29 @@ CREATE TABLE `wudong_common_recommend` (
   UNIQUE KEY `uk_position_target` (`position`, `target_type`, `target_id`)
 ) ENGINE=InnoDB COMMENT='首页推荐位';
 
+-- 1.21 文化推文（管理端编写的图文内容，对应前端 CultureStory；首页/列表页/文化详情页展示）
+CREATE TABLE `wudong_common_story` (
+  `id`           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `module`       VARCHAR(8)      NOT NULL COMMENT '所属模块：YI 衣 / SHI 食 / ZHU 住 / XING 行',
+  `slug`         VARCHAR(64)     NOT NULL COMMENT '路由 id，全站唯一（如 yi-silver-hammer，前缀 yi-/shi-/zhu-/xing-）',
+  `eyebrow`      VARCHAR(64)     NOT NULL DEFAULT '' COMMENT '英文小标（如 YI · SILVER）',
+  `title`        VARCHAR(128)    NOT NULL COMMENT '标题',
+  `summary`      VARCHAR(500)    NOT NULL DEFAULT '' COMMENT '导语（卡片正文与详情页共用，30-50 字）',
+  `cover`        VARCHAR(500)    NOT NULL DEFAULT '' COMMENT '封面图 URL',
+  `quote`        VARCHAR(255)    NOT NULL DEFAULT '' COMMENT '一句话引文（详情页知识锚点）',
+  `paragraphs`   JSON            NULL COMMENT '正文段落数组（纯文本，2-4 段）',
+  `links`        JSON            NULL COMMENT '尾部导流 [{label,to}]，to 为站内路由',
+  `sort`         INT UNSIGNED    NOT NULL DEFAULT 0 COMMENT '模块内展示顺序，小者在前',
+  `status`       VARCHAR(16)     NOT NULL DEFAULT 'PUBLISHED' COMMENT 'DRAFT 草稿 / PUBLISHED 已发布 / OFFLINE 下线',
+  `published_at` DATETIME        NULL DEFAULT NULL COMMENT '发布时间',
+  `created_at`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at`   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted_at`   DATETIME        NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_slug` (`slug`),
+  KEY `idx_module_status_sort` (`module`, `status`, `sort`)
+) ENGINE=InnoDB COMMENT='文化推文（管理端编写）';
+
 -- =====================================================================
 -- 二、wudong_m1 衣（第 1 组）：非遗商品 + 特产
 --     决策：前端 Product 用 module=GOODS|SPECIALTY 统一建模、列表/搜索/

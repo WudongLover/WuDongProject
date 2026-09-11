@@ -1,11 +1,16 @@
 <script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import type { CultureStory } from '@/types'
 import { getCultureSection } from '@/api'
 
 const props = defineProps<{ story: CultureStory }>()
 
 /** 同模块的其他段落：各自独立成卡，点进去能继续读，而不是回到商品 */
-const more = getCultureSection(props.story.module)?.stories.filter((s) => s.id !== props.story.id) ?? []
+const more = ref<CultureStory[]>([])
+onMounted(async () => {
+  const stories = (await getCultureSection(props.story.module))?.stories ?? []
+  more.value = stories.filter((s) => s.id !== props.story.id)
+})
 </script>
 
 <template>

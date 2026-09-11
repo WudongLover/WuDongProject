@@ -35,6 +35,32 @@ export const useMenuStore = defineStore('menu', function () {
 		}
 	}
 
+	// 自定义菜单模式下，后端不返回权限数据，默认放行 eps 中声明的全部权限
+	function getEpsPerms(): string[] {
+		const list: string[] = [];
+
+		function deep(d: any) {
+			if (!d || typeof d != 'object') {
+				return;
+			}
+
+			if (d.namespace && d.permission) {
+				for (const i in d.permission) {
+					list.push(d.permission[i]);
+				}
+				return;
+			}
+
+			for (const i in d) {
+				deep(d[i]);
+			}
+		}
+
+		deep(service);
+
+		return list;
+	}
+
 	// 设置权限
 	function setPerms(list: Menu.List) {
 		function deep(d: any) {
@@ -155,7 +181,8 @@ export const useMenuStore = defineStore('menu', function () {
 		// 自定义菜单
 		if (!isEmpty(config.app.menu.list)) {
 			next({
-				menus: revDeepTree(config.app.menu.list || [])
+				menus: revDeepTree(config.app.menu.list || []),
+				perms: getEpsPerms()
 			});
 		} else {
 			// 动态菜单

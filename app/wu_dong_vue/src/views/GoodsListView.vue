@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import * as api from '@/api'
-import type { Product } from '@/types'
+import type { CultureSection, Product } from '@/types'
 import ProductCard from '@/components/ProductCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import CultureBand from '@/components/CultureBand.vue'
 import { img } from '@/mock/images'
 
-/** 文化导览：固定内容，先讲手艺再挑东西 */
-const culture = api.getCultureSection('YI')
+/** 文化导览推文：后端接口异步加载，先讲手艺再挑东西 */
+const culture = ref<CultureSection | null>(null)
+onMounted(async () => {
+  culture.value = (await api.getCultureSection('YI')) ?? null
+})
 
 const sorts = [
   { key: 'default', label: '综合' },
