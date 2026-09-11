@@ -4,10 +4,12 @@ import * as api from '@/api'
 import { unwrapError } from '@/api'
 import type { CultureSection, Scenic, TravelRoute } from '@/types'
 import { useUserStore } from '@/stores/user'
+import { useMockPay } from '@/composables/useMockPay'
 import RouteCard from '@/components/RouteCard.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
 import CultureBand from '@/components/CultureBand.vue'
+import PayDialog from '@/components/PayDialog.vue'
 import { img } from '@/mock/images'
 
 /** 文化导览推文：后端接口异步加载，先讲山水与节庆的来路，票种价格往后放 */
@@ -17,6 +19,8 @@ onMounted(async () => {
 })
 
 const userStore = useUserStore()
+// 门票下单后立即弹虚拟支付
+const { pendingOrder, askPay, onPaid, onDismiss } = useMockPay()
 const scenics = ref<Scenic[]>([])
 const routesList = ref<TravelRoute[]>([])
 const loading = ref(true)
@@ -79,8 +83,7 @@ async function submitBuy() {
       contactPhone: visitorPhone.value,
     })
     buyScenic.value = null
-    userStore.toast('下单成功，支付后生成电子票')
-    router.push({ path: '/orders', query: { highlight: order.data.orderNo, pay: '1' } })
+    askPay(order.data)
   } catch (e) {
     buyErr.value = unwrapError(e).message
   } finally {
@@ -222,6 +225,9 @@ const filteredRoutes = () =>
         </div>
       </div>
     </transition>
+
+    <!-- 门票下单后立即弹虚拟支付 -->
+    <PayDialog :order="pendingOrder" @paid="onPaid" @dismiss="onDismiss" />
   </div>
 </template>
 

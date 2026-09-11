@@ -50,21 +50,22 @@ onMounted(async () => {
 
 async function submitBooking() {
   bookErr.value = ''
+  if (!userStore.requireLogin()) return
+  if (!slotId.value) return (bookErr.value = '请选择用餐时段')
   if (!contact.value.trim()) return (bookErr.value = '请填写联系人姓名')
   if (!/^1\d{10}$/.test(phoneTail.value)) return (bookErr.value = '请填写 11 位手机号')
   submitting.value = true
   try {
-    const order = await api.createOrder({
-      type: 'MEAL',
-      title: `${rest.value!.name} · 餐位预订`,
-      cover: rest.value!.cover,
-      summary: `${bookDate.value} ${slot.value?.name} · ${guests.value} 人 · ${contact.value}`,
-      amount: rest.value!.pricePerCapita * guests.value,
-      qty: guests.value,
-      shop: rest.value!.name,
+    const order = await api.createMealBooking({
+      restaurantId: String(rest.value!.id),
+      slotId: String(slotId.value),
+      diningDate: bookDate.value,
+      guests: guests.value,
+      contactName: contact.value.trim(),
+      contactPhone: phoneTail.value,
     })
     showBook.value = false
-    router.push({ path: '/orders', query: { highlight: order.data.orderNo, pay: '1' } })
+    router.push(`/order/result/${order.data.orderNo}`)
   } catch (e) {
     bookErr.value = unwrapError(e).message
   } finally {

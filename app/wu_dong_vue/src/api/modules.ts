@@ -127,9 +127,8 @@ export function getCategories(module?: ProductModule): Promise<Envelope<Category
   return apiFetch<Envelope<Category[]>>(`/v1/m1/categories${module ? `?module=${module}` : ''}`)
 }
 
-/* 食 */
-export const getRestaurants = S.getRestaurants
-export const getRestaurantDetail = S.getRestaurantDetail
+/* 食（真实后端 m2：列表/详情含菜品与时段） */
+export { getRestaurants, getRestaurantDetail } from './food'
 
 /* 住 */
 export async function getHomestays() {
@@ -147,6 +146,8 @@ export async function getRoomCalendar(roomTypeId: string | number) {
 /* 行：门票、景区和路线均使用真实后端接口 */
 export * from './m4'
 export * from './m4-order'
+/* 通用订单 + 餐位/民宿预订（真实后端 order / m2 / m3） */
+export * from './order'
 
 /* 社区（真实后端 http://127.0.0.1:8001，vite 代理 /api） */
 
@@ -207,12 +208,8 @@ export function checkFavorite(targetType: string, targetId: string | number): Pr
   return apiFetch<Envelope<{ favorited: boolean }>>(`/favorites/${targetType}/${targetId}`)
 }
 
-/* 购物车 */
-export const getCart = S.getCart
-export const addToCart = S.addToCart
-export const updateCartItem = S.updateCartItem
-export const removeCartItem = S.removeCartItem
-export const checkCart = S.checkCart
+/* 购物车：真实后端 /api/cart，见 @/api/cart（页面通过 stores/cart 调用） */
+export { cartApi } from './cart'
 
 /* 消息 / 地址 / 资料 */
 export const getMessages = S.getMessages

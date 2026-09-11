@@ -9,14 +9,19 @@ const TOKEN_REQUIRED_PATHS = [
   '/api/user/password',
   '/api/favorites',
 ];
-/** m3/m4/m5 的写操作需要登录，公开查询放行 */
-const TOKEN_REQUIRED_WRITE_PREFIXES = ['/api/app/m3', '/api/app/m4', '/api/posts'];
+/** m2/m3/m4 的写操作需要登录，公开查询放行 */
+const TOKEN_REQUIRED_WRITE_PREFIXES = ['/api/app/m2', '/api/app/m3', '/api/app/m4'];
+/**
+ * 订单与购物车：读（我的订单/购物车列表）写都需要登录。
+ * 购物车是用户私有数据，历史上靠 X-User-Id 头识别身份，已统一收敛为 Bearer token。
+ */
+const TOKEN_REQUIRED_ALL_PREFIXES = ['/api/app/order', '/api/cart'];
 
 /**
  * C 端鉴权中间件：
  * - 任何请求只要携带合法 Bearer token，都解析并写入 ctx.userId（可选鉴权，
  *   使公开 GET 也能识别登录用户，如帖子 liked 状态）；
- * - needToken 命中的接口（用户私有接口 + m3/m4/m5 写操作）无合法 token 时 401。
+ * - needToken 命中的接口（用户私有接口 + 购物车/订单 + m2/m3/m4 写操作）无合法 token 时 401。
  */
 @Provide()
 @Middleware()
@@ -32,7 +37,8 @@ export class AuthMiddleware {
         (ctx.method !== 'GET' &&
           TOKEN_REQUIRED_WRITE_PREFIXES.some((prefix) =>
             path.startsWith(prefix)
-          ));
+          )) ||
+        TOKEN_REQUIRED_ALL_PREFIXES.some((prefix) => path.startsWith(prefix));
 
       const header = ctx.headers.authorization || '';
       const id = this.auth.verify(header.replace(/^Bearer\s+/i, ''));

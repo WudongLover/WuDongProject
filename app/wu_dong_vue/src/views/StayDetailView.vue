@@ -1,18 +1,21 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import * as api from '@/api'
 import { unwrapError } from '@/api'
 import type { Homestay, RoomType } from '@/types'
 import { useUserStore } from '@/stores/user'
 import { useFavoriteStore } from '@/stores/favorite'
+import { useMockPay } from '@/composables/useMockPay'
 import EmptyState from '@/components/EmptyState.vue'
 import AppIcon from '@/components/AppIcon.vue'
+import PayDialog from '@/components/PayDialog.vue'
 
 const route = useRoute()
-const router = useRouter()
 const userStore = useUserStore()
 const favStore = useFavoriteStore()
+// 民宿下单（预占房态）后立即弹虚拟支付
+const { pendingOrder, askPay, onPaid, onDismiss } = useMockPay()
 
 const stay = ref<Homestay | null>(null)
 const notFound = ref(false)
@@ -25,6 +28,7 @@ const openRoom = ref<RoomType | null>(null)
 const calendar = ref<{ date: string; stock: number; priceDelta: number }[]>([])
 const guestName = ref('')
 const guestPhone = ref('')
+const guests = ref(1)
 const submitting = ref(false)
 const bookErr = ref('')
 
@@ -82,34 +86,29 @@ async function openCalendar(room: RoomType) {
 
 async function bookRoom() {
   bookErr.value = ''
+  if (!userStore.requireLogin()) return
+  if (!Number.isInteger(guests.value) || guests.value < 1) {
+    return (bookErr.value = '请填写入住人数')
+  }
+  if (guests.value > openRoom.value!.maxGuests) {
+    return (bookErr.value = `该房型最多入住 ${openRoom.value!.maxGuests} 人`)
+  }
   if (!guestName.value.trim()) return (bookErr.value = '请填写入住人姓名')
   if (!/^1\d{10}$/.test(guestPhone.value)) return (bookErr.value = '请填写 11 位手机号')
-  if (nights.value > 1 && calendar.value.some((c) => c.date >= checkIn.value && c.date < checkOut.value && c.stock === 0)) {
-    return (bookErr.value = '所选日期中存在满房，请调整日期')
-  }
   submitting.value = true
   try {
-    const room = openRoom.value!
-    // 计算总价：每晚价格 = 房型基础价 + 当日浮动价
-    let totalAmount = 0
-    for (let i = 0; i < nights.value; i++) {
-      const d = new Date(checkIn.value)
-      d.setDate(d.getDate() + i)
-      const dateStr = d.toISOString().slice(0, 10)
-      const cal = calendar.value.find((c) => c.date === dateStr)
-      totalAmount += room.price + (cal?.priceDelta || 0)
-    }
-    const order = await api.createOrder({
-      type: 'LODGING',
-      title: `${stay.value!.name} · ${room.name}`,
-      cover: stay.value!.cover,
-      summary: `${checkIn.value} 入住 · ${checkOut.value} 离店 · ${nights.value} 晚 · ${guestName.value}`,
-      amount: totalAmount,
-      qty: nights.value,
-      shop: stay.value!.name,
+    // 金额与房态由服务端按日历重算/预占，前端只提交预订参数
+    const order = await api.createLodgingBooking({
+      homestayId: String(stay.value!.id),
+      roomTypeId: String(openRoom.value!.id),
+      checkInDate: checkIn.value,
+      checkOutDate: checkOut.value,
+      guests: guests.value,
+      contactName: guestName.value.trim(),
+      contactPhone: guestPhone.value,
     })
     openRoom.value = null
-    router.push({ path: '/orders', query: { highlight: order.data.orderNo, pay: '1' } })
+    askPay(order.data)
   } catch (e) {
     bookErr.value = unwrapError(e).message
   } finally {
@@ -261,8 +260,13 @@ async function bookRoom() {
             </div>
           </div>
 
+          <div class="field" style="margin: 0 0 14px">
+            <label>入住人数（最多 {{ openRoom.maxGuests }} 人）</label>
+            <input v-model.number="guests" type="number" min="1" :max="openRoom.maxGuests" placeholder="入住人数" />
+          </div>
+
           <div class="amount-row">
-            <span>{{ openRoom.price }} × {{ nights }} 晚</span>
+            <span>{{ openRoom.price }} 起 × {{ nights }} 晚</span>
             <span class="price">¥{{ totalPrice }}</span>
           </div>
 
@@ -273,6 +277,9 @@ async function bookRoom() {
         </div>
       </div>
     </transition>
+
+    <!-- 民宿下单后立即弹虚拟支付 -->
+    <PayDialog :order="pendingOrder" @paid="onPaid" @dismiss="onDismiss" />
   </div>
 </template>
 

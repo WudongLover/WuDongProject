@@ -22,6 +22,8 @@ const router = createRouter({
     { path: '/search', name: 'search', component: () => import('@/views/SearchView.vue') },
     { path: '/cart', name: 'cart', component: () => import('@/views/CartView.vue') },
     { path: '/orders', name: 'orders', component: () => import('@/views/OrdersView.vue') },
+    { path: '/order/pay/:orderNo', name: 'order-pay', component: () => import('@/views/OrderPayView.vue') },
+    { path: '/order/result/:orderNo', name: 'order-result', component: () => import('@/views/OrderResultView.vue') },
     { path: '/user', name: 'user', component: () => import('@/views/UserView.vue') },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
