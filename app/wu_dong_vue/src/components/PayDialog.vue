@@ -72,6 +72,12 @@ function dismiss() {
           </div>
           <p v-else class="pd-summary">{{ order.summary }}</p>
 
+          <div v-if="order.receiver" class="pd-address">
+            <span>收货信息</span>
+            <b>{{ order.receiver.name }} {{ order.receiver.phone }}</b>
+            <p>{{ order.receiver.address }}</p>
+          </div>
+
           <div class="pd-row">
             <span>订单号</span>
             <em>{{ order.orderNo }}</em>
@@ -220,6 +226,33 @@ function dismiss() {
   font-size: 12.5px;
   color: var(--text-2);
   border-bottom: 1px dashed var(--line);
+}
+
+.pd-address {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+.pd-address > span {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--text-3);
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+}
+
+.pd-address b {
+  font-size: 13px;
+}
+
+.pd-address p {
+  margin-top: 4px;
+  color: var(--text-2);
+  font-size: 12.5px;
+  line-height: 1.6;
 }
 
 .pd-row {

@@ -19,7 +19,9 @@ import { ApiError } from '../../m5-community/error/api_error';
 import { OrderEntity } from '../../order/entity/order_entity';
 import { OrderItemEntity } from '../../order/entity/order_item_entity';
 import { OrderService } from '../../order/service/order_service';
+import { AddressService, AddressSnapshot } from '../../user/service/address_service';
 import { CartItemEntity } from '../entity/cart_item_entity';
+import { M1OrderExtEntity } from '../entity/order_ext_entity';
 import { ProductEntity } from '../entity/product_entity';
 import { SkuEntity } from '../entity/sku_entity';
 
@@ -55,6 +57,9 @@ export class CartCheckoutService {
   @Inject()
   orderService!: OrderService;
 
+  @Inject()
+  addressService!: AddressService;
+
   @InjectDataSource('default')
   dataSource!: DataSource;
 
@@ -62,8 +67,10 @@ export class CartCheckoutService {
   async createFromCart(
     userId: string,
     cartItemIds: unknown,
+    addressId: string | number,
   ): Promise<OrderEntity> {
     const ids = this.normalizeCartIds(cartItemIds);
+    const receiver = await this.addressService.getSnapshot(userId, addressId);
 
     return this.dataSource.transaction(async (em) => {
       const cartRepo = em.getRepository(CartItemEntity);
@@ -83,15 +90,20 @@ export class CartCheckoutService {
       }
 
       await this.deductStock(em, lines);
-      const order = await this.saveOrder(em, userId, lines);
+      const order = await this.saveOrder(em, userId, lines, receiver);
       await cartRepo.softRemove(items);
       return order;
     });
   }
 
   /** 立即购买：按商品 + 规格 + 数量直接下单，不写购物车 */
-  async createDirect(userId: string, items: unknown): Promise<OrderEntity> {
+  async createDirect(
+    userId: string,
+    items: unknown,
+    addressId: string | number,
+  ): Promise<OrderEntity> {
     const parsed = this.normalizeDirectItems(items);
+    const receiver = await this.addressService.getSnapshot(userId, addressId);
 
     return this.dataSource.transaction(async (em) => {
       const lines: CheckoutLine[] = [];
@@ -101,7 +113,7 @@ export class CartCheckoutService {
         );
       }
       await this.deductStock(em, lines);
-      return this.saveOrder(em, userId, lines);
+      return this.saveOrder(em, userId, lines, receiver);
     });
   }
 
@@ -218,6 +230,7 @@ export class CartCheckoutService {
     em: EntityManager,
     userId: string,
     lines: CheckoutLine[],
+    receiver: AddressSnapshot,
   ): Promise<OrderEntity> {
     const amount = lines.reduce((sum, line) => sum + line.price * line.qty, 0);
     const qty = lines.reduce((sum, line) => sum + line.qty, 0);
@@ -268,6 +281,19 @@ export class CartCheckoutService {
           amount: line.price * line.qty,
         }),
       ),
+    );
+
+    const first = lines[0];
+    const extRepo = em.getRepository(M1OrderExtEntity);
+    await extRepo.save(
+      extRepo.create({
+        orderId: order.id,
+        productId: first.productId,
+        skuId: first.skuId,
+        receiverName: receiver.name,
+        receiverPhone: receiver.phone,
+        receiverAddr: `${receiver.region} ${receiver.detail}`.trim().slice(0, 255),
+      }),
     );
 
     return order;

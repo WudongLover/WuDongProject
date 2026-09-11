@@ -17,6 +17,13 @@ export interface AddressVo {
   isDefault: boolean;
 }
 
+export interface AddressSnapshot {
+  name: string;
+  phone: string;
+  region: string;
+  detail: string;
+}
+
 @Provide()
 export class AddressService {
   @Inject()
@@ -46,6 +53,21 @@ export class AddressService {
     const address = await this.addressMapper.setDefault(userId, id);
     if (!address) throw new ApiError(1003, '地址不存在', 404);
     return this.toVo(address);
+  }
+
+  async getSnapshot(userId: string, addressId: string | number): Promise<AddressSnapshot> {
+    const id = String(addressId ?? '');
+    if (!/^\d+$/.test(id) || Number(id) <= 0) {
+      throw new ApiError(1004, '请选择收货地址');
+    }
+    const address = await this.addressMapper.findOwned(userId, id);
+    if (!address) throw new ApiError(1003, '收货地址不存在', 404);
+    return {
+      name: address.name,
+      phone: address.phone,
+      region: address.region,
+      detail: address.detail,
+    };
   }
 
   private normalize(body: any): AddressInput {

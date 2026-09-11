@@ -241,6 +241,11 @@ export interface Order {
   shop: string
   /** 购物车下单的商品明细（合并支付一张订单，逐项展示） */
   items?: OrderItem[]
+  receiver?: {
+    name: string
+    phone: string
+    address: string
+  }
 }
 
 /** 订单内单件商品（来源 wudong_common_order_item） */

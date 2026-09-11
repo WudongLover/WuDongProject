@@ -22,6 +22,7 @@ export interface CreateOrderPayload {
   qty?: number
   shop?: string
   cartItemIds?: string[]
+  addressId?: string
   /** 立即购买：不走购物车，服务端按实时价格算价并扣库存 */
   items?: { productId: string; skuId?: string; qty: number }[]
   scenicId?: string

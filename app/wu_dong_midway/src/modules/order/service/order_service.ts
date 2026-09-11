@@ -14,6 +14,7 @@ import { ApiError } from '../../m5-community/error/api_error';
 import { OrderEntity, OrderStatus, OrderType } from '../entity/order_entity';
 import { OrderItemEntity } from '../entity/order_item_entity';
 import { PaymentEntity } from '../entity/payment_entity';
+import { M1OrderExtEntity } from '../../m1-goods/entity/order_ext_entity';
 
 /** 建单入参：字段与 wudong_common_order 列对齐，业务模块负责组装展示快照 */
 export interface CreateOrderInput {
@@ -45,6 +46,9 @@ export class OrderService {
 
   @InjectEntityModel(OrderItemEntity)
   orderItemRepo: Repository<OrderItemEntity>;
+
+  @InjectEntityModel(M1OrderExtEntity)
+  m1OrderExtRepo: Repository<M1OrderExtEntity>;
 
   /** 单号：WD + yymmdd + 6 位随机 */
   private genNo(prefix: string) {
@@ -116,7 +120,8 @@ export class OrderService {
       where: { orderId: order.id },
       order: { id: 'ASC' },
     });
-    return { ...order, items, payments };
+    const [orderWithItems] = await this.attachItems([order]);
+    return { ...orderWithItems, items, payments };
   }
 
   /**
@@ -143,7 +148,29 @@ export class OrderService {
     for (const order of orders) {
       (order as any).items = grouped.get(String(order.id)) ?? [];
     }
+    await this.attachM1Receivers(orders);
     return orders;
+  }
+
+  private async attachM1Receivers(orders: OrderEntity[]): Promise<void> {
+    const physicalOrders = orders.filter(
+      (order) => order.type === 'GOODS' || order.type === 'SPECIALTY',
+    );
+    if (!physicalOrders.length) return;
+    const rows = await this.m1OrderExtRepo.find({
+      where: { orderId: In(physicalOrders.map((order) => order.id)) },
+    });
+    const receiverByOrder = new Map(rows.map((row) => [String(row.orderId), row]));
+    for (const order of physicalOrders) {
+      const receiver = receiverByOrder.get(String(order.id));
+      (order as any).receiver = receiver
+        ? {
+            name: receiver.receiverName,
+            phone: receiver.receiverPhone,
+            address: receiver.receiverAddr,
+          }
+        : null;
+    }
   }
 
   /** 按单号取当前用户的订单（供取消/释放库存分发使用） */

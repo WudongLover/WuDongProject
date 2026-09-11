@@ -10,6 +10,7 @@ import { SkuEntity } from '../modules/m1-goods/entity/sku_entity';
 import { CategoryEntity } from '../modules/m1-goods/entity/category_entity';
 import { ReviewEntity } from '../modules/m1-goods/entity/review_entity';
 import { CartItemEntity } from '../modules/m1-goods/entity/cart_item_entity';
+import { M1OrderExtEntity } from '../modules/m1-goods/entity/order_ext_entity';
 import { RestaurantEntity } from '../modules/m2-meal/entity/restaurant_entity';
 import { HomestayEntity } from '../modules/m3-lodging/entity/homestay_entity';
 import { RoomTypeEntity } from '../modules/m3-lodging/entity/room_type_entity';
@@ -74,6 +75,7 @@ export default {
           CategoryEntity,
           ReviewEntity,
           CartItemEntity,
+          M1OrderExtEntity,
           RestaurantEntity,
           HomestayEntity, RoomTypeEntity, RoomCalendarEntity,
           TicketEntity, ScenicEntity, RouteEntity, RouteDayEntity,
