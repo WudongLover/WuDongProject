@@ -149,7 +149,7 @@ export * from './m4-order'
 /* 通用订单 + 餐位/民宿预订（真实后端 order / m2 / m3） */
 export * from './order'
 
-/* 社区（真实后端 http://127.0.0.1:8001，vite 代理 /api） */
+/* 社区（真实后端 http://127.0.0.1:6666，vite 代理 /api） */
 
 export function getPosts(topic?: string, sort?: 'hot' | 'new'): Promise<Envelope<Post[]>> {
   const params = new URLSearchParams()
