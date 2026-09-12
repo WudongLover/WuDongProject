@@ -13,9 +13,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      // wu_dong_midway 后端（端口 6666）
+      // 开发环境默认访问本机 6666；Docker Compose 中由环境变量切换到 api:8001。
       '/api': {
-        target: 'http://localhost:6666',
+        target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:6666',
         changeOrigin: true,
       },
     },

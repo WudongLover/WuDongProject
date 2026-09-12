@@ -5,6 +5,8 @@ const { Bootstrap } = require('@midwayjs/bootstrap');
 Bootstrap.configure({
   // eslint-disable-next-line node/no-unpublished-require
   imports: require('./dist/configuration'),
-  // 禁用依赖注入目录扫描，改由 dist/configuration 显式引入
-  moduleDetector: false,
+  // 保持默认的依赖注入目录扫描（baseDir=dist）：
+  // useMiddleware/useFilter/@Inject 都依赖容器中已注册的 @Provide 类定义，
+  // 若设 moduleDetector:false 关闭扫描，所有请求会因
+  // MidwayDefinitionNotFoundError（如 RequestLogMiddleware is not valid）而 500
 }).run();

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, nextTick, onMounted, onUnmounted } from 'vue'
-import { checkAgentStatus, sendAgentMessage } from '@/api/agent'
+import { checkAgentStatus, streamAgentMessage } from '@/api/agent'
 
 interface Message {
   role: 'user' | 'assistant'
@@ -16,6 +16,11 @@ const messages = ref<Message[]>([])
 const sessionId = ref<number | null>(null)
 const deviceId = ref('')
 const listEl = ref<HTMLElement | null>(null)
+// 等待首个增量期间显示"正在输入"动画，气泡出现后隐藏
+const awaitingReply = ref(false)
+// 当前进行中的流式请求与打字机，用于清空对话/卸载组件时中断
+let activeStream: { abort: () => void } | null = null
+let activeTypewriter: { stop: () => void } | null = null
 
 // 面板宽度（可拖拽调整）
 const DEFAULT_WIDTH = 400
@@ -104,23 +109,102 @@ async function send() {
   messages.value.push({ role: 'user', content })
   input.value = ''
   loading.value = true
+  awaitingReply.value = true
   await scrollToBottom()
 
+  // 助手气泡用数组下标定位：通过 messages.value[i] 拿到的是响应式代理，
+  // 直接改 push 进去的原始对象不会触发更新，所以不能持有原对象引用。
+  let replyIndex = -1
+  let pendingSources: string[] | undefined
+
+  const appendText = (text: string) => {
+    if (replyIndex === -1) {
+      messages.value.push({ role: 'assistant', content: '', sources: pendingSources })
+      replyIndex = messages.value.length - 1
+      awaitingReply.value = false
+    }
+    messages.value[replyIndex].content += text
+  }
+
+  // 打字机：增量先进缓冲，按节奏逐字吐出，避免整段文字瞬间出现。
+  // 缓冲积压越多吐得越快，保证不会明显落后于模型输出速度。
+  const TYPE_STEP_MS = 28
+  let buffer = ''
+  let timer: number | null = null
+  let onIdle: (() => void) | null = null
+
+  const step = () => {
+    timer = null
+    if (!buffer) {
+      onIdle?.()
+      onIdle = null
+      return
+    }
+    const take = Math.max(1, Math.ceil(buffer.length / 10))
+    appendText(buffer.slice(0, take))
+    buffer = buffer.slice(take)
+    scheduleScroll()
+    timer = window.setTimeout(step, TYPE_STEP_MS)
+  }
+
+  const typewriter = {
+    push(text: string) {
+      buffer += text
+      if (timer === null) timer = window.setTimeout(step, TYPE_STEP_MS)
+    },
+    /** 等缓冲全部显示完 */
+    waitIdle(): Promise<void> {
+      if (!buffer && timer === null) return Promise.resolve()
+      return new Promise((resolve) => {
+        onIdle = resolve
+      })
+    },
+    /** 中断并丢弃未显示的缓冲 */
+    stop() {
+      if (timer !== null) window.clearTimeout(timer)
+      timer = null
+      buffer = ''
+      onIdle?.()
+      onIdle = null
+    },
+  }
+  activeTypewriter = typewriter
+
   try {
-    const res = await sendAgentMessage(content, sessionId.value, deviceId.value)
-    sessionId.value = res.data.sessionId
-    messages.value.push({
-      role: 'assistant',
-      content: res.data.reply,
-      sources: res.data.sources?.length ? res.data.sources : undefined,
+    const stream = streamAgentMessage(content, sessionId.value, deviceId.value, {
+      onMeta: (meta) => {
+        sessionId.value = meta.sessionId
+        pendingSources = meta.sources?.length ? meta.sources : undefined
+        if (replyIndex !== -1) messages.value[replyIndex].sources = pendingSources
+      },
+      onDelta: (text) => {
+        typewriter.push(text)
+      },
     })
+    activeStream = stream
+    await stream.done
+    // 等文字吐完再解除 loading，避免输入框提前解锁导致消息穿插
+    await typewriter.waitIdle()
   } catch (err: any) {
-    messages.value.push({
-      role: 'assistant',
-      content: '抱歉，刚刚走神了，能再说一遍吗？' + (err?.message ? `（${err.message}）` : ''),
-    })
+    // 用户主动中断时不提示错误
+    if (err?.name === 'AbortError') {
+      typewriter.stop()
+      return
+    }
+    const message = '抱歉，刚刚走神了，能再说一遍吗？' + (err?.message ? `（${err.message}）` : '')
+    if (replyIndex !== -1) {
+      // 已输出部分内容，追加错误提示，保留已有回复
+      typewriter.push(`\n\n${message}`)
+      await typewriter.waitIdle()
+    } else {
+      typewriter.stop()
+      messages.value.push({ role: 'assistant', content: message })
+    }
   } finally {
+    activeStream = null
+    activeTypewriter = null
     loading.value = false
+    awaitingReply.value = false
     await scrollToBottom()
   }
 }
@@ -137,7 +221,22 @@ async function scrollToBottom() {
   }
 }
 
+// 流式输出时按帧节流滚动，避免每个增量都触发一次布局
+let scrollScheduled = false
+function scheduleScroll() {
+  if (scrollScheduled) return
+  scrollScheduled = true
+  requestAnimationFrame(() => {
+    scrollScheduled = false
+    scrollToBottom()
+  })
+}
+
 function clearChat() {
+  activeStream?.abort()
+  activeTypewriter?.stop()
+  activeStream = null
+  activeTypewriter = null
   messages.value = []
   sessionId.value = null
 }
@@ -151,6 +250,10 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  activeStream?.abort()
+  activeTypewriter?.stop()
+  activeStream = null
+  activeTypewriter = null
   window.removeEventListener('mousemove', onResize)
   window.removeEventListener('mouseup', stopResize)
   window.removeEventListener('touchmove', onResize)
@@ -162,7 +265,7 @@ onUnmounted(() => {
   <!-- 左上角触发按钮 -->
   <button class="agent-trigger" :class="{ active: open }" @click="togglePanel" aria-label="AI 助手">
     <span class="trigger-diamond"></span>
-    <span class="trigger-text">AI 助手</span>
+    <span class="trigger-text">文旅助手</span>
   </button>
 
   <!-- 遮罩层 -->
@@ -237,8 +340,8 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <!-- 加载中 -->
-        <div v-if="loading" class="message assistant">
+        <!-- 等待首个增量时的加载动画 -->
+        <div v-if="awaitingReply" class="message assistant">
           <div class="msg-avatar"><span>AI</span></div>
           <div class="msg-bubble typing">
             <span></span><span></span><span></span>

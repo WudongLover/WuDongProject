@@ -16,7 +16,8 @@ RUN npm config set registry https://registry.npmmirror.com
 
 # 先安装依赖（含构建所需 devDependencies），善用构建缓存
 COPY package.json package-lock.json ./
-RUN npm ci
+# BuildKit 缓存挂载：跨构建复用 npm 下载缓存
+RUN --mount=type=cache,target=/root/.npm npm ci
 
 # 拷贝源码并编译 TS -> dist（bootstrap.js 引用 dist/configuration）
 COPY . .

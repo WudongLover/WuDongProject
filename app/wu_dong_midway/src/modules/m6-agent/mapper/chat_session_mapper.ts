@@ -20,7 +20,7 @@ export class ChatSessionMapper {
     return this.repo.findOne({ where: { id } });
   }
 
-  async listByUser(userId: number | null, deviceId: string, limit = 20): Promise<ChatSessionEntity[]> {
+  async listByUser(userId: string | null, deviceId: string, limit = 20): Promise<ChatSessionEntity[]> {
     const qb = this.repo.createQueryBuilder('s').orderBy('s.updated_at', 'DESC').limit(limit);
     if (userId) {
       qb.where('s.user_id = :userId', { userId });
