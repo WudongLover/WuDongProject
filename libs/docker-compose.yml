@@ -1,6 +1,6 @@
 # 乌东文旅全套服务编排
 # app 下 4 个服务：
-#   midway = app/cool-admin-midway（管理端后端 Cool Admin）   API_PORT   默认 8001
+#   midway = app/cool-admin-midway（管理端后端 Cool Admin）   API_PORT   默认 8888
 #   api    = app/wu_dong_midway（C 端业务后端，连 wudong 库） WUDONG_API_PORT 默认 8002
 #   admin  = app/cool_admin_vue（管理端前端）                 ADMIN_PORT  默认 9000
 #   web    = app/wu_dong_vue（C 端前端）                     WEB_PORT    默认 5173
@@ -70,7 +70,7 @@ services:
     environment:
       NODE_ENV: production
       TZ: Asia/Shanghai
-      KOA_PORT: 8001
+      KOA_PORT: 8888
       MYSQL_HOST: mysql
       MYSQL_PORT: 3306
       MYSQL_USERNAME: root
@@ -80,7 +80,7 @@ services:
       mysql:
         condition: service_healthy
     ports:
-      - "${API_PORT:-8001}:8001"
+      - "${API_PORT:-8888}:8888"
 
   # 管理端前端
   admin:

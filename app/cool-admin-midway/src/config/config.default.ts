@@ -13,7 +13,7 @@ export default {
   // 确保每个项目唯一，项目首次启动会自动生成
   keys: '2072827a-d52a-475a-b4a6-7d431a35bb23',
   koa: {
-    port: availablePort(Number(process.env.KOA_PORT) || 8001),
+    port: availablePort(Number(process.env.KOA_PORT) || 8888),
   },
   // 开启异步上下文管理
   asyncContextManager: {

@@ -80,7 +80,7 @@ cd E:\project\WuDongProject\libs
 |---|---|---|---|
 | `mysql` | `mysql:8.0` | 数据库(库名 `cool`,密码见 .env) | 3306 |
 | `redis` | `redis:7-alpine` | 缓存 | 6379 |
-| `midway` | `../app/cool-admin-midway` 构建 | 后端 API(端口 8001 由 KOA_PORT 决定) | 8001 |
+| `midway` | `../app/cool-admin-midway` 构建 | 后端 API(端口 8888 由 KOA_PORT 决定) | 8888 |
 | `admin` | `../app/cool_admin_vue` 构建 | 管理后台(静态页,nginx 托管) | 9000 |
 | `web` | `node:20-alpine` | 商城前端(开发模式,热更新) | 5173 |
 
@@ -101,7 +101,7 @@ docker compose up -d
 - 全部就绪后浏览器访问:
   - 管理后台 `http://localhost:9000`
   - 商城前端 `http://localhost:5173`
-  - 后端 API `http://localhost:8001`
+  - 后端 API `http://localhost:8888`
 
 ### 4.3 日常启动 / 停止
 
@@ -139,7 +139,7 @@ docker compose up -d mysql redis  # 只起数据库两个
    MYSQL_DATABASE=cool
    MYSQL_PORT=3307        # 本机 3306 被占用时改这里
    REDIS_PORT=6379
-   API_PORT=8001
+   API_PORT=8888
    ADMIN_PORT=9000
    WEB_PORT=5173
    ```
@@ -228,7 +228,7 @@ docker system prune -a          # 狠一点:删所有未使用的镜像(下次�
 |---|---|
 | `Error response from daemon: ... i/o timeout` 拉镜像失败 | **【本机】** Docker Hub 被墙:开代理/VPN 后重试,或配国内镜像加速器 |
 | `error during connect` / 找不到 daemon | 引擎没启动:见第 2 节启动 Docker Desktop |
-| `port is already allocated` | 本机 3306/6379/8001/9000/5173 被占用:`netstat -ano | findstr :3306` 查占用进程;或改 `libs/.env` 端口映射 |
+| `port is already allocated` | 本机 3306/6379/8888/9000/5173 被占用:`netstat -ano | findstr :3306` 查占用进程;或改 `libs/.env` 端口映射 |
 | `web` 启动报 `npm ERR!` | node_modules 卷残留损坏: `docker compose down -v && docker compose up -d web` |
 | 后端起来了但接口报 502/连不上库 | 等 mysql 健康后再 `docker compose restart midway`;确认 .env 密码与库一致(见 4.5 注意) |
 | `midway` 构建卡在 `npm install` | 容器内 npm 走默认源,国内网络慢/超时:开代理重试,或在 `app/cool-admin-midway/Dockerfile` 里加 `npm config set registry`(阿里源)后重新构建 |
@@ -240,6 +240,6 @@ docker system prune -a          # 狠一点:删所有未使用的镜像(下次�
 ## 附录:PowerShell / CMD 小贴士
 
 - 命令与 Linux 终端基本一致,少数不同:
-  - 查看端口占用:`netstat -ano | findstr :8001`
+  - 查看端口占用:`netstat -ano | findstr :8888`
   - 复制/移动:`copy` / `move` / `robocopy`(目录复制用它)
 - 在 Git Bash 里挂载当前目录用 `$PWD`(PowerShell 用 `${PWD}` 或 `(Get-Location).Path`)。

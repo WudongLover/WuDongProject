@@ -11,13 +11,13 @@
 | 端 | 技术 | 端口 |
 | --- | --- | --- |
 | C端后端 | wu_dong_midway（纯 Midway v3 + TypeORM + MySQL） | 6666 |
-| 管理后台后端 | cool-admin-midway（Cool Admin + Midway + TypeORM + MySQL） | 8001 |
+| 管理后台后端 | cool-admin-midway（Cool Admin + Midway + TypeORM + MySQL） | 8888 |
 | C端前端 | wu_dong_vue（Vue 3 + Vite + TS） | 5173 |
 | 管理后台前端 | cool_admin_vue（cool-admin-vue 8.x） | 9000 |
 
 - Node.js >= 18，包管理器统一使用 **npm**（不要使用 pnpm / yarn / bun）。
-- 端口规划为 6666 / 8001 / 5173 / 9000，不要引入其他端口。
-- 后端为两个独立服务：C端业务在 wu_dong_midway（6666），管理后台在 cool-admin-midway（8001）。
+- 端口规划为 6666 / 8888 / 5173 / 9000，不要引入其他端口。
+- 后端为两个独立服务：C端业务在 wu_dong_midway（6666），管理后台在 cool-admin-midway（8888）。
 
 ## 目录结构
 
@@ -30,7 +30,7 @@ WuDongProject/
 │   │   └── src/
 │   │       ├── config/         # 环境配置
 │   │       └── modules/        # C端业务模块（m1-goods / m2-meal / m3-lodging / m4-ticket / m5-community / order / user）
-│   ├── cool-admin-midway/      # 管理后台后端（端口 8001，Cool Admin）
+│   ├── cool-admin-midway/      # 管理后台后端（端口 8888，Cool Admin）
 │   │   ├── .env                # MySQL 连接与端口配置
 │   │   └── src/
 │   │       ├── comm/           # 公共工具：path.ts / port.ts / utils.ts
@@ -50,7 +50,7 @@ WuDongProject/
 │   │       ├── stores/         # Pinia 状态
 │   │       ├── styles/         # 全局样式
 │   │       └── views/          # 页面视图
-│   └── cool_admin_vue/         # 管理后台前端（端口 9000，cool-admin-vue 8.x，代理 → localhost:8001）
+│   └── cool_admin_vue/         # 管理后台前端（端口 9000，cool-admin-vue 8.x，代理 → localhost:8888）
 │       └── src/
 │           ├── config/         # 全局配置
 │           ├── cool/           # 框架核心（bootstrap/router/service/utils...）
@@ -75,7 +75,7 @@ cd app/wu_dong_midway && npm install && npm run dev
 
 # 管理后台后端（连接配置见 app/cool-admin-midway/.env）
 cd app/cool-admin-midway && npm install && npm run dev
-# 接口：http://127.0.0.1:8001 ，Swagger：http://127.0.0.1:8001/swagger/ui
+# 接口：http://127.0.0.1:8888 ，Swagger：http://127.0.0.1:8888/swagger/ui
 
 # C端前端
 cd app/wu_dong_vue && npm install && npm run dev

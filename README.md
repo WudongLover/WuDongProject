@@ -47,7 +47,7 @@ WuDongProject/
 ├── app/                        # 服务模块
 │   ├── wu_dong_vue/            # C端前端 - 乌东文旅门户（Vue 3 + Vite + TS，端口 5173）
 │   ├── cool_admin_vue/         # 管理后台前端（cool-admin-vue 8.x，端口 9000）
-│   └── cool-admin-midway/      # 管理后台后端（Midway + TypeORM + MySQL，端口 8001）
+│   └── cool-admin-midway/      # 管理后台后端（Midway + TypeORM + MySQL，端口 8888）
 ├── docx/                       # 项目文档（设计文档、TODO、技术开发规范等）
 ├── exp/                        # 实验模块（Demo 代码，用于测试新功能）
 ├── libs/                       # 公共工具类（日期、字符串等通用工具）
@@ -75,7 +75,7 @@ npm run dev
 
 访问 <http://localhost:5173> 。当前数据来自本地 Mock（`src/mock/server.ts`），`/api` 已代理到 `http://localhost:8000`，后续 FastAPI 后端就绪后可无缝切换。
 
-### 2. 管理后台后端 cool-admin-midway（端口 8001）
+### 2. 管理后台后端 cool-admin-midway（端口 8888）
 
 需先准备 MySQL：创建数据库 `cool`（首次启动自动建表并导入初始数据）。
 
@@ -86,7 +86,7 @@ CREATE DATABASE cool DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
 数据库连接、服务端口等配置在 `app/cool-admin-midway/.env` 中（模板见 `.env.example`）：
 
 ```env
-KOA_PORT=8001
+KOA_PORT=8888
 MYSQL_HOST=127.0.0.1
 MYSQL_PORT=3306
 MYSQL_USERNAME=root
@@ -102,7 +102,7 @@ npm install
 npm run dev
 ```
 
-启动后接口地址为 <http://127.0.0.1:8001> ，Swagger 文档见 <http://127.0.0.1:8001/swagger/ui> 。
+启动后接口地址为 <http://127.0.0.1:8888> ，Swagger 文档见 <http://127.0.0.1:8888/swagger/ui> 。
 
 ### 3. 管理后台前端 cool\_admin\_vue（端口 9000）
 
@@ -114,7 +114,7 @@ npm install
 npm run dev
 ```
 
-访问 <http://localhost:9000> ，默认账号 `admin / 123456`。`/dev` 前缀请求已代理到 `http://127.0.0.1:8001`。
+访问 <http://localhost:9000> ，默认账号 `admin / 123456`。`/dev` 前缀请求已代理到 `http://127.0.0.1:8888`。
 
 ## git分支规则
 

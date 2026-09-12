@@ -88,18 +88,18 @@ console.log(result);
 
 ```bash
 # 分页查询
-curl http://localhost:8001/admin/m3/homestay/page
+curl http://localhost:8888/admin/m3/homestay/page
 
 # 单点查询
-curl http://localhost:8001/admin/m3/homestay/info/1
+curl http://localhost:8888/admin/m3/homestay/info/1
 
 # 添加民宿
-curl -X POST http://localhost:8001/admin/m3/homestay/add \
+curl -X POST http://localhost:8888/admin/m3/homestay/add \
   -H "Content-Type: application/json" \
   -d '{"name":"测试民宿","cover":"https://example.com/cover.jpg","address":"测试地址"}'
 
 # 逻辑删除
-curl -X DELETE http://localhost:8001/admin/m3/homestay/delete?ids=1
+curl -X DELETE http://localhost:8888/admin/m3/homestay/delete?ids=1
 ```
 
 ## 注意事项
